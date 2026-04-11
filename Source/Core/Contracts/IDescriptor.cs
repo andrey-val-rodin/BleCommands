@@ -1,5 +1,6 @@
 ﻿namespace Core.Contracts
 {
+    // TODO: remove this interface?
     public interface IDescriptor
     {
         Guid Id { get; }

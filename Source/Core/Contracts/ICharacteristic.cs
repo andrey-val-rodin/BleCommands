@@ -30,8 +30,8 @@
 
         Task StopUpdatesAsync(CancellationToken cancellationToken = default);
 
-        Task<IReadOnlyList<IDescriptor>> GetDescriptorsAsync(CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<IDescriptor>?> GetDescriptorsAsync(CancellationToken cancellationToken = default);
 
-        Task<IDescriptor> GetDescriptorAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<IDescriptor?> GetDescriptorAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }

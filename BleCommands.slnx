@@ -1,4 +1,0 @@
-<Solution>
-  <Project Path="BleCommands/BleCommands.csproj" />
-  <Project Path="Tests/Tests.csproj" />
-</Solution>

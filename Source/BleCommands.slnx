@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Core/Core.csproj" />
+  <Project Path="Maui/Maui.csproj" />
+  <Project Path="Tests/Tests.csproj" />
+  <Project Path="Windows/Windows.csproj" />
+</Solution>

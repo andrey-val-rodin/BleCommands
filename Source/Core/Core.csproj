@@ -8,12 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSoft.System.BluetoothLe" Version="2.0.2110.291" />
     <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.14.15" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Abstractions\" />
   </ItemGroup>
 
 </Project>

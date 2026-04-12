@@ -8,7 +8,7 @@ using DeviceEventArgs = Plugin.BLE.Abstractions.EventArgs.DeviceEventArgs;
 
 namespace Maui
 {
-    public class DeviceFinder : IDeviceFinder
+    public class BleScanner : IBleScanner
     {
         private readonly AsyncSemaphore _scanLock = new(1);
 
@@ -19,24 +19,21 @@ namespace Maui
         /// </summary>
         /// <param name="deviceName">Name prefix to search for.</param>
         /// <param name="timeout">Maximum time to scan (from 1 second to 1 minute).</param>
-        /// <param name="token">Cancellation token</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Found device or null if timeout expired.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the specified timeout is out of the range</exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when Bluetooth scanning is already in progress.
         /// Use <see cref="Adapter.StopScanningForDevicesAsync"/> to stop existing scan.
         /// </exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors</exception>
-        public async Task<IDevice?> FindDeviceAsync(string deviceName, TimeSpan timeout, CancellationToken token = default)
+        public async Task<IDevice?> FindDeviceAsync(string deviceName, TimeSpan timeout, CancellationToken cancellationToken = default)
         {
             VerifyTimeout(timeout);
 
-            var releaser = await _scanLock.EnterAsync(token).ConfigureAwait(false);
+            var releaser = await _scanLock.EnterAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var boundedDevice = GetBoundedDevice(deviceName);
-                if (boundedDevice != null)
-                    return boundedDevice;
-
                 if (Adapter.IsScanning)
                 {
                     throw new InvalidOperationException(
@@ -46,11 +43,11 @@ namespace Maui
 
                 var tcs = new TaskCompletionSource<IDevice?>();
 
-                void Handler(object sender, DeviceEventArgs e)
+                void Handler(object sender, DeviceEventArgs args)
                 {
-                    if (e.Device?.Name?.StartsWith(deviceName) == true)
+                    if (args.Device?.Name == deviceName)
                     {
-                        tcs.TrySetResult(new Device(e.Device));
+                        tcs.TrySetResult(new Device(args.Device));
                     }
                 }
 
@@ -61,10 +58,10 @@ namespace Maui
 
                     await Adapter.StartScanningForDevicesAsync(
                         scanFilterOptions: new ScanFilterOptions { DeviceNames = new[] { deviceName } },
-                        cancellationToken: token
+                        cancellationToken: cancellationToken
                     ).ConfigureAwait(false);
 
-                    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+                    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                     timeoutCts.CancelAfter(timeout);
 
                     using (timeoutCts.Token.Register(() => tcs.TrySetResult(null)))
@@ -89,21 +86,12 @@ namespace Maui
             }
         }
 
-        private void VerifyTimeout(TimeSpan timeout)
+        private static void VerifyTimeout(TimeSpan timeout)
         {
             if (timeout <= TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout too short");
             if (timeout > TimeSpan.FromMinutes(1))
                 throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout too long");
-        }
-
-        private IDevice? GetBoundedDevice(string deviceName)
-        {
-            // TODO: Do we really need this method? Perhaps we should only return scanned devices...
-            // TODO: what about Adapter.BondedDevices?
-            var device = Adapter.GetSystemConnectedOrPairedDevices()?
-                .FirstOrDefault(d => d.Name?.StartsWith(deviceName) == true);
-            return device != null ? new Device(device) : null;
         }
     }
 }

@@ -4,11 +4,13 @@ using Microsoft.VisualStudio.Threading;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
-using IDevice = Core.Contracts.IDevice;
+using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
+using INativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
+using INativeService = Plugin.BLE.Abstractions.Contracts.IService;
 
 namespace Maui
 {
-    public class BleScanner : IBleScanner
+    public class BleScanner : IBleScanner<INativeDevice, INativeService, INativeCharacteristic>
     {
         private readonly AsyncSemaphore _scanLock = new(1);
 
@@ -27,7 +29,8 @@ namespace Maui
         /// Use <see cref="Adapter.StopScanningForDevicesAsync"/> to stop existing scan.
         /// </exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors</exception>
-        public async Task<IDevice?> FindDeviceAsync(string deviceName, TimeSpan timeout, CancellationToken cancellationToken = default)
+        public async Task<IDevice<INativeDevice, INativeService, ICharacteristic>?> FindDeviceAsync(
+            string deviceName, TimeSpan timeout, CancellationToken cancellationToken = default)
         {
             VerifyTimeout(timeout);
 
@@ -41,7 +44,7 @@ namespace Maui
                         "Stop existing scan before starting a new one, or wait for it to complete.");
                 }
 
-                var tcs = new TaskCompletionSource<IDevice?>();
+                var tcs = new TaskCompletionSource<IDevice<INativeDevice, INativeService, ICharacteristic>?>();
 
                 void Handler(object sender, DeviceEventArgs args)
                 {

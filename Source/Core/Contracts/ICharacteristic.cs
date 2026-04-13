@@ -1,12 +1,14 @@
 ﻿namespace Core.Contracts
 {
-    public interface ICharacteristic
+    public interface ICharacteristic<TCharacteristic>
     {
         event EventHandler<ValueUpdatedEventArgs> ValueUpdated;
 
         Guid Id { get; }
 
         CharacteristicPropertyFlags Properties { get; }
+
+        TCharacteristic NativeCharacteristic { get; }
 
         bool CanRead { get; }
 

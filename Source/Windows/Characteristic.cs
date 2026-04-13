@@ -3,20 +3,20 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace Windows
 {
-    public class Characteristic : ICharacteristic
+    public class Characteristic : ICharacteristic<GattCharacteristic>
     {
         public event EventHandler<ValueUpdatedEventArgs>? ValueUpdated;
 
         public Characteristic(GattCharacteristic characteristic)
         {
-            ExternalCharacteristic = characteristic ?? throw new ArgumentNullException(nameof(characteristic));
+            NativeCharacteristic = characteristic ?? throw new ArgumentNullException(nameof(characteristic));
         }
 
-        private GattCharacteristic ExternalCharacteristic { get; }
+        public GattCharacteristic NativeCharacteristic { get; }
 
-        public Guid Id => ExternalCharacteristic.Uuid;
+        public Guid Id => NativeCharacteristic.Uuid;
 
-        public CharacteristicPropertyFlags Properties => (CharacteristicPropertyFlags)ExternalCharacteristic.CharacteristicProperties;
+        public CharacteristicPropertyFlags Properties => (CharacteristicPropertyFlags)NativeCharacteristic.CharacteristicProperties;
 
         /// <summary>
         /// Indicates whether the characteristic can be read or not.
@@ -37,7 +37,7 @@ namespace Windows
 
         public Task<byte[]> ReadAsync(CancellationToken _ = default)
         {
-            //var result = await ExternalCharacteristic.ReadValueAsync(BluetoothCacheMode.Uncached);
+            //var result = await NativeCharacteristic.ReadValueAsync(BluetoothCacheMode.Uncached);
             //return result.GetValueOrThrowIfError();
 
             throw new NotImplementedException();

@@ -1,11 +1,13 @@
 ﻿using Core.Contracts;
 using Core.Exceptions;
 using Microsoft.VisualStudio.Threading;
+using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
 
 namespace Windows
 {
-    public class BleScanner : IBleScanner
+    public class BleScanner : IBleScanner<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
     {
         private readonly AsyncSemaphore _scanLock = new(1);
 
@@ -23,7 +25,7 @@ namespace Windows
         /// </exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors</exception>
         /// <remarks>The method may return a cached device even after the device becomes unavailable.</remarks>
-        public async Task<IDevice?> FindDeviceAsync(
+        public async Task<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?> FindDeviceAsync(
             string deviceName, TimeSpan timeout, CancellationToken cancellationToken = default)
         {
             VerifyTimeout(timeout);
@@ -31,7 +33,7 @@ namespace Windows
             var releaser = await _scanLock.EnterAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var tcs = new TaskCompletionSource<IDevice?>();
+                var tcs = new TaskCompletionSource<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?>();
                 string aqsFilter = $"System.ItemNameDisplay:=\"{deviceName}\"";
                 var deviceWatcher = DeviceInformation.CreateWatcher(
                     aqsFilter,

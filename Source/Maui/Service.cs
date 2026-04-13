@@ -1,32 +1,34 @@
 ﻿using Core.Contracts;
-using ExternalService = Plugin.BLE.Abstractions.Contracts.IService;
+using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
+using INativeService = Plugin.BLE.Abstractions.Contracts.IService;
 
 namespace Maui
 {
-    public class Service : IService
+    public class Service : IService<INativeService, INativeCharacteristic>
     {
         private bool _disposed = false;
 
-        public Service(ExternalService externalService)
+        public Service(INativeService nativeService)
         {
-            ExternalService = externalService;
+            NativeService = nativeService;
         }
 
-        public Guid Id => ExternalService.Id;
-        internal ExternalService ExternalService { get; }
+        public Guid Id => NativeService.Id;
 
-        public Task<ICharacteristic?> GetCharacteristicAsync(Guid id)
+        public INativeService NativeService { get; }
+
+        public Task<ICharacteristic<INativeCharacteristic>?> GetCharacteristicAsync(Guid id)
         {
             ThrowIfDisposed();
             //TODO
-            return Task.FromResult<ICharacteristic?>(null);
+            return Task.FromResult<ICharacteristic<INativeCharacteristic>?>(null);
         }
 
-        public Task<IReadOnlyList<ICharacteristic>> GetCharacteristicsAsync()
+        public Task<IReadOnlyList<ICharacteristic<INativeCharacteristic>>> GetCharacteristicsAsync()
         {
             ThrowIfDisposed();
             //TODO
-            return Task.FromResult<IReadOnlyList<ICharacteristic>>(null);
+            return Task.FromResult<IReadOnlyList<ICharacteristic<INativeCharacteristic>>>(null);
         }
 
         private void ThrowIfDisposed()
@@ -41,7 +43,7 @@ namespace Maui
             {
                 if (disposing)
                 {
-                    ExternalService.Dispose();
+                    NativeService.Dispose();
                 }
 
                 _disposed = true;

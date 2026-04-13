@@ -4,28 +4,29 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace Windows
 {
-    public class Service : IService
+    public class Service : IService<GattDeviceService, GattCharacteristic>
     {
         private bool _disposed = false;
 
-        public Service(GattDeviceService externalService)
+        public Service(GattDeviceService nativeService)
         {
-            ExternalService = externalService ?? throw new ArgumentNullException(nameof(externalService));
+            NativeService = nativeService ?? throw new ArgumentNullException(nameof(nativeService));
         }
 
-        public Guid Id => ExternalService.Uuid;
-        private GattDeviceService ExternalService { get; }
+        public Guid Id => NativeService.Uuid;
 
-        public async Task<ICharacteristic?> GetCharacteristicAsync(Guid id)
+        public GattDeviceService NativeService { get; }
+
+        public async Task<ICharacteristic<GattCharacteristic>?> GetCharacteristicAsync(Guid id)
         {
             ThrowIfDisposed();
 
             try
             {
-                var result = await ExternalService.GetCharacteristicsForUuidAsync(id);
-                var externalService = result.Characteristics.Count > 0 ? result.Characteristics[0] : null;
+                var result = await NativeService.GetCharacteristicsForUuidAsync(id);
+                var nativeService = result.Characteristics.Count > 0 ? result.Characteristics[0] : null;
 
-                return externalService == null ? null : new Characteristic(externalService);
+                return nativeService == null ? null : new Characteristic(nativeService);
             }
             catch (Exception ex)
             {
@@ -33,17 +34,17 @@ namespace Windows
             }
         }
 
-        public async Task<IReadOnlyList<ICharacteristic>> GetCharacteristicsAsync()
+        public async Task<IReadOnlyList<ICharacteristic<GattCharacteristic>>> GetCharacteristicsAsync()
         {
             ThrowIfDisposed();
 
             try
             {
-                var result = await ExternalService.GetCharacteristicsAsync();
-                var externalCharacteristics = result?.Characteristics;
-                return externalCharacteristics == null
-                    ? new List<ICharacteristic>()
-                    : externalCharacteristics.Select(c => new Characteristic(c)).ToList<ICharacteristic>();
+                var result = await NativeService.GetCharacteristicsAsync();
+                var nativeCharacteristics = result?.Characteristics;
+                return nativeCharacteristics == null
+                    ? new List<ICharacteristic<GattCharacteristic>>()
+                    : nativeCharacteristics.Select(c => new Characteristic(c)).ToList<ICharacteristic<GattCharacteristic>>();
             }
             catch (Exception ex)
             {
@@ -62,7 +63,7 @@ namespace Windows
             {
                 if (disposing)
                 {
-                    ExternalService.Dispose();
+                    NativeService.Dispose();
                 }
 
                 _disposed = true;

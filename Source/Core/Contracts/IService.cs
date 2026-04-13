@@ -1,11 +1,13 @@
 ﻿namespace Core.Contracts
 {
-    public interface IService : IDisposable
+    public interface IService<TService, TCharacteristic> : IDisposable
     {
         Guid Id { get; }
 
-        Task<IReadOnlyList<ICharacteristic>> GetCharacteristicsAsync();
+        TService NativeService { get; }
 
-        Task<ICharacteristic?> GetCharacteristicAsync(Guid id);
+        Task<IReadOnlyList<ICharacteristic<TCharacteristic>>> GetCharacteristicsAsync();
+
+        Task<ICharacteristic<TCharacteristic>?> GetCharacteristicAsync(Guid id);
     }
 }

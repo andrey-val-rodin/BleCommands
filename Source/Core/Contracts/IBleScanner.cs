@@ -1,7 +1,8 @@
 ﻿namespace Core.Contracts
 {
-    public interface IBleScanner
+    public interface IBleScanner<TDevice, TService, TCharacteristic>
     {
-        Task<IDevice?> FindDeviceAsync(string deviceName, TimeSpan timeout, CancellationToken token = default);
+        Task<IDevice<TDevice, TService, TCharacteristic>?> FindDeviceAsync(
+            string deviceName, TimeSpan timeout, CancellationToken token = default);
     }
 }

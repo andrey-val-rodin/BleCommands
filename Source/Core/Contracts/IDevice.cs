@@ -1,6 +1,6 @@
 ﻿namespace Core.Contracts
 {
-    public interface IDevice
+    public interface IDevice : IDisposable
     {
         string Id { get; }
 
@@ -10,7 +10,7 @@
 
         Task<bool> ConnectAsync(CancellationToken cancellationToken = default);
 
-        Task<IReadOnlyList<IService>?> GetServicesAsync(CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<IService>> GetServicesAsync(CancellationToken cancellationToken = default);
 
         Task<IService?> GetServiceAsync(Guid id, CancellationToken cancellationToken = default);
     }

@@ -1,8 +1,7 @@
 ﻿using Core.Contracts;
 using Core.Exceptions;
 using Microsoft.VisualStudio.Threading;
-using Windows.Devices.Bluetooth;
-using Windows.Devices.Bluetooth.Advertisement;
+using Windows.Devices.Enumeration;
 
 namespace Windows
 {
@@ -23,6 +22,7 @@ namespace Windows
         /// Use <see cref="Adapter.StopScanningForDevicesAsync"/> to stop existing scan.
         /// </exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors</exception>
+        /// <remarks>The method may return a cached device even after the device becomes unavailable.</remarks>
         public async Task<IDevice?> FindDeviceAsync(
             string deviceName, TimeSpan timeout, CancellationToken cancellationToken = default)
         {
@@ -32,31 +32,28 @@ namespace Windows
             try
             {
                 var tcs = new TaskCompletionSource<IDevice?>();
+                string aqsFilter = $"System.ItemNameDisplay:=\"{deviceName}\"";
+                var deviceWatcher = DeviceInformation.CreateWatcher(
+                    aqsFilter,
+                    null,
+                    DeviceInformationKind.AssociationEndpoint);
 
-                var deviceWatcher = new BluetoothLEAdvertisementWatcher();
-
-#pragma warning disable IDE0079
-#pragma warning disable VSTHRD100 // Avoid async void methods
-                // Reason: This handler is called synchronously by BluetoothLEAdvertisementWatcher 
-                // in a non-UI thread (no SynchronizationContext). The async void pattern is safe here 
-                // because we quickly await the async operation and any exceptions are caught inside.
-                // Using async Task would be incompatible with the event signature (expects void).
-                async void Handler(object sender, BluetoothLEAdvertisementReceivedEventArgs args)
-#pragma warning restore VSTHRD100
-#pragma warning restore IDE0079
+                void AddedHandler(DeviceWatcher sender, DeviceInformation deviceInfo)
                 {
-                    try
-                    {
-                        using var device = await BluetoothLEDevice.FromBluetoothAddressAsync(args.BluetoothAddress);
-                        if (device?.Name == deviceName)
-                            tcs.TrySetResult(new Device(device.DeviceId));
-                    }
-                    catch { /* Just skip device */}
+                    if (deviceInfo?.Name != deviceName)
+                        return;
+
+                    tcs.TrySetResult(new Device(deviceInfo.Id));
                 }
+                void DummyHandler(DeviceWatcher sender, DeviceInformationUpdate args) { }
+
+                // Register event handlers before starting the watcher. We must subscribe to all events.
+                deviceWatcher.Added += AddedHandler;
+                deviceWatcher.Updated += DummyHandler;
+                deviceWatcher.Removed += DummyHandler;
 
                 try
                 {
-                    deviceWatcher.Received += Handler;
                     deviceWatcher.Start();
                     using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                     timeoutCts.CancelAfter(timeout);
@@ -72,7 +69,9 @@ namespace Windows
                 }
                 finally
                 {
-                    deviceWatcher.Received -= Handler;
+                    deviceWatcher.Added -= AddedHandler;
+                    deviceWatcher.Updated -= DummyHandler;
+                    deviceWatcher.Removed -= DummyHandler;
                     deviceWatcher.Stop();
                 }
             }

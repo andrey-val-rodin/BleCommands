@@ -1,6 +1,6 @@
 ﻿namespace Core.Contracts
 {
-    public enum CharacteristicPropertyType
+    public enum CharacteristicPropertyFlags
     {
         Broadcast = 1,
         Read = 2,

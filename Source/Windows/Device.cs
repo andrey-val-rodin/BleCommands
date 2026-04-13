@@ -2,11 +2,10 @@
 using Core.Exceptions;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
-using ExternalDevice = Windows.Devices.Bluetooth.BluetoothLEDevice;
 
 namespace Windows
 {
-    public class Device : IDevice, IDisposable
+    public class Device : IDevice
     {
         private bool _disposed = false;
         private GattSession? _gattSession;
@@ -22,7 +21,7 @@ namespace Windows
         public string Id { get; private set; }
         public string Name => ExternalDevice?.Name ?? string.Empty;
         public bool IsConnected { get; private set; }
-        private ExternalDevice? ExternalDevice { get; set; }
+        private BluetoothLEDevice? ExternalDevice { get; set; }
 
         /// <summary>
         /// Connects to the device by the specified id.
@@ -49,7 +48,9 @@ namespace Windows
                 ExternalDevice.ConnectionStatusChanged += OnConnectionStatusChanged;
 
                 // Retrieve services to establish actual connection
-                var services = await ExternalDevice.GetGattServicesAsync(BluetoothCacheMode.Uncached);
+                var result = await ExternalDevice.GetGattServicesAsync(BluetoothCacheMode.Uncached);
+                if (result?.Status != GattCommunicationStatus.Success)
+                    return false;
 
                 IsConnected = ExternalDevice.ConnectionStatus == BluetoothConnectionStatus.Connected;
                 return IsConnected;
@@ -75,11 +76,9 @@ namespace Windows
             try
             {
                 var result = await ExternalDevice.GetGattServicesForUuidAsync(id, BluetoothCacheMode.Cached);
-                var externalService = result.Services.Count > 0 ? result.Services[0] : null;
-                if (externalService == null)
-                    return null;
+                var externalService = result?.Services?.Count > 0 ? result.Services[0] : null;
 
-                return new Service(externalService);
+                return externalService == null ? null : new Service(externalService);
             }
             catch (Exception ex)
             {
@@ -87,7 +86,7 @@ namespace Windows
             }
         }
 
-        public async Task<IReadOnlyList<IService>?> GetServicesAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<IService>> GetServicesAsync(CancellationToken cancellationToken = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
 
@@ -98,10 +97,7 @@ namespace Windows
             {
                 var result = await ExternalDevice.GetGattServicesAsync(BluetoothCacheMode.Cached);
                 var externalServices = result?.Services;
-                if (externalServices == null)
-                    return null;
-
-                return externalServices.Select(s => new Service(s)).ToList();
+                return externalServices == null ? new List<IService>() : externalServices.Select(s => new Service(s)).ToList();
             }
             catch (Exception ex)
             {

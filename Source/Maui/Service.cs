@@ -3,40 +3,30 @@ using ExternalService = Plugin.BLE.Abstractions.Contracts.IService;
 
 namespace Maui
 {
-    public class Service : IService, IDisposable
+    public class Service : IService
     {
-        private readonly ExternalService _externalService;
         private bool _disposed = false;
 
         public Service(ExternalService externalService)
         {
-            _externalService = externalService;
+            ExternalService = externalService;
         }
 
-        public Guid Id => _externalService.Id;
-        public string Name => _externalService.Name;
-        internal ExternalService ExternalService => _externalService;
+        public Guid Id => ExternalService.Id;
+        internal ExternalService ExternalService { get; }
 
         public Task<ICharacteristic?> GetCharacteristicAsync(Guid id)
         {
             ThrowIfDisposed();
             //TODO
-#pragma warning disable CS8603 // Возможно, возврат ссылки, допускающей значение NULL.
-#pragma warning disable VSTHRD114 // Avoid returning a null Task
-            return null;
-#pragma warning restore VSTHRD114 // Avoid returning a null Task
-#pragma warning restore CS8603 // Возможно, возврат ссылки, допускающей значение NULL.
+            return Task.FromResult<ICharacteristic?>(null);
         }
 
-        public Task<IReadOnlyList<ICharacteristic>?> GetCharacteristicsAsync()
+        public Task<IReadOnlyList<ICharacteristic>> GetCharacteristicsAsync()
         {
             ThrowIfDisposed();
             //TODO
-#pragma warning disable CS8603 // Возможно, возврат ссылки, допускающей значение NULL.
-#pragma warning disable VSTHRD114 // Avoid returning a null Task
-            return null;
-#pragma warning restore VSTHRD114 // Avoid returning a null Task
-#pragma warning restore CS8603 // Возможно, возврат ссылки, допускающей значение NULL.
+            return Task.FromResult<IReadOnlyList<ICharacteristic>>(null);
         }
 
         private void ThrowIfDisposed()
@@ -51,7 +41,7 @@ namespace Maui
             {
                 if (disposing)
                 {
-                    _externalService.Dispose();
+                    ExternalService.Dispose();
                 }
 
                 _disposed = true;

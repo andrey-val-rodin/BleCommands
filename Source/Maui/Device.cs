@@ -7,7 +7,7 @@ using IService = Core.Contracts.IService;
 
 namespace Maui
 {
-    public class Device : IDevice, IDisposable
+    public class Device : IDevice
     {
         private readonly string? _id;
         private bool _disposed = false;
@@ -18,7 +18,7 @@ namespace Maui
                 throw new ArgumentNullException(nameof(id));
             if (Guid.TryParse(id, out Guid _))
                 throw new ArgumentException("The specified id is not Guid");
-            
+
             _id = id;
         }
 
@@ -78,17 +78,16 @@ namespace Maui
             }
         }
 
-        public async Task<IReadOnlyList<IService>?> GetServicesAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<IService>> GetServicesAsync(CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             if (!IsConnected || ExternalDevice == null)
                 throw new InvalidOperationException("Device not connected");
 
             var externalServices = await ExternalDevice.GetServicesAsync(cancellationToken);
-            if (externalServices == null)
-                return null;
-
-            return externalServices.Select(s => new Service(s)).ToList();
+            return externalServices == null
+                ? new List<IService>()
+                : externalServices.Select(s => new Service(s)).ToList<IService>();
         }
 
         public async Task<IService?> GetServiceAsync(Guid id, CancellationToken cancellationToken = default)
@@ -98,10 +97,7 @@ namespace Maui
                 throw new InvalidOperationException("Device not connected");
 
             var externalService = await ExternalDevice.GetServiceAsync(id, cancellationToken);
-            if (externalService == null)
-                return null;
-
-            return new Service(externalService);
+            return externalService == null ? null : new Service(externalService);
         }
 
         private void ThrowIfDisposed()

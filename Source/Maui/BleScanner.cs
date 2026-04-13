@@ -3,8 +3,8 @@ using Core.Exceptions;
 using Microsoft.VisualStudio.Threading;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
+using Plugin.BLE.Abstractions.EventArgs;
 using IDevice = Core.Contracts.IDevice;
-using DeviceEventArgs = Plugin.BLE.Abstractions.EventArgs.DeviceEventArgs;
 
 namespace Maui
 {

@@ -1,42 +1,54 @@
 ﻿using Core.Contracts;
-using ExternalService = Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceService;
+using Core.Exceptions;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace Windows
 {
-    public class Service : IService, IDisposable
+    public class Service : IService
     {
-        private readonly ExternalService _externalService;
         private bool _disposed = false;
 
-        public Service(ExternalService externalService)
+        public Service(GattDeviceService externalService)
         {
-            _externalService = externalService;
+            ExternalService = externalService ?? throw new ArgumentNullException(nameof(externalService));
         }
 
-        public Guid Id => _externalService.Uuid;
-        public string Name => _externalService.Uuid.ToString();
-        internal ExternalService ExternalService => _externalService;
+        public Guid Id => ExternalService.Uuid;
+        private GattDeviceService ExternalService { get; }
 
-        public Task<ICharacteristic?> GetCharacteristicAsync(Guid id)
+        public async Task<ICharacteristic?> GetCharacteristicAsync(Guid id)
         {
             ThrowIfDisposed();
-            //TODO
-#pragma warning disable CS8603 // Возможно, возврат ссылки, допускающей значение NULL.
-#pragma warning disable VSTHRD114 // Avoid returning a null Task
-            return null;
-#pragma warning restore VSTHRD114 // Avoid returning a null Task
-#pragma warning restore CS8603 // Возможно, возврат ссылки, допускающей значение NULL.
+
+            try
+            {
+                var result = await ExternalService.GetCharacteristicsForUuidAsync(id);
+                var externalService = result.Characteristics.Count > 0 ? result.Characteristics[0] : null;
+
+                return externalService == null ? null : new Characteristic(externalService);
+            }
+            catch (Exception ex)
+            {
+                throw new DeviceException("GetCharacteristicAsync() failed", ex);
+            }
         }
 
-        public Task<IReadOnlyList<ICharacteristic>?> GetCharacteristicsAsync()
+        public async Task<IReadOnlyList<ICharacteristic>> GetCharacteristicsAsync()
         {
             ThrowIfDisposed();
-            //TODO
-#pragma warning disable CS8603 // Возможно, возврат ссылки, допускающей значение NULL.
-#pragma warning disable VSTHRD114 // Avoid returning a null Task
-            return null;
-#pragma warning restore VSTHRD114 // Avoid returning a null Task
-#pragma warning restore CS8603 // Возможно, возврат ссылки, допускающей значение NULL.
+
+            try
+            {
+                var result = await ExternalService.GetCharacteristicsAsync();
+                var externalCharacteristics = result?.Characteristics;
+                return externalCharacteristics == null
+                    ? new List<ICharacteristic>()
+                    : externalCharacteristics.Select(c => new Characteristic(c)).ToList<ICharacteristic>();
+            }
+            catch (Exception ex)
+            {
+                throw new DeviceException("GetCharacteristicsAsync() failed", ex);
+            }
         }
 
         private void ThrowIfDisposed()
@@ -50,7 +62,7 @@ namespace Windows
             {
                 if (disposing)
                 {
-                    _externalService.Dispose();
+                    ExternalService.Dispose();
                 }
 
                 _disposed = true;

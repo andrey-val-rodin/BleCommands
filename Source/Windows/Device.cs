@@ -91,8 +91,8 @@ namespace Windows
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
 
-            if (!IsConnected || NativeDevice == null)
-                throw new InvalidOperationException("Device not connected");
+            if (NativeDevice == null)
+                throw new InvalidOperationException("Device is not connected");
 
             try
             {
@@ -112,8 +112,8 @@ namespace Windows
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
 
-            if (!IsConnected || NativeDevice == null)
-                throw new InvalidOperationException("Device not connected");
+            if (NativeDevice == null)
+                throw new InvalidOperationException("Device is not connected");
 
             try
             {

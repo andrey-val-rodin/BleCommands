@@ -21,15 +21,19 @@ namespace Core.Contracts
         Task<IDevice<TDevice, TService, TCharacteristic>?> FindDeviceAsync(string deviceName);
 
         /// <summary>
-        /// Searches for a Bluetooth device by name with specified timeout.
+        /// Searches for a Bluetooth device by name with cancellation support.
         /// </summary>
         /// <param name="deviceName">Name to search for.</param>
-        /// <param name="timeout">Maximum time to scan (from 1 second to 1 minute).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Found device or null if timeout expired.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if deviceName is null or empty.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if timeout is out of range.</exception>
-        /// <exception cref="InvalidOperationException">Thrown when Bluetooth scanning is already in progress.</exception>
-        /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
+        /// <remarks>
+        /// This method does NOT have a built-in timeout. 
+        /// It runs indefinitely until either a device is found or the cancellation token is cancelled.
+        /// For timeout-based scanning, use <see cref="FindDeviceAsync(string, TimeSpan)"/>.
+        /// </remarks>
+        /// <exception cref="OperationCanceledException">
+        /// Thrown when the operation is cancelled via <paramref name="cancellationToken"/>.
+        /// </exception>
         Task<IDevice<TDevice, TService, TCharacteristic>?> FindDeviceAsync(
             string deviceName, TimeSpan timeout);
 

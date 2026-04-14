@@ -13,7 +13,7 @@ namespace Tests.Windows
         private BleScanner BleScanner { get; } = new BleScanner();
 
         [Fact]
-        public async Task FindDeviceAsync_Cancel_OperationCanceledException()
+        public async Task FindDeviceWithCts_Cancel_OperationCanceledException()
         {
             using var cts = new CancellationTokenSource();
 
@@ -27,7 +27,7 @@ namespace Tests.Windows
         }
 
         [Fact]
-        public async Task FindDeviceAsync_Timeout_ReturnsNull()
+        public async Task FindDeviceWithTimeout_Timeout_ReturnsNull()
         {
             // Timeout 1 second
             var device = await BleScanner.FindDeviceAsync("Unexistent Device", TimeSpan.FromSeconds(1));
@@ -35,7 +35,7 @@ namespace Tests.Windows
         }
 
         [Fact]
-        public async Task FindDeviceAsync_Found()
+        public async Task FindDevice_Found()
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             using var device = await BleScanner.FindDeviceAsync("Rotating Table", cts.Token);

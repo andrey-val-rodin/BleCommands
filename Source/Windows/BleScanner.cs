@@ -35,7 +35,7 @@ namespace Windows
             }
             catch (OperationCanceledException)
             {
-                // Таймаут — возвращаем null
+                // Timeout
                 return null;
             }
         }

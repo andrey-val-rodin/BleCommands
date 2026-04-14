@@ -14,7 +14,6 @@ namespace Maui
 {
     public class Device : IDevice
     {
-        private INativeDevice? _nativeDevice;
         private readonly string? _id;
         private bool _disposed = false;
 
@@ -30,20 +29,17 @@ namespace Maui
 
         internal Device(INativeDevice nativeDevice)
         {
-            _nativeDevice = nativeDevice ?? throw new ArgumentNullException(nameof(nativeDevice));
+            NativeDevice = nativeDevice ?? throw new ArgumentNullException(nameof(nativeDevice));
         }
 
-        public string Id => _id ?? _nativeDevice?.Id.ToString() ?? string.Empty;
+        public string Id => _id ?? NativeDevice?.Id.ToString() ?? string.Empty;
 
-        public string Name => _nativeDevice?.Name ?? string.Empty;
+        public string Name => NativeDevice?.Name ?? string.Empty;
 
         /// <summary>
         /// Gets platform-specific device
         /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when accessed before calling <see cref="ConnectAsync"/>.
-        /// </exception>
-        public INativeDevice NativeDevice => _nativeDevice ?? throw new InvalidOperationException("Native device is not ready. Call ConnectAsync()");
+        public INativeDevice? NativeDevice { get; private set; }
 
         private static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
 
@@ -51,9 +47,9 @@ namespace Maui
 
         public async Task<bool> ConnectAsync(CancellationToken cancellationToken = default)
         {
-            if (_nativeDevice != null)
+            if (NativeDevice != null)
             {
-                IsConnected = await ConnectAsync(_nativeDevice, cancellationToken).ConfigureAwait(false);
+                IsConnected = await ConnectAsync(NativeDevice, cancellationToken).ConfigureAwait(false);
             }
             else if (_id != null)
             {
@@ -83,7 +79,7 @@ namespace Maui
             try
             {
                 Guid guid = Guid.Parse(id);
-                _nativeDevice = await Adapter.ConnectToKnownDeviceAsync(guid,
+                NativeDevice = await Adapter.ConnectToKnownDeviceAsync(guid,
                     new ConnectParameters(false, forceBleTransport: true), cancellationToken);
                 return true;
             }
@@ -96,10 +92,10 @@ namespace Maui
         public async Task<IReadOnlyList<IService>> GetServicesAsync(CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
-            if (!IsConnected || _nativeDevice == null)
+            if (!IsConnected || NativeDevice == null)
                 throw new InvalidOperationException("Device not connected");
 
-            var nativeServices = await _nativeDevice.GetServicesAsync(cancellationToken);
+            var nativeServices = await NativeDevice.GetServicesAsync(cancellationToken);
             return nativeServices == null
                 ? new List<IService>()
                 : nativeServices.Select(s => new Service(s)).ToList<IService>();
@@ -108,10 +104,10 @@ namespace Maui
         public async Task<IService?> GetServiceAsync(Guid id, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
-            if (!IsConnected || _nativeDevice == null)
+            if (!IsConnected || NativeDevice == null)
                 throw new InvalidOperationException("Device not connected");
 
-            var nativeService = await _nativeDevice.GetServiceAsync(id, cancellationToken);
+            var nativeService = await NativeDevice.GetServiceAsync(id, cancellationToken);
             return nativeService == null ? null : new Service(nativeService);
         }
 
@@ -127,7 +123,7 @@ namespace Maui
             {
                 if (disposing)
                 {
-                    _nativeDevice?.Dispose();
+                    NativeDevice?.Dispose();
                 }
 
                 _disposed = true;

@@ -8,7 +8,7 @@
 
         bool IsConnected { get; }
 
-        TDevice NativeDevice { get; }
+        TDevice? NativeDevice { get; }
 
         Task<bool> ConnectAsync(CancellationToken cancellationToken = default);
 

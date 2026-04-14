@@ -7,7 +7,7 @@ namespace Windows
 {
     public class Device : IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
     {
-        private BluetoothLEDevice? _nativeDevice;
+        private readonly ulong _bluetoothAddress;
         private GattSession? _gattSession;
         private bool _disposed = false;
 
@@ -19,6 +19,12 @@ namespace Windows
             Id = id;
         }
 
+        public Device(ulong bluetoothAddress)
+        {
+            Id = string.Empty;
+            _bluetoothAddress = bluetoothAddress;
+        }
+
         public string Id { get; private set; }
 
         public string Name => NativeDevice?.Name ?? string.Empty;
@@ -28,10 +34,7 @@ namespace Windows
         /// <summary>
         /// Gets platform-specific device
         /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when accessed before calling <see cref="ConnectAsync"/>.
-        /// </exception>
-        public BluetoothLEDevice NativeDevice => _nativeDevice ?? throw new InvalidOperationException("Native device is not ready. Call ConnectAsync()");
+        public BluetoothLEDevice? NativeDevice { get; private set; }
 
         /// <summary>
         /// Connects to the device by the specified id.
@@ -46,8 +49,8 @@ namespace Windows
 
             try
             {
-                _nativeDevice = await BluetoothLEDevice.FromIdAsync(Id);
-                if (_nativeDevice == null)
+                NativeDevice = await GetNativeDeviceAsync();
+                if (NativeDevice == null)
                     return false;
 
                 // Create and configure GATT session to maintain connection
@@ -69,6 +72,13 @@ namespace Windows
             {
                 throw new DeviceException("Device connection error", ex);
             }
+        }
+
+        private async Task<BluetoothLEDevice> GetNativeDeviceAsync()
+        {
+            return string.IsNullOrEmpty(Id)
+                ? await BluetoothLEDevice.FromBluetoothAddressAsync(_bluetoothAddress)
+                : await BluetoothLEDevice.FromIdAsync(Id);
         }
 
         private void OnConnectionStatusChanged(BluetoothLEDevice sender, object args)

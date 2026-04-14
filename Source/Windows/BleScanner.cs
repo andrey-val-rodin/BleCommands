@@ -2,80 +2,98 @@
 using Core.Exceptions;
 using Microsoft.VisualStudio.Threading;
 using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.Advertisement;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
-using Windows.Devices.Enumeration;
 
 namespace Windows
 {
     public class BleScanner : IBleScanner<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
     {
         private readonly AsyncSemaphore _scanLock = new(1);
+        private const int DefaultTimeoutSeconds = 5;
+        private const int MaxTimeoutSeconds = 60;
+        private const int MinTimeoutSeconds = 1;
 
-        /// <summary>
-        /// Searches for a Bluetooth device by name.
-        /// </summary>
-        /// <param name="deviceName">Name to search for.</param>
-        /// <param name="timeout">Maximum time to scan (from 1 second to 1 minute).</param>
-        /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Found device or null if timeout expired.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the specified timeout is out of the range</exception>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when Bluetooth scanning is already in progress.
-        /// Use <see cref="Adapter.StopScanningForDevicesAsync"/> to stop existing scan.
-        /// </exception>
-        /// <exception cref="DeviceException">Thrown on Bluetooth errors</exception>
-        /// <remarks>The method may return a cached device even after the device becomes unavailable.</remarks>
+        /// <inheritdoc />
         public async Task<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?> FindDeviceAsync(
-            string deviceName, TimeSpan timeout, CancellationToken cancellationToken = default)
+            string deviceName)
         {
-            VerifyTimeout(timeout);
+            return await FindDeviceAsync(deviceName, TimeSpan.FromSeconds(DefaultTimeoutSeconds)).ConfigureAwait(false);
+        }
 
+        /// <inheritdoc />
+        public async Task<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?> FindDeviceAsync(
+            string deviceName, TimeSpan timeout)
+        {
+            ValidateDeviceName(deviceName);
+            ValidateTimeout(timeout);
+
+            using var cts = new CancellationTokenSource(timeout);
+            try
+            {
+                return await FindDeviceInternalAsync(deviceName, cts.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Таймаут — возвращаем null
+                return null;
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?> FindDeviceAsync(
+            string deviceName, CancellationToken cancellationToken)
+        {
+            ValidateDeviceName(deviceName);
+            return await FindDeviceInternalAsync(deviceName, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?> FindDeviceInternalAsync(
+            string deviceName,
+            CancellationToken cancellationToken)
+        {
             var releaser = await _scanLock.EnterAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 var tcs = new TaskCompletionSource<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?>();
-                string aqsFilter = $"System.ItemNameDisplay:=\"{deviceName}\"";
-                var deviceWatcher = DeviceInformation.CreateWatcher(
-                    aqsFilter,
-                    null,
-                    DeviceInformationKind.AssociationEndpoint);
 
-                void AddedHandler(DeviceWatcher sender, DeviceInformation deviceInfo)
+                var deviceWatcher = new BluetoothLEAdvertisementWatcher
                 {
-                    if (deviceInfo?.Name != deviceName)
-                        return;
+                    ScanningMode = BluetoothLEScanningMode.Active,
+                    AdvertisementFilter = new BluetoothLEAdvertisementFilter
+                    {
+                        Advertisement = new BluetoothLEAdvertisement
+                        {
+                            LocalName = deviceName
+                        }
+                    }
+                };
 
-                    tcs.TrySetResult(new Device(deviceInfo.Id));
+                void Handler(object sender, BluetoothLEAdvertisementReceivedEventArgs args)
+                {
+                    if (args.Advertisement.LocalName == deviceName)
+                        tcs.TrySetResult(new Device(args.BluetoothAddress));
                 }
-                void DummyHandler(DeviceWatcher sender, DeviceInformationUpdate args) { }
-
-                // Register event handlers before starting the watcher. We must subscribe to all events.
-                deviceWatcher.Added += AddedHandler;
-                deviceWatcher.Updated += DummyHandler;
-                deviceWatcher.Removed += DummyHandler;
 
                 try
                 {
+                    deviceWatcher.Received += Handler;
                     deviceWatcher.Start();
-                    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                    timeoutCts.CancelAfter(timeout);
 
-                    using (timeoutCts.Token.Register(() => tcs.TrySetResult(null)))
+                    using (cancellationToken.Register(() => tcs.TrySetException(new OperationCanceledException(cancellationToken))))
                     {
                         return await tcs.Task.ConfigureAwait(false);
                     }
                 }
-                catch (Exception ex)
-                {
-                    throw new DeviceException("BLE Scanning error", ex);
-                }
                 finally
                 {
-                    deviceWatcher.Added -= AddedHandler;
-                    deviceWatcher.Updated -= DummyHandler;
-                    deviceWatcher.Removed -= DummyHandler;
+                    deviceWatcher.Received -= Handler;
                     deviceWatcher.Stop();
                 }
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                throw new DeviceException("BLE scanning error", ex);
             }
             finally
             {
@@ -83,12 +101,19 @@ namespace Windows
             }
         }
 
-        private static void VerifyTimeout(TimeSpan timeout)
+        private static void ValidateDeviceName(string deviceName)
+        {
+            if (string.IsNullOrWhiteSpace(deviceName))
+                throw new ArgumentNullException(nameof(deviceName));
+        }
+
+        private static void ValidateTimeout(TimeSpan timeout)
         {
             if (timeout <= TimeSpan.Zero)
-                throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout too short");
-            if (timeout > TimeSpan.FromMinutes(1))
-                throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout too long");
+                throw new ArgumentOutOfRangeException(nameof(timeout), $"Timeout too short. Minimum is {MinTimeoutSeconds} second.");
+
+            if (timeout > TimeSpan.FromSeconds(MaxTimeoutSeconds))
+                throw new ArgumentOutOfRangeException(nameof(timeout), $"Timeout too long. Maximum is {MaxTimeoutSeconds} seconds.");
         }
     }
 }

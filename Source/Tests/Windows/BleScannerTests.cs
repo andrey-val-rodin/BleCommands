@@ -1,20 +1,47 @@
 ﻿using Windows;
+using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.Advertisement;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace Tests.Windows
 {
+    /// <summary>
+    /// Temporary tests for Windows.BleScanner
+    /// </summary>
     public class BleScannerTests
     {
-        /// <summary>
-        /// Temporary test for Windows development
-        /// </summary>
+        private BleScanner BleScanner { get; } = new BleScanner();
+
+        [Fact]
+        public async Task FindDeviceAsync_Cancel_OperationCanceledException()
+        {
+            using var cts = new CancellationTokenSource();
+
+            // Cancel in 100 мс
+            cts.CancelAfter(100);
+
+            await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                await BleScanner.FindDeviceAsync("Unexistent Device", cts.Token);
+            });
+        }
+
+        [Fact]
+        public async Task FindDeviceAsync_Timeout_ReturnsNull()
+        {
+            // Timeout 1 second
+            var device = await BleScanner.FindDeviceAsync("Unexistent Device", TimeSpan.FromSeconds(1));
+            Assert.Null(device);
+        }
+
         [Fact]
         public async Task FindDeviceAsync_Found()
         {
-            var finder = new BleScanner();
-            using var cts = new CancellationTokenSource();
-            using var device = await finder.FindDeviceAsync("Rotating Table", TimeSpan.FromSeconds(5), cts.Token);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var device = await BleScanner.FindDeviceAsync("Rotating Table", cts.Token);
 
             Assert.NotNull(device);
+            var n = device.Name;
             await device.ConnectAsync(cts.Token);
             Assert.True(device.IsConnected);
             var uuid = Guid.Parse("0000ffe0-0000-1000-8000-00805f9b34fb");

@@ -13,37 +13,53 @@ namespace Maui
     public class BleScanner : IBleScanner<INativeDevice, INativeService, INativeCharacteristic>
     {
         private readonly AsyncSemaphore _scanLock = new(1);
+        private const int DefaultTimeoutSeconds = 5;
+        private const int MaxTimeoutSeconds = 60;
+        private const int MinTimeoutSeconds = 1;
 
         private static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
 
-        /// <summary>
-        /// Searches for a Bluetooth device by name prefix.
-        /// </summary>
-        /// <param name="deviceName">Name prefix to search for.</param>
-        /// <param name="timeout">Maximum time to scan (from 1 second to 1 minute).</param>
-        /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Found device or null if timeout expired.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the specified timeout is out of the range</exception>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when Bluetooth scanning is already in progress.
-        /// Use <see cref="Adapter.StopScanningForDevicesAsync"/> to stop existing scan.
-        /// </exception>
-        /// <exception cref="DeviceException">Thrown on Bluetooth errors</exception>
+        /// <inheritdoc />
         public async Task<IDevice<INativeDevice, INativeService, ICharacteristic>?> FindDeviceAsync(
-            string deviceName, TimeSpan timeout, CancellationToken cancellationToken = default)
+            string deviceName)
         {
-            VerifyTimeout(timeout);
+            return await FindDeviceAsync(deviceName, TimeSpan.FromSeconds(DefaultTimeoutSeconds)).ConfigureAwait(false);
+        }
 
+        /// <inheritdoc />
+        public async Task<IDevice<INativeDevice, INativeService, ICharacteristic>?> FindDeviceAsync(
+            string deviceName, TimeSpan timeout)
+        {
+            ValidateDeviceName(deviceName);
+            ValidateTimeout(timeout);
+
+            using var cts = new CancellationTokenSource(timeout);
+            try
+            {
+                return await FindDeviceInternalAsync(deviceName, cts.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Таймаут — возвращаем null
+                return null;
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<IDevice<INativeDevice, INativeService, ICharacteristic>?> FindDeviceAsync(
+            string deviceName, CancellationToken cancellationToken)
+        {
+            ValidateDeviceName(deviceName);
+            return await FindDeviceInternalAsync(deviceName, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<IDevice<INativeDevice, INativeService, ICharacteristic>?> FindDeviceInternalAsync(
+            string deviceName,
+            CancellationToken cancellationToken)
+        {
             var releaser = await _scanLock.EnterAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (Adapter.IsScanning)
-                {
-                    throw new InvalidOperationException(
-                        "Bluetooth scanning is already in progress. " +
-                        "Stop existing scan before starting a new one, or wait for it to complete.");
-                }
-
                 var tcs = new TaskCompletionSource<IDevice<INativeDevice, INativeService, ICharacteristic>?>();
 
                 void Handler(object sender, DeviceEventArgs args)
@@ -64,17 +80,10 @@ namespace Maui
                         cancellationToken: cancellationToken
                     ).ConfigureAwait(false);
 
-                    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                    timeoutCts.CancelAfter(timeout);
-
-                    using (timeoutCts.Token.Register(() => tcs.TrySetResult(null)))
+                    using (cancellationToken.Register(() => tcs.TrySetException(new OperationCanceledException(cancellationToken))))
                     {
                         return await tcs.Task.ConfigureAwait(false);
                     }
-                }
-                catch (Exception ex)
-                {
-                    throw new DeviceException("BLE Scanning error", ex);
                 }
                 finally
                 {
@@ -83,18 +92,29 @@ namespace Maui
                         await Adapter.StopScanningForDevicesAsync().ConfigureAwait(false);
                 }
             }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                throw new DeviceException("BLE scanning error", ex);
+            }
             finally
             {
                 releaser.Dispose();
             }
         }
 
-        private static void VerifyTimeout(TimeSpan timeout)
+        private static void ValidateDeviceName(string deviceName)
+        {
+            if (string.IsNullOrWhiteSpace(deviceName))
+                throw new ArgumentNullException(nameof(deviceName));
+        }
+
+        private static void ValidateTimeout(TimeSpan timeout)
         {
             if (timeout <= TimeSpan.Zero)
-                throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout too short");
-            if (timeout > TimeSpan.FromMinutes(1))
-                throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout too long");
+                throw new ArgumentOutOfRangeException(nameof(timeout), $"Timeout too short. Minimum is {MinTimeoutSeconds} second.");
+
+            if (timeout > TimeSpan.FromSeconds(MaxTimeoutSeconds))
+                throw new ArgumentOutOfRangeException(nameof(timeout), $"Timeout too long. Maximum is {MaxTimeoutSeconds} seconds.");
         }
     }
 }

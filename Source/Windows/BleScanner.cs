@@ -1,7 +1,6 @@
 ﻿using BleCommands.Core.Contracts;
-using Core.Exceptions;
+using BleCommands.Core.Exceptions;
 using Microsoft.VisualStudio.Threading;
-using Windows;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Advertisement;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;

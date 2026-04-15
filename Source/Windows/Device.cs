@@ -1,7 +1,6 @@
 ﻿using BleCommands.Core.Contracts;
+using BleCommands.Core.Exceptions;
 using BleCommands.Windows.Extensions;
-using Core.Exceptions;
-using Windows;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 

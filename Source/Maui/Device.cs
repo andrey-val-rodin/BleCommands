@@ -1,4 +1,4 @@
-﻿using Core.Exceptions;
+﻿using BleCommands.Core.Exceptions;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using IDevice = BleCommands.Core.Contracts.IDevice<

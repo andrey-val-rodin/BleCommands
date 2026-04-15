@@ -1,5 +1,5 @@
 ﻿using BleCommands.Core.Contracts;
-using Core.Exceptions;
+using BleCommands.Core.Exceptions;
 using Microsoft.VisualStudio.Threading;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;

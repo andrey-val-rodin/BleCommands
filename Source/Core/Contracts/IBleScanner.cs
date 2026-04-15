@@ -1,4 +1,4 @@
-﻿using Core.Exceptions;
+﻿using BleCommands.Core.Exceptions;
 
 namespace BleCommands.Core.Contracts
 {

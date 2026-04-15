@@ -1,4 +1,4 @@
-﻿namespace Core.Exceptions
+﻿namespace BleCommands.Core.Exceptions
 {
     public class DeviceException : Exception
     {

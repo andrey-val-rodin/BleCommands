@@ -22,7 +22,7 @@ namespace Maui
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentNullException(nameof(id));
             if (Guid.TryParse(id, out Guid _))
-                throw new ArgumentException("The specified id is not Guid");
+                throw new ArgumentException("The specified id is not Guid.");
 
             _id = id;
         }
@@ -45,69 +45,69 @@ namespace Maui
 
         public bool IsConnected { get; private set; }
 
-        public async Task<bool> ConnectAsync(CancellationToken cancellationToken = default)
+        public async Task<bool> ConnectAsync(CancellationToken token = default)
         {
             if (NativeDevice != null)
             {
-                IsConnected = await ConnectAsync(NativeDevice, cancellationToken).ConfigureAwait(false);
+                IsConnected = await ConnectAsync(NativeDevice, token).ConfigureAwait(false);
             }
             else if (_id != null)
             {
-                IsConnected = await ConnectAsync(_id, cancellationToken).ConfigureAwait(false);
+                IsConnected = await ConnectAsync(_id, token).ConfigureAwait(false);
             }
 
             return IsConnected;
         }
 
         private static async Task<bool> ConnectAsync(
-            INativeDevice nativeDevice, CancellationToken cancellationToken = default)
+            INativeDevice nativeDevice, CancellationToken token = default)
         {
             var parameters = new ConnectParameters(false, forceBleTransport: true);
             try
             {
-                await Adapter.ConnectToDeviceAsync(nativeDevice, parameters, cancellationToken);
+                await Adapter.ConnectToDeviceAsync(nativeDevice, parameters, token);
                 return true;
             }
             catch (Exception ex)
             {
-                throw new DeviceException("Device connection error", ex);
+                throw new DeviceException("Device connection error.", ex);
             }
         }
 
-        private async Task<bool> ConnectAsync(string id, CancellationToken cancellationToken = default)
+        private async Task<bool> ConnectAsync(string id, CancellationToken token = default)
         {
             try
             {
                 Guid guid = Guid.Parse(id);
                 NativeDevice = await Adapter.ConnectToKnownDeviceAsync(guid,
-                    new ConnectParameters(false, forceBleTransport: true), cancellationToken);
+                    new ConnectParameters(false, forceBleTransport: true), token);
                 return true;
             }
             catch (Exception ex)
             {
-                throw new DeviceException("Device connection error", ex);
+                throw new DeviceException("Device connection error.", ex);
             }
         }
 
-        public async Task<IReadOnlyList<IService>> GetServicesAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<IService>> GetServicesAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
             if (!IsConnected || NativeDevice == null)
-                throw new InvalidOperationException("Device not connected");
+                throw new InvalidOperationException("Device not connected.");
 
-            var nativeServices = await NativeDevice.GetServicesAsync(cancellationToken);
+            var nativeServices = await NativeDevice.GetServicesAsync(token);
             return nativeServices == null
                 ? new List<IService>()
                 : nativeServices.Select(s => new Service(s)).ToList<IService>();
         }
 
-        public async Task<IService?> GetServiceAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<IService?> GetServiceAsync(Guid id, CancellationToken token = default)
         {
             ThrowIfDisposed();
             if (!IsConnected || NativeDevice == null)
-                throw new InvalidOperationException("Device not connected");
+                throw new InvalidOperationException("Device not connected.");
 
-            var nativeService = await NativeDevice.GetServiceAsync(id, cancellationToken);
+            var nativeService = await NativeDevice.GetServiceAsync(id, token);
             return nativeService == null ? null : new Service(nativeService);
         }
 

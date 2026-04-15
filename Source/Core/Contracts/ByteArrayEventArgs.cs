@@ -1,12 +1,12 @@
 ﻿namespace Core.Contracts
 {
-    public class ValueUpdatedEventArgs
+    public class ByteArrayEventArgs
     {
-        public ValueUpdatedEventArgs(string value)
+        public ByteArrayEventArgs(byte[] value)
         {
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public string Value { get; }
+        public byte[] Value { get; }
     }
 }

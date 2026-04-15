@@ -2,7 +2,7 @@
 {
     public interface ICharacteristic<TCharacteristic>
     {
-        event EventHandler<ValueUpdatedEventArgs> ValueUpdated;
+        event EventHandler<ByteArrayEventArgs> ValueUpdated;
 
         Guid Id { get; }
 
@@ -16,12 +16,18 @@
 
         bool CanUpdate { get; }
 
-        Task<byte[]> ReadAsync(CancellationToken cancellationToken = default);
+        CommandStream? CommandStream { get; }
 
-        Task<bool> WriteAsync(byte[] data, CancellationToken cancellationToken = default);
+        Task<byte[]> ReadAsync(CancellationToken token = default);
 
-        Task StartUpdatesAsync(CancellationToken cancellationToken = default);
+        Task WriteAsync(byte[] data, CancellationToken token = default);
 
-        Task StopUpdatesAsync(CancellationToken cancellationToken = default);
+        Task StartUpdatesAsync(CancellationToken token = default);
+
+        Task StopUpdatesAsync(CancellationToken token = default);
+
+        void AttachCommandStream(CommandStream stream);
+
+        void DetachCommandStream();
     }
 }

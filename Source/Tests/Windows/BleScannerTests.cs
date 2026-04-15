@@ -1,7 +1,4 @@
 ﻿using Windows;
-using Windows.Devices.Bluetooth;
-using Windows.Devices.Bluetooth.Advertisement;
-using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace Tests.Windows
 {

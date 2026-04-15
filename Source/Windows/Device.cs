@@ -2,6 +2,7 @@
 using Core.Exceptions;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
+using Windows.Extensions;
 
 namespace Windows
 {
@@ -39,11 +40,11 @@ namespace Windows
         /// <summary>
         /// Connects to the device by the specified id.
         /// </summary>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
+        /// <param name="token">Token to cancel the operation.</param>
         /// <returns>True if device is successfully connected; false otherwise.</returns>
         /// <remarks>This method must be called from a UI thread.</remarks>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
-        public async Task<bool> ConnectAsync(CancellationToken cancellationToken = default)
+        public async Task<bool> ConnectAsync(CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
 
@@ -62,15 +63,14 @@ namespace Windows
 
                 // Retrieve services to establish actual connection
                 var result = await NativeDevice.GetGattServicesAsync(BluetoothCacheMode.Uncached);
-                if (result?.Status != GattCommunicationStatus.Success)
-                    return false;
+                result.ThrowIfError();
 
                 IsConnected = NativeDevice.ConnectionStatus == BluetoothConnectionStatus.Connected;
                 return IsConnected;
             }
             catch (Exception ex)
             {
-                throw new DeviceException("Device connection error", ex);
+                throw new DeviceException("Device connection error.", ex);
             }
         }
 
@@ -87,45 +87,48 @@ namespace Windows
         }
 
         public async Task<IService<GattDeviceService, GattCharacteristic>?> GetServiceAsync(
-            Guid id, CancellationToken cancellationToken = default)
+            Guid id, CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
 
             if (NativeDevice == null)
-                throw new InvalidOperationException("Device is not connected");
+                throw new InvalidOperationException("Device is not connected.");
 
             try
             {
                 var result = await NativeDevice.GetGattServicesForUuidAsync(id, BluetoothCacheMode.Cached);
-                var nativeService = result?.Services?.Count > 0 ? result.Services[0] : null;
+                result.ThrowIfError();
+                var nativeService = result.Services?.Count > 0 ? result.Services[0] : null;
 
                 return nativeService == null ? null : new Service(nativeService);
             }
             catch (Exception ex)
             {
-                throw new DeviceException("Failed to get service", ex);
+                throw new DeviceException("Failed to get service.", ex);
             }
         }
 
         public async Task<IReadOnlyList<IService<GattDeviceService, GattCharacteristic>>> GetServicesAsync(
-            CancellationToken cancellationToken = default)
+            CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
 
             if (NativeDevice == null)
-                throw new InvalidOperationException("Device is not connected");
+                throw new InvalidOperationException("Device is not connected.");
 
             try
             {
                 var result = await NativeDevice.GetGattServicesAsync(BluetoothCacheMode.Cached);
-                var nativeServices = result?.Services;
+                result.ThrowIfError();
+                var nativeServices = result.Services;
+
                 return nativeServices == null
                     ? new List<IService<GattDeviceService, GattCharacteristic>>()
                     : nativeServices.Select(s => new Service(s)).ToList();
             }
             catch (Exception ex)
             {
-                throw new DeviceException("Failed to get services", ex);
+                throw new DeviceException("Failed to get services.", ex);
             }
         }
 

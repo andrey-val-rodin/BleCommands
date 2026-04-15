@@ -1,11 +1,19 @@
-﻿using Core.Contracts;
+﻿using Core;
+using Core.Contracts;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
+using Windows.Extensions;
+using Windows.Security.Cryptography;
+using Windows.Storage.Streams;
 
 namespace Windows
 {
     public class Characteristic : ICharacteristic<GattCharacteristic>
     {
-        public event EventHandler<ValueUpdatedEventArgs>? ValueUpdated;
+        public event EventHandler<ByteArrayEventArgs>? ValueUpdated;
+
+        private CommandStream? _commandStream;
 
         public Characteristic(GattCharacteristic characteristic)
         {
@@ -16,7 +24,8 @@ namespace Windows
 
         public Guid Id => NativeCharacteristic.Uuid;
 
-        public CharacteristicPropertyFlags Properties => (CharacteristicPropertyFlags)NativeCharacteristic.CharacteristicProperties;
+        public CharacteristicPropertyFlags Properties =>
+            (CharacteristicPropertyFlags)NativeCharacteristic.CharacteristicProperties;
 
         /// <summary>
         /// Indicates whether the characteristic can be read or not.
@@ -26,36 +35,119 @@ namespace Windows
         /// <summary>
         /// Indicates whether the characteristic supports notify or not.
         /// </summary>
-        public bool CanUpdate => Properties.HasFlag(CharacteristicPropertyFlags.Notify) |
+        public bool CanUpdate => Properties.HasFlag(CharacteristicPropertyFlags.Notify) ||
                                  Properties.HasFlag(CharacteristicPropertyFlags.Indicate);
 
         /// <summary>
         /// Indicates whether the characteristic can be written or not.
         /// </summary>
-        public bool CanWrite => Properties.HasFlag(CharacteristicPropertyFlags.Write) |
+        public bool CanWrite => Properties.HasFlag(CharacteristicPropertyFlags.Write) ||
                                 Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse);
 
-        public Task<byte[]> ReadAsync(CancellationToken _ = default)
-        {
-            //var result = await NativeCharacteristic.ReadValueAsync(BluetoothCacheMode.Uncached);
-            //return result.GetValueOrThrowIfError();
+        public CommandStream? CommandStream => _commandStream;
 
-            throw new NotImplementedException();
+        public async Task<byte[]> ReadAsync(CancellationToken token = default)
+        {
+            var result = await NativeCharacteristic
+                .ReadValueAsync()
+                .AsTask(token);
+            return result.GetValueOrThrowIfError();
         }
 
-        public Task StartUpdatesAsync(CancellationToken cancellationToken = default)
+        public async Task StartUpdatesAsync(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            NativeCharacteristic.ValueChanged += NativeCharacteristic_ValueChanged;
+
+            GattClientCharacteristicConfigurationDescriptorValue descriptor;
+            if (Properties.HasFlag(CharacteristicPropertyFlags.Notify))
+            {
+                descriptor = GattClientCharacteristicConfigurationDescriptorValue.Notify;
+            }
+            else if (Properties.HasFlag(CharacteristicPropertyFlags.Indicate))
+            {
+                descriptor = GattClientCharacteristicConfigurationDescriptorValue.Indicate;
+            }
+            else
+            {
+                throw new InvalidOperationException("The characteristic is neither Update nor Indicate.");
+            }
+
+            var result = await NativeCharacteristic
+                .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(descriptor)
+                .AsTask(token);
+            result.ThrowIfError();
         }
 
-        public Task StopUpdatesAsync(CancellationToken cancellationToken = default)
+        public async Task StopUpdatesAsync(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            var result = await NativeCharacteristic
+                .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(
+                    GattClientCharacteristicConfigurationDescriptorValue.None)
+                .AsTask(token);
+            result.ThrowIfError();
+
+            NativeCharacteristic.ValueChanged -= NativeCharacteristic_ValueChanged;
         }
 
-        public Task<bool> WriteAsync(byte[] data, CancellationToken cancellationToken = default)
+        public async Task WriteAsync(byte[] data, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(data);
+
+            if (!CanWrite)
+                throw new InvalidOperationException("The characteristic is neither Write nor Write without response.");
+
+            IBuffer value = CryptographicBuffer.CreateFromByteArray(data);
+            GattWriteOption option = Properties.HasFlag(CharacteristicPropertyFlags.Write)
+                ? GattWriteOption.WriteWithResponse
+                : GattWriteOption.WriteWithoutResponse;
+            var result = await NativeCharacteristic
+                .WriteValueWithResultAsync(value, option)
+                .AsTask(token);
+            result.ThrowIfError();
+        }
+
+        private void NativeCharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
+        {
+            var bytes = args.CharacteristicValue.ToArray();
+            ValueUpdated?.Invoke(this, new ByteArrayEventArgs(bytes));
+
+            var stream = Interlocked.CompareExchange(ref _commandStream, null, null);
+            if (stream != null)
+            {
+                var text = ToString(bytes);
+                stream.Append(text);
+            }
+        }
+
+        private static string ToString(byte[] value)
+        {
+            try
+            {
+                return Encoding.UTF8.GetString(value);
+            }
+            catch (Exception ex) when (ex is DecoderFallbackException or ArgumentException or ArgumentNullException)
+            {
+                return string.Empty;
+            }
+        }
+        
+        public void AttachCommandStream(CommandStream stream)
+        {
+            if (!CanUpdate)
+                throw new InvalidOperationException("The characteristic is neither Update nor Indicate.");
+
+            ArgumentNullException.ThrowIfNull(stream);
+
+            var original = Interlocked.CompareExchange(ref _commandStream, stream, null);
+            if (original != null)
+            {
+                throw new InvalidOperationException("CommandStream is already attached. Call DetachCommandStream first.");
+            }
+        }
+
+        public void DetachCommandStream()
+        {
+            Interlocked.Exchange(ref _commandStream, null);
         }
     }
 }

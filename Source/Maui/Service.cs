@@ -28,7 +28,7 @@ namespace Maui
         {
             ThrowIfDisposed();
             //TODO
-            return Task.FromResult<IReadOnlyList<ICharacteristic<INativeCharacteristic>>>(null);
+            return Task.FromResult<IReadOnlyList<ICharacteristic<INativeCharacteristic>>>(new List<ICharacteristic<INativeCharacteristic>>());
         }
 
         private void ThrowIfDisposed()

@@ -12,10 +12,11 @@ namespace Maui
 {
     public class BleScanner : IBleScanner<INativeDevice, INativeService, INativeCharacteristic>
     {
-        private readonly AsyncSemaphore _scanLock = new(1);
         private const int DefaultTimeoutSeconds = 5;
         private const int MaxTimeoutSeconds = 60;
         private const int MinTimeoutSeconds = 1;
+
+        private readonly AsyncSemaphore _scanLock = new(1);
 
         private static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
 
@@ -47,17 +48,17 @@ namespace Maui
 
         /// <inheritdoc />
         public async Task<IDevice<INativeDevice, INativeService, ICharacteristic>?> FindDeviceAsync(
-            string deviceName, CancellationToken cancellationToken)
+            string deviceName, CancellationToken token)
         {
             ValidateDeviceName(deviceName);
-            return await FindDeviceInternalAsync(deviceName, cancellationToken).ConfigureAwait(false);
+            return await FindDeviceInternalAsync(deviceName, token).ConfigureAwait(false);
         }
 
         private async Task<IDevice<INativeDevice, INativeService, ICharacteristic>?> FindDeviceInternalAsync(
             string deviceName,
-            CancellationToken cancellationToken)
+            CancellationToken token)
         {
-            var releaser = await _scanLock.EnterAsync(cancellationToken).ConfigureAwait(false);
+            var releaser = await _scanLock.EnterAsync(token).ConfigureAwait(false);
             try
             {
                 var tcs = new TaskCompletionSource<IDevice<INativeDevice, INativeService, ICharacteristic>?>();
@@ -77,10 +78,10 @@ namespace Maui
 
                     await Adapter.StartScanningForDevicesAsync(
                         scanFilterOptions: new ScanFilterOptions { DeviceNames = new[] { deviceName } },
-                        cancellationToken: cancellationToken
+                        cancellationToken: token
                     ).ConfigureAwait(false);
 
-                    using (cancellationToken.Register(() => tcs.TrySetException(new OperationCanceledException(cancellationToken))))
+                    using (token.Register(() => tcs.TrySetException(new OperationCanceledException(token))))
                     {
                         return await tcs.Task.ConfigureAwait(false);
                     }
@@ -94,7 +95,7 @@ namespace Maui
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                throw new DeviceException("BLE scanning error", ex);
+                throw new DeviceException("BLE scanning error.", ex);
             }
             finally
             {

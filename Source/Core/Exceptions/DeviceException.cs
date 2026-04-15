@@ -2,7 +2,7 @@
 {
     public class DeviceException : Exception
     {
-        public DeviceException()
+        public DeviceException() : base()
         {
         }
 

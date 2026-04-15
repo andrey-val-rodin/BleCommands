@@ -1,6 +1,7 @@
 ﻿using Core.Contracts;
 using Core.Exceptions;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
+using Windows.Extensions;
 
 namespace Windows
 {
@@ -24,13 +25,14 @@ namespace Windows
             try
             {
                 var result = await NativeService.GetCharacteristicsForUuidAsync(id);
+                result.ThrowIfError();
                 var nativeService = result.Characteristics.Count > 0 ? result.Characteristics[0] : null;
 
                 return nativeService == null ? null : new Characteristic(nativeService);
             }
             catch (Exception ex)
             {
-                throw new DeviceException("GetCharacteristicAsync() failed", ex);
+                throw new DeviceException("GetCharacteristicAsync() failed.", ex);
             }
         }
 
@@ -41,14 +43,16 @@ namespace Windows
             try
             {
                 var result = await NativeService.GetCharacteristicsAsync();
-                var nativeCharacteristics = result?.Characteristics;
+                result.ThrowIfError();
+                var nativeCharacteristics = result.Characteristics;
+
                 return nativeCharacteristics == null
                     ? new List<ICharacteristic<GattCharacteristic>>()
                     : nativeCharacteristics.Select(c => new Characteristic(c)).ToList<ICharacteristic<GattCharacteristic>>();
             }
             catch (Exception ex)
             {
-                throw new DeviceException("GetCharacteristicsAsync() failed", ex);
+                throw new DeviceException("GetCharacteristicsAsync() failed.", ex);
             }
         }
 

@@ -9,10 +9,11 @@ namespace Windows
 {
     public class BleScanner : IBleScanner<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
     {
-        private readonly AsyncSemaphore _scanLock = new(1);
         private const int DefaultTimeoutSeconds = 5;
         private const int MaxTimeoutSeconds = 60;
         private const int MinTimeoutSeconds = 1;
+
+        private readonly AsyncSemaphore _scanLock = new(1);
 
         /// <inheritdoc />
         public async Task<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?> FindDeviceAsync(
@@ -42,17 +43,17 @@ namespace Windows
 
         /// <inheritdoc />
         public async Task<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?> FindDeviceAsync(
-            string deviceName, CancellationToken cancellationToken)
+            string deviceName, CancellationToken token)
         {
             ValidateDeviceName(deviceName);
-            return await FindDeviceInternalAsync(deviceName, cancellationToken).ConfigureAwait(false);
+            return await FindDeviceInternalAsync(deviceName, token).ConfigureAwait(false);
         }
 
         private async Task<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?> FindDeviceInternalAsync(
             string deviceName,
-            CancellationToken cancellationToken)
+            CancellationToken token)
         {
-            var releaser = await _scanLock.EnterAsync(cancellationToken).ConfigureAwait(false);
+            var releaser = await _scanLock.EnterAsync(token).ConfigureAwait(false);
             try
             {
                 var tcs = new TaskCompletionSource<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?>();
@@ -80,7 +81,7 @@ namespace Windows
                     deviceWatcher.Received += Handler;
                     deviceWatcher.Start();
 
-                    using (cancellationToken.Register(() => tcs.TrySetException(new OperationCanceledException(cancellationToken))))
+                    using (token.Register(() => tcs.TrySetException(new OperationCanceledException(token))))
                     {
                         return await tcs.Task.ConfigureAwait(false);
                     }
@@ -93,7 +94,7 @@ namespace Windows
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                throw new DeviceException("BLE scanning error", ex);
+                throw new DeviceException("BLE scanning error.", ex);
             }
             finally
             {

@@ -10,10 +10,10 @@
 
         TDevice? NativeDevice { get; }
 
-        Task<bool> ConnectAsync(CancellationToken cancellationToken = default);
+        Task<bool> ConnectAsync(CancellationToken token = default);
 
-        Task<IReadOnlyList<IService<TService, TCharacteristic>>> GetServicesAsync(CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<IService<TService, TCharacteristic>>> GetServicesAsync(CancellationToken token = default);
 
-        Task<IService<TService, TCharacteristic>?> GetServiceAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<IService<TService, TCharacteristic>?> GetServiceAsync(Guid id, CancellationToken token = default);
     }
 }

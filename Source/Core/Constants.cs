@@ -1,6 +1,6 @@
-﻿namespace Core.Contracts
+﻿namespace Core
 {
-    public class Constants
+    public static class Constants
     {
         public const char Terminator = '\n';
     }

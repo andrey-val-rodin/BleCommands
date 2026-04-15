@@ -1,4 +1,4 @@
-﻿namespace Core.Contracts
+﻿namespace Core.Events
 {
     public class ByteArrayEventArgs
     {

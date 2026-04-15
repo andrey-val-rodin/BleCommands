@@ -1,4 +1,6 @@
-﻿namespace Core.Contracts
+﻿using Core.Events;
+
+namespace Core.Contracts
 {
     public interface ICharacteristic<TCharacteristic>
     {

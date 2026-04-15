@@ -1,5 +1,5 @@
 using Core;
-using Core.Contracts;
+using Core.Events;
 using System.Text;
 
 namespace Tests.Core

@@ -1,5 +1,6 @@
 ﻿using Core;
 using Core.Contracts;
+using Core.Events;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
@@ -130,7 +131,7 @@ namespace Windows
                 return string.Empty;
             }
         }
-        
+
         public void AttachCommandStream(CommandStream stream)
         {
             if (!CanUpdate)

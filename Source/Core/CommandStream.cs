@@ -1,4 +1,4 @@
-﻿using Core.Contracts;
+﻿using Core.Events;
 using Core.Exceptions;
 using System.Text;
 

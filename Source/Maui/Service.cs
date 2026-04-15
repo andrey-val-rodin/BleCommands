@@ -1,8 +1,8 @@
-﻿using Core.Contracts;
+﻿using BleCommands.Core.Contracts;
 using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 using INativeService = Plugin.BLE.Abstractions.Contracts.IService;
 
-namespace Maui
+namespace BleCommands.Maui
 {
     public class Service : IService<INativeService, INativeCharacteristic>
     {

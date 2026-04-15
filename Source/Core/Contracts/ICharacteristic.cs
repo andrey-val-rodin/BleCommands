@@ -1,6 +1,7 @@
-﻿using Core.Events;
+﻿using BleCommands.Core.Enums;
+using BleCommands.Core.Events;
 
-namespace Core.Contracts
+namespace BleCommands.Core.Contracts
 {
     public interface ICharacteristic<TCharacteristic>
     {
@@ -18,7 +19,7 @@ namespace Core.Contracts
 
         bool CanUpdate { get; }
 
-        CommandStream? CommandStream { get; }
+        BleStream? Stream { get; }
 
         Task<byte[]> ReadAsync(CancellationToken token = default);
 
@@ -28,7 +29,7 @@ namespace Core.Contracts
 
         Task StopUpdatesAsync(CancellationToken token = default);
 
-        void AttachCommandStream(CommandStream stream);
+        void AttachCommandStream(BleStream stream);
 
         void DetachCommandStream();
     }

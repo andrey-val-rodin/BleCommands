@@ -1,14 +1,14 @@
-using Core;
-using Core.Events;
+using BleCommands.Core;
+using BleCommands.Core.Events;
 using System.Text;
 
-namespace Tests.Core
+namespace BleCommands.Tests.Core
 {
-    public sealed class CommandStreamTests
+    public sealed class BleStreamTests
     {
         private const char N = Constants.Terminator;
 
-        private CommandStream Stream { get; } = new();
+        private BleStream Stream { get; } = new();
 
         private List<string> Tokens { get; } = [];
 
@@ -16,7 +16,7 @@ namespace Tests.Core
         public void Append_OneToken_ValidToken()
         {
             var token = "Token 1";
-            Stream.CommandReceived += Stream_TokenUpdated;
+            Stream.TokenReceived += Stream_TokenUpdated;
             try
             {
                 Stream.Append($"{token}{N}");
@@ -26,7 +26,7 @@ namespace Tests.Core
             }
             finally
             {
-                Stream.CommandReceived -= Stream_TokenUpdated;
+                Stream.TokenReceived -= Stream_TokenUpdated;
             }
         }
 
@@ -34,7 +34,7 @@ namespace Tests.Core
         public void Append_UnicodeToken_ValidToken()
         {
             var token = "Русский токен🔥";
-            Stream.CommandReceived += Stream_TokenUpdated;
+            Stream.TokenReceived += Stream_TokenUpdated;
             try
             {
                 Stream.Append($"{token}{N}");
@@ -44,7 +44,7 @@ namespace Tests.Core
             }
             finally
             {
-                Stream.CommandReceived -= Stream_TokenUpdated;
+                Stream.TokenReceived -= Stream_TokenUpdated;
             }
         }
 
@@ -54,7 +54,7 @@ namespace Tests.Core
             var token1 = "";
             var token2 = "Token 2";
             var token3 = "Token 3";
-            Stream.CommandReceived += Stream_TokenUpdated;
+            Stream.TokenReceived += Stream_TokenUpdated;
             try
             {
                 Stream.Append($"{token1}{N}");
@@ -68,7 +68,7 @@ namespace Tests.Core
             }
             finally
             {
-                Stream.CommandReceived -= Stream_TokenUpdated;
+                Stream.TokenReceived -= Stream_TokenUpdated;
             }
         }
 
@@ -78,7 +78,7 @@ namespace Tests.Core
             var token1 = "Token 1";
             var token2 = "Token 2";
             var token3 = "";
-            Stream.CommandReceived += Stream_TokenUpdated;
+            Stream.TokenReceived += Stream_TokenUpdated;
             try
             {
                 Stream.Append($"{token1}{N}");
@@ -92,7 +92,7 @@ namespace Tests.Core
             }
             finally
             {
-                Stream.CommandReceived -= Stream_TokenUpdated;
+                Stream.TokenReceived -= Stream_TokenUpdated;
             }
         }
 
@@ -103,7 +103,7 @@ namespace Tests.Core
             var token1 = "Token 1";
             var token2 = "";
             var token3 = "Token 3";
-            Stream.CommandReceived += Stream_TokenUpdated;
+            Stream.TokenReceived += Stream_TokenUpdated;
             try
             {
                 Stream.Append($"{token1}{N}");
@@ -117,7 +117,7 @@ namespace Tests.Core
             }
             finally
             {
-                Stream.CommandReceived -= Stream_TokenUpdated;
+                Stream.TokenReceived -= Stream_TokenUpdated;
             }
         }
 
@@ -126,7 +126,7 @@ namespace Tests.Core
         {
             var chain1 = $"Token 1{N}Token 2";
             var chain2 = $"{N}Token 3{N}";
-            Stream.CommandReceived += Stream_TokenUpdated;
+            Stream.TokenReceived += Stream_TokenUpdated;
             try
             {
                 Stream.Append(chain1);
@@ -139,7 +139,7 @@ namespace Tests.Core
             }
             finally
             {
-                Stream.CommandReceived -= Stream_TokenUpdated;
+                Stream.TokenReceived -= Stream_TokenUpdated;
             }
         }
 
@@ -152,7 +152,7 @@ namespace Tests.Core
                 builder.Append($"Token {i}{N}");
             }
             string str = builder.ToString();
-            Stream.CommandReceived += Stream_TokenUpdated;
+            Stream.TokenReceived += Stream_TokenUpdated;
             try
             {
                 // Append big string by characters
@@ -169,7 +169,7 @@ namespace Tests.Core
             }
             finally
             {
-                Stream.CommandReceived -= Stream_TokenUpdated;
+                Stream.TokenReceived -= Stream_TokenUpdated;
             }
         }
 

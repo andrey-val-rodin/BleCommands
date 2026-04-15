@@ -1,10 +1,11 @@
-﻿using Core.Contracts;
+﻿using BleCommands.Core.Contracts;
+using BleCommands.Windows.Extensions;
 using Core.Exceptions;
+using Windows;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
-using Windows.Extensions;
 
-namespace Windows
+namespace BleCommands.Windows
 {
     public class Device : IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
     {

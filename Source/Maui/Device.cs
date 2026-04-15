@@ -1,16 +1,16 @@
 ﻿using Core.Exceptions;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
-using IDevice = Core.Contracts.IDevice<
+using IDevice = BleCommands.Core.Contracts.IDevice<
     Plugin.BLE.Abstractions.Contracts.IDevice,
     Plugin.BLE.Abstractions.Contracts.IService,
     Plugin.BLE.Abstractions.Contracts.ICharacteristic>;
 using INativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
-using IService = Core.Contracts.IService<
+using IService = BleCommands.Core.Contracts.IService<
     Plugin.BLE.Abstractions.Contracts.IService,
     Plugin.BLE.Abstractions.Contracts.ICharacteristic>;
 
-namespace Maui
+namespace BleCommands.Maui
 {
     public class Device : IDevice
     {

@@ -12,12 +12,12 @@
 // 4. Minor changes in GetErrorMessage()
 // 5. new byte[0] => Array.Empty<byte>()
 
-using Core.Exceptions;
+using BleCommands.Core.Exceptions;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
-namespace Windows.Extensions
+namespace BleCommands.Windows.Extensions
 {
     internal static class GattResultExtensions
     {

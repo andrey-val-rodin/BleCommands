@@ -1,20 +1,21 @@
-﻿using Core;
-using Core.Contracts;
-using Core.Events;
+﻿using BleCommands.Core;
+using BleCommands.Core.Contracts;
+using BleCommands.Core.Enums;
+using BleCommands.Core.Events;
+using BleCommands.Windows.Extensions;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
-using Windows.Extensions;
 using Windows.Security.Cryptography;
 using Windows.Storage.Streams;
 
-namespace Windows
+namespace BleCommands.Windows
 {
     public class Characteristic : ICharacteristic<GattCharacteristic>
     {
         public event EventHandler<ByteArrayEventArgs>? ValueUpdated;
 
-        private CommandStream? _commandStream;
+        private BleStream? _stream;
 
         public Characteristic(GattCharacteristic characteristic)
         {
@@ -45,7 +46,7 @@ namespace Windows
         public bool CanWrite => Properties.HasFlag(CharacteristicPropertyFlags.Write) ||
                                 Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse);
 
-        public CommandStream? CommandStream => _commandStream;
+        public BleStream? Stream => _stream;
 
         public async Task<byte[]> ReadAsync(CancellationToken token = default)
         {
@@ -57,26 +58,21 @@ namespace Windows
 
         public async Task StartUpdatesAsync(CancellationToken token = default)
         {
-            NativeCharacteristic.ValueChanged += NativeCharacteristic_ValueChanged;
-
+            // Logic as in Plugin.BLE.Windows.Characteristic:
             GattClientCharacteristicConfigurationDescriptorValue descriptor;
             if (Properties.HasFlag(CharacteristicPropertyFlags.Notify))
-            {
                 descriptor = GattClientCharacteristicConfigurationDescriptorValue.Notify;
-            }
             else if (Properties.HasFlag(CharacteristicPropertyFlags.Indicate))
-            {
                 descriptor = GattClientCharacteristicConfigurationDescriptorValue.Indicate;
-            }
             else
-            {
                 throw new InvalidOperationException("The characteristic is neither Update nor Indicate.");
-            }
 
             var result = await NativeCharacteristic
                 .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(descriptor)
                 .AsTask(token);
             result.ThrowIfError();
+
+            NativeCharacteristic.ValueChanged += NativeCharacteristic_ValueChanged;
         }
 
         public async Task StopUpdatesAsync(CancellationToken token = default)
@@ -112,7 +108,7 @@ namespace Windows
             var bytes = args.CharacteristicValue.ToArray();
             ValueUpdated?.Invoke(this, new ByteArrayEventArgs(bytes));
 
-            var stream = Interlocked.CompareExchange(ref _commandStream, null, null);
+            var stream = Interlocked.CompareExchange(ref _stream, null, null);
             if (stream != null)
             {
                 var text = ToString(bytes);
@@ -132,23 +128,21 @@ namespace Windows
             }
         }
 
-        public void AttachCommandStream(CommandStream stream)
+        public void AttachCommandStream(BleStream stream)
         {
             if (!CanUpdate)
                 throw new InvalidOperationException("The characteristic is neither Update nor Indicate.");
 
             ArgumentNullException.ThrowIfNull(stream);
 
-            var original = Interlocked.CompareExchange(ref _commandStream, stream, null);
+            var original = Interlocked.CompareExchange(ref _stream, stream, null);
             if (original != null)
-            {
                 throw new InvalidOperationException("CommandStream is already attached. Call DetachCommandStream first.");
-            }
         }
 
         public void DetachCommandStream()
         {
-            Interlocked.Exchange(ref _commandStream, null);
+            Interlocked.Exchange(ref _stream, null);
         }
     }
 }

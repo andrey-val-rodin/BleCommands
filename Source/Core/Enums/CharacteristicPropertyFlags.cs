@@ -1,4 +1,4 @@
-﻿namespace Core.Contracts
+﻿namespace BleCommands.Core.Enums
 {
     public enum CharacteristicPropertyFlags
     {

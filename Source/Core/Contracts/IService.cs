@@ -1,4 +1,4 @@
-﻿namespace Core.Contracts
+﻿namespace BleCommands.Core.Contracts
 {
     public interface IService<TService, TCharacteristic> : IDisposable
     {

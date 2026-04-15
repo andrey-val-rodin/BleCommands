@@ -1,24 +1,24 @@
-﻿using Core.Events;
-using Core.Exceptions;
+﻿using BleCommands.Core.Events;
+using BleCommands.Core.Exceptions;
 using System.Text;
 
-namespace Core
+namespace BleCommands.Core
 {
-    public class CommandStream
+    public class BleStream
     {
         private const int Capacity = 1024;
         private const char Terminator = Constants.Terminator;
 
         private readonly StringBuilder _buffer = new();
 
-        public event EventHandler<TextEventArgs>? CommandReceived;
+        public event EventHandler<TextEventArgs>? TokenReceived;
 
         public void Append(string text)
         {
             lock (_buffer)
             {
                 if (_buffer.Length + text.Length > Capacity)
-                    throw new CommandStreamException("Maximum buffer capacity exceeded.");
+                    throw new StreamException("Maximum buffer capacity exceeded.");
 
                 _buffer.Append(text);
                 Parse();
@@ -34,7 +34,7 @@ namespace Core
                 if (c == Terminator)
                 {
                     var token = currentToken.ToString();
-                    CommandReceived?.Invoke(this, new TextEventArgs(token));
+                    TokenReceived?.Invoke(this, new TextEventArgs(token));
                     currentToken.Clear();
                 }
                 else

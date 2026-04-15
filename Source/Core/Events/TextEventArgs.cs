@@ -1,4 +1,4 @@
-﻿namespace Core.Events
+﻿namespace BleCommands.Core.Events
 {
     public class TextEventArgs : EventArgs
     {

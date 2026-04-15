@@ -1,4 +1,4 @@
-﻿namespace Core
+﻿namespace BleCommands.Core
 {
     public static class Constants
     {

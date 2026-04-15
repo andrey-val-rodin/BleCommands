@@ -12,7 +12,7 @@
 
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
-namespace Windows.Extensions
+namespace BleCommands.Windows.Extensions
 {
     /// <summary>
     /// Helper function when working with <see cref="GattProtocolError" />

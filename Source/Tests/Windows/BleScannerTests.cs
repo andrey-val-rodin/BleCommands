@@ -1,6 +1,6 @@
-﻿using Windows;
+﻿using BleCommands.Windows;
 
-namespace Tests.Windows
+namespace BleCommands.Tests.Windows
 {
     /// <summary>
     /// Temporary tests for Windows.BleScanner

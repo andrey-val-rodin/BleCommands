@@ -1,4 +1,4 @@
-﻿using Core.Contracts;
+﻿using BleCommands.Core.Contracts;
 using Core.Exceptions;
 using Microsoft.VisualStudio.Threading;
 using Plugin.BLE.Abstractions;
@@ -8,7 +8,7 @@ using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 using INativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
 using INativeService = Plugin.BLE.Abstractions.Contracts.IService;
 
-namespace Maui
+namespace BleCommands.Maui
 {
     public class BleScanner : IBleScanner<INativeDevice, INativeService, INativeCharacteristic>
     {
@@ -21,14 +21,14 @@ namespace Maui
         private static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
 
         /// <inheritdoc />
-        public async Task<IDevice<INativeDevice, INativeService, ICharacteristic>?> FindDeviceAsync(
+        public async Task<IDevice<INativeDevice, INativeService, INativeCharacteristic>?> FindDeviceAsync(
             string deviceName)
         {
             return await FindDeviceAsync(deviceName, TimeSpan.FromSeconds(DefaultTimeoutSeconds)).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public async Task<IDevice<INativeDevice, INativeService, ICharacteristic>?> FindDeviceAsync(
+        public async Task<IDevice<INativeDevice, INativeService, INativeCharacteristic>?> FindDeviceAsync(
             string deviceName, TimeSpan timeout)
         {
             ValidateDeviceName(deviceName);
@@ -47,21 +47,21 @@ namespace Maui
         }
 
         /// <inheritdoc />
-        public async Task<IDevice<INativeDevice, INativeService, ICharacteristic>?> FindDeviceAsync(
+        public async Task<IDevice<INativeDevice, INativeService, INativeCharacteristic>?> FindDeviceAsync(
             string deviceName, CancellationToken token)
         {
             ValidateDeviceName(deviceName);
             return await FindDeviceInternalAsync(deviceName, token).ConfigureAwait(false);
         }
 
-        private async Task<IDevice<INativeDevice, INativeService, ICharacteristic>?> FindDeviceInternalAsync(
+        private async Task<IDevice<INativeDevice, INativeService, INativeCharacteristic>?> FindDeviceInternalAsync(
             string deviceName,
             CancellationToken token)
         {
             var releaser = await _scanLock.EnterAsync(token).ConfigureAwait(false);
             try
             {
-                var tcs = new TaskCompletionSource<IDevice<INativeDevice, INativeService, ICharacteristic>?>();
+                var tcs = new TaskCompletionSource<IDevice<INativeDevice, INativeService, INativeCharacteristic>?>();
 
                 void Handler(object sender, DeviceEventArgs args)
                 {

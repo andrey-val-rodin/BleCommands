@@ -1,11 +1,12 @@
-﻿using Core.Contracts;
+﻿using BleCommands.Core.Contracts;
 using Core.Exceptions;
 using Microsoft.VisualStudio.Threading;
+using Windows;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Advertisement;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
-namespace Windows
+namespace BleCommands.Windows
 {
     public class BleScanner : IBleScanner<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
     {

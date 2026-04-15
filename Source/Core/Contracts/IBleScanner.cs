@@ -1,6 +1,6 @@
 ﻿using Core.Exceptions;
 
-namespace Core.Contracts
+namespace BleCommands.Core.Contracts
 {
     /// <summary>
     /// Bluetooth Low Energy scanner.

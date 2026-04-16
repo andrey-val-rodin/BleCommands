@@ -10,7 +10,8 @@
 // 2. namespace Plugin.BLE.Extensions -> Windows.Extensions
 // 3. Nullable types
 // 4. Minor changes in GetErrorMessage()
-// 5. new byte[0] => Array.Empty<byte>()
+// 5. new byte[0] -> Array.Empty<byte>()
+// 6. throw new Exception(errorMessage) -> throw new CharacteristicException(errorMessage)
 
 using BleCommands.Core.Exceptions;
 using System.Runtime.CompilerServices;
@@ -49,7 +50,7 @@ namespace BleCommands.Windows.Extensions
             var errorMessage = status.GetErrorMessage(tag, protocolError);
             if (!string.IsNullOrEmpty(errorMessage))
             {
-                throw new Exception(errorMessage);
+                throw new CharacteristicException(errorMessage);
             }
         }
 

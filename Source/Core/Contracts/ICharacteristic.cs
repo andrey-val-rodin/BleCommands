@@ -18,9 +18,9 @@ namespace BleCommands.Core.Contracts
 
         TokenAggregator? TokenAggregator { get; }
 
-        Task<byte[]> ReadAsync(CancellationToken token = default);
+        Task<string> ReadAsync(CancellationToken token = default);
 
-        Task WriteAsync(byte[] data, CancellationToken token = default);
+        Task WriteAsync(string data, CancellationToken token = default);
 
         Task StartUpdatesAsync(CancellationToken token = default);
 

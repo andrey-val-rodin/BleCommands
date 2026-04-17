@@ -1,6 +1,5 @@
 using BleCommands.Core;
 using BleCommands.Core.Events;
-using BleCommands.Core.Exceptions;
 using System.Text;
 
 namespace BleCommands.Tests.Core
@@ -210,7 +209,7 @@ namespace BleCommands.Tests.Core
 
         private void Aggregator_TokenReceived(object? sender, TextEventArgs e)
         {
-            Tokens.Add(e.Value);
+            Tokens.Add(e.Text);
         }
     }
 }

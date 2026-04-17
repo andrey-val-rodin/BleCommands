@@ -8,8 +8,8 @@ namespace BleCommands.Windows
 {
     public class Device : IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
     {
-        protected readonly ulong _bluetoothAddress;
-        protected GattSession? _gattSession;
+        private readonly ulong _bluetoothAddress;
+        private GattSession? _gattSession;
         private bool _disposed = false;
 
         public Device(string id)

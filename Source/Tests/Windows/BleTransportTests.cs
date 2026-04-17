@@ -23,7 +23,7 @@ namespace BleCommands.Tests.Windows
         public IBleTransport<GattCharacteristic> BleTransport { get; private set; } = null!;
 
         public IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic> Device { get; private set; } = null!;
-        
+
         public IService<GattDeviceService, GattCharacteristic> Service { get; private set; } = null!;
 
         public ICharacteristic<GattCharacteristic> CommandCharacteristic { get; private set; } = null!;
@@ -47,17 +47,26 @@ namespace BleCommands.Tests.Windows
             Assert.NotNull(ListeningCharacteristic);
             CharacteristicWithAttachedAggregator = (await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
             CharacteristicWithAttachedAggregator.AttachTokenAggregator(new TokenAggregator());
+            BleTransport = new BleTransport(
+                CommandCharacteristic,
+                ResponseCharacteristic,
+                ListeningCharacteristic,
+                '\n');
+            await BleTransport.StartAsync();
         }
 
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
+            if (ResponseCharacteristic != null)
+                await ResponseCharacteristic.StopUpdatesAsync();
             Device?.Dispose();
             Service?.Dispose();
-            return ValueTask.CompletedTask;
+            BleTransport?.Dispose();
         }
     }
 
-    public class BleTransportTests(BleTransportFixture fixture) : IClassFixture<BleTransportFixture>
+    public sealed class BleTransportTests(BleTransportFixture fixture)
+        : IClassFixture<BleTransportFixture>
     {
         private BleTransportFixture Fixture { get; } = fixture;
 
@@ -68,8 +77,8 @@ namespace BleCommands.Tests.Windows
             {
                 new BleTransport(
                     null!,
-                    Fixture.ResponseCharacteristic,
-                    Fixture.ListeningCharacteristic);
+                    new CharacteristicStub(CharacteristicPropertyFlags.Indicate),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Indicate));
             });
             Assert.Equal("commandCharacteristic", exception.ParamName);
         }
@@ -81,8 +90,8 @@ namespace BleCommands.Tests.Windows
             {
                 new BleTransport(
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify),
-                    Fixture.ResponseCharacteristic,
-                    Fixture.ListeningCharacteristic);
+                    new CharacteristicStub(CharacteristicPropertyFlags.Indicate),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Indicate));
             });
             Assert.Equal("commandCharacteristic", exception.ParamName);
         }
@@ -93,9 +102,9 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
                 new BleTransport(
-                    Fixture.CommandCharacteristic,
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     null!,
-                    Fixture.ListeningCharacteristic);
+                    new CharacteristicStub(CharacteristicPropertyFlags.Indicate));
             });
             Assert.Equal("responseCharacteristic", exception.ParamName);
         }
@@ -106,9 +115,9 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentException>(() =>
             {
                 new BleTransport(
-                    Fixture.CommandCharacteristic,
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     new CharacteristicStub(0),
-                    Fixture.ListeningCharacteristic);
+                    new CharacteristicStub(CharacteristicPropertyFlags.Indicate));
             });
             Assert.Equal("responseCharacteristic", exception.ParamName);
         }
@@ -119,9 +128,9 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentException>(() =>
             {
                 new BleTransport(
-                    Fixture.CommandCharacteristic,
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     Fixture.CharacteristicWithAttachedAggregator,
-                    Fixture.ListeningCharacteristic);
+                    new CharacteristicStub(CharacteristicPropertyFlags.Indicate));
             });
             Assert.Equal("responseCharacteristic", exception.ParamName);
         }
@@ -132,8 +141,8 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
                 new BleTransport(
-                    Fixture.CommandCharacteristic,
-                    Fixture.ResponseCharacteristic,
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                     null!);
             });
             Assert.Equal("listeningCharacteristic", exception.ParamName);
@@ -145,8 +154,8 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentException>(() =>
             {
                 new BleTransport(
-                    Fixture.CommandCharacteristic,
-                    Fixture.ResponseCharacteristic,
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                     new CharacteristicStub(0));
             });
             Assert.Equal("listeningCharacteristic", exception.ParamName);
@@ -158,11 +167,19 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentException>(() =>
             {
                 new BleTransport(
-                    Fixture.CommandCharacteristic,
-                    Fixture.ResponseCharacteristic,
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                     Fixture.CharacteristicWithAttachedAggregator);
             });
             Assert.Equal("listeningCharacteristic", exception.ParamName);
+        }
+
+        [Fact]
+        public async Task SendCommandAsync_Status_ValidResponse()
+        {
+            var cts = new CancellationTokenSource();
+            var response = await Fixture.BleTransport.SendCommandAsync("STATUS", cts.Token);
+            Assert.Equal("READY", response);
         }
     }
 }

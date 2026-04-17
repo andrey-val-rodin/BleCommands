@@ -37,7 +37,7 @@ namespace BleCommands.Tests.Windows
             TokenAggregator = null;
         }
 
-        public Task<byte[]> ReadAsync(CancellationToken token = default)
+        public Task<string> ReadAsync(CancellationToken token = default)
         {
             throw new NotImplementedException();
         }
@@ -52,7 +52,7 @@ namespace BleCommands.Tests.Windows
             throw new NotImplementedException();
         }
 
-        public Task WriteAsync(byte[] data, CancellationToken token = default)
+        public Task WriteAsync(string data, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }

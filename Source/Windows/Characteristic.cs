@@ -12,7 +12,7 @@ namespace BleCommands.Windows
 {
     public class Characteristic : ICharacteristic<GattCharacteristic>
     {
-        protected TokenAggregator? _tokenAggregator;
+        private TokenAggregator? _tokenAggregator;
         private bool _disposed;
 
         public Characteristic(GattCharacteristic characteristic)
@@ -46,13 +46,14 @@ namespace BleCommands.Windows
 
         public TokenAggregator? TokenAggregator => _tokenAggregator;
 
-        public async Task<byte[]> ReadAsync(CancellationToken token = default)
+        public async Task<string> ReadAsync(CancellationToken token = default)
         {
             var result = await NativeCharacteristic
                 .ReadValueAsync()
                 .AsTask(token)
                 .ConfigureAwait(false);
-            return result.GetValueOrThrowIfError();
+            var bytes = result.GetValueOrThrowIfError();
+            return ConvertToString(bytes);
         }
 
         public async Task StartUpdatesAsync(CancellationToken token = default)
@@ -87,14 +88,15 @@ namespace BleCommands.Windows
             NativeCharacteristic.ValueChanged -= NativeCharacteristic_ValueChanged;
         }
 
-        public async Task WriteAsync(byte[] data, CancellationToken token = default)
+        public async Task WriteAsync(string text, CancellationToken token = default)
         {
-            ArgumentNullException.ThrowIfNull(data);
-
             if (!CanWrite)
                 throw new InvalidOperationException("The characteristic is neither Write nor Write without response.");
 
-            IBuffer value = CryptographicBuffer.CreateFromByteArray(data);
+            ArgumentNullException.ThrowIfNull(text);
+
+            var bytes = Encoding.UTF8.GetBytes(text);
+            IBuffer value = CryptographicBuffer.CreateFromByteArray(bytes);
             GattWriteOption option = Properties.HasFlag(CharacteristicPropertyFlags.Write)
                 ? GattWriteOption.WriteWithResponse
                 : GattWriteOption.WriteWithoutResponse;
@@ -108,13 +110,13 @@ namespace BleCommands.Windows
         protected void NativeCharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
         {
             var bytes = args.CharacteristicValue.ToArray();
-            var text = ToString(bytes);
+            var text = ConvertToString(bytes);
 
             var tokenAggegater = Interlocked.CompareExchange(ref _tokenAggregator, null, null);
             tokenAggegater?.Append(text);
         }
 
-        protected static string ToString(byte[] value)
+        protected static string ConvertToString(byte[] value)
         {
             try
             {

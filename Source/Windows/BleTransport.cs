@@ -10,6 +10,8 @@ namespace BleCommands.Windows
     /// <inheritdoc />
     public class BleTransport : IBleTransport<GattCharacteristic>
     {
+        private TaskCompletionSource<string>? _pendingRequest;
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
         private bool _disposed;
 
         /// <summary>
@@ -63,9 +65,7 @@ namespace BleCommands.Windows
 
             if (ResponseCharacteristic == ListeningCharacteristic)
             {
-                var aggregator = new TokenAggregator();
-                ResponseCharacteristic.AttachTokenAggregator(aggregator);
-                ListeningCharacteristic.AttachTokenAggregator(aggregator);
+                ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator());
             }
             else
             {
@@ -89,24 +89,71 @@ namespace BleCommands.Windows
         /// <inheritdoc />
         public ICharacteristic<GattCharacteristic> ResponseCharacteristic { get; }
 
+        protected TokenAggregator? ResponseAggregator => ResponseCharacteristic.TokenAggregator;
+
         /// <inheritdoc />
         public ICharacteristic<GattCharacteristic> ListeningCharacteristic { get; }
 
+        protected TokenAggregator? ListeningAggregator => ListeningCharacteristic.TokenAggregator;
+
         /// <inheritdoc />
         public bool IsListening { get; protected set; }
+
+        public bool IsStarted { get; protected set; }
 
         // TODO: describe exceptions
         /// <inheritdoc />
         public async Task StartAsync(CancellationToken token = default)
         {
+            if (IsStarted)
+                return;
+
             await ResponseCharacteristic.StartUpdatesAsync(token).ConfigureAwait(false);
-            await ListeningCharacteristic.StartUpdatesAsync(token).ConfigureAwait(false);
+            if (ResponseCharacteristic != ListeningCharacteristic)
+                await ListeningCharacteristic.StartUpdatesAsync(token).ConfigureAwait(false);
+
+            IsStarted = true;
         }
 
         /// <inheritdoc />
-        public Task<string> SendCommandAsync(string command, CancellationToken token = default)
+        public async Task<string> SendCommandAsync(string command, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            System.Diagnostics.Debug.WriteLine($"Command: {command}");
+
+            await _semaphore.WaitAsync(token).ConfigureAwait(false);
+
+            if (ResponseAggregator != null)
+                ResponseAggregator.TokenReceived += BleTransport_TokenReceived;
+            var tcs = new TaskCompletionSource<string>();
+            Interlocked.Exchange(ref _pendingRequest, tcs);
+
+            try
+            {
+                // Append terminator
+                command += TokenDelimiter;
+                await CommandCharacteristic.WriteAsync(command, token).ConfigureAwait(false);
+
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+                cts.CancelAfter(TimeSpan.FromSeconds(5));
+
+                using (cts.Token.Register(() => _pendingRequest?.TrySetCanceled()))
+                {
+                    return await tcs.Task.ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                _pendingRequest = null;
+                if (ResponseAggregator != null)
+                    ResponseAggregator.TokenReceived -= BleTransport_TokenReceived;
+                _semaphore.Release();
+            }
+        }
+
+        private void BleTransport_TokenReceived(object? sender, TextEventArgs e)
+        {
+            var tcs = Interlocked.Exchange(ref _pendingRequest, null);
+            tcs?.TrySetResult(e.Text);
         }
 
         /// <inheritdoc />

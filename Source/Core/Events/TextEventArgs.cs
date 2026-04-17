@@ -2,11 +2,11 @@
 {
     public class TextEventArgs : EventArgs
     {
-        public TextEventArgs(string value)
+        public TextEventArgs(string text)
         {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
+            Text = text ?? throw new ArgumentNullException(nameof(text));
         }
 
-        public string Value { get; }
+        public string Text { get; }
     }
 }

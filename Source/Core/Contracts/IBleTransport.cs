@@ -7,7 +7,7 @@ namespace BleCommands.Core.Contracts
     /// Provides Bluetooth communication capabilities with a connected device.
     /// </summary>
     /// <typeparam name="TCharacteristic">Platform-specific characteristic type.</typeparam>
-    public interface IBleTransport<TCharacteristic>
+    public interface IBleTransport<TCharacteristic> : IDisposable
     {
         /// <summary>
         /// Occurs when the listening timeout is exceeded (no token received within the specified interval).
@@ -19,6 +19,11 @@ namespace BleCommands.Core.Contracts
         /// Subscribe to this event before calling <see cref="StartListening"/>.
         /// </summary>
         event EventHandler<TextEventArgs>? ListeningTokenReceived;
+
+        /// <summary>
+        /// Token separator. Typically, character '\n' is used.
+        /// </summary>
+        char TokenDelimiter { get; }
 
         /// <summary>
         /// Gets the characteristic used for sending commands to the Bluetooth device.
@@ -41,27 +46,20 @@ namespace BleCommands.Core.Contracts
         bool IsListening { get; }
 
         /// <summary>
-        /// Configures the characteristics required for Bluetooth communication.
-        /// Must be called before any send or listen operations.
+        /// Starts process of communication between Bluetooth transport and device.
         /// </summary>
-        /// <param name="commandCharacteristic">Characteristic for sending commands to the device (Write or WriteWithoutResponse).</param>
-        /// <param name="responseCharacteristic">Characteristic for receiving command responses from the device (Notify or Indicate).</param>
-        /// <param name="listeningCharacteristic">Characteristic for receiving token streams during listening (Notify or Indicate).</param>
-        /// <exception cref="ArgumentNullException">Thrown if any characteristic is null.</exception>
-        /// <exception cref="ArgumentException">Thrown if any characteristic has invalid properties.</exception>
-        void SetCharacteristics(
-            ICharacteristic<TCharacteristic> commandCharacteristic,
-            ICharacteristic<TCharacteristic> responseCharacteristic,
-            ICharacteristic<TCharacteristic> listeningCharacteristic);
+        /// <param name="token">A token to cancel the operation.</param>
+        Task StartAsync(CancellationToken token = default);
 
         /// <summary>
         /// Sends a command to the Bluetooth device and waits for the response.
         /// </summary>
         /// <param name="command">The command string to send.</param>
         /// <returns>The response string received from the Bluetooth device.</returns>
+        /// <param name="token">A token to cancel the operation.</param>
         /// <exception cref="CharacteristicException">Thrown when Bluetooth errors occur/</exception>
         /// <exception cref="TimeoutException">Thrown when the device doesn't respond within the expected timeframe.</exception>
-        Task<string> SendCommandAsync(string command);
+        Task<string> SendCommandAsync(string command, CancellationToken token = default);
 
         /// <summary>
         /// Starts listening for a token stream from the Bluetooth device.

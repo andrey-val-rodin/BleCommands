@@ -1,7 +1,6 @@
 ﻿using BleCommands.Core;
 using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
-using BleCommands.Core.Events;
 using BleCommands.Windows.Extensions;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
@@ -13,9 +12,8 @@ namespace BleCommands.Windows
 {
     public class Characteristic : ICharacteristic<GattCharacteristic>
     {
-        public event EventHandler<ByteArrayEventArgs>? ValueUpdated;
-
-        private BleStream? _stream;
+        protected TokenAggregator? _tokenAggregator;
+        private bool _disposed;
 
         public Characteristic(GattCharacteristic characteristic)
         {
@@ -46,13 +44,14 @@ namespace BleCommands.Windows
         public bool CanWrite => Properties.HasFlag(CharacteristicPropertyFlags.Write) ||
                                 Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse);
 
-        public BleStream? Stream => _stream;
+        public TokenAggregator? TokenAggregator => _tokenAggregator;
 
         public async Task<byte[]> ReadAsync(CancellationToken token = default)
         {
             var result = await NativeCharacteristic
                 .ReadValueAsync()
-                .AsTask(token);
+                .AsTask(token)
+                .ConfigureAwait(false);
             return result.GetValueOrThrowIfError();
         }
 
@@ -69,7 +68,8 @@ namespace BleCommands.Windows
 
             var result = await NativeCharacteristic
                 .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(descriptor)
-                .AsTask(token);
+                .AsTask(token)
+                .ConfigureAwait(false);
             result.ThrowIfError();
 
             NativeCharacteristic.ValueChanged += NativeCharacteristic_ValueChanged;
@@ -80,7 +80,8 @@ namespace BleCommands.Windows
             var result = await NativeCharacteristic
                 .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(
                     GattClientCharacteristicConfigurationDescriptorValue.None)
-                .AsTask(token);
+                .AsTask(token)
+                .ConfigureAwait(false);
             result.ThrowIfError();
 
             NativeCharacteristic.ValueChanged -= NativeCharacteristic_ValueChanged;
@@ -99,24 +100,21 @@ namespace BleCommands.Windows
                 : GattWriteOption.WriteWithoutResponse;
             var result = await NativeCharacteristic
                 .WriteValueWithResultAsync(value, option)
-                .AsTask(token);
+                .AsTask(token)
+                .ConfigureAwait(false);
             result.ThrowIfError();
         }
 
-        private void NativeCharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
+        protected void NativeCharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
         {
             var bytes = args.CharacteristicValue.ToArray();
-            ValueUpdated?.Invoke(this, new ByteArrayEventArgs(bytes));
+            var text = ToString(bytes);
 
-            var stream = Interlocked.CompareExchange(ref _stream, null, null);
-            if (stream != null)
-            {
-                var text = ToString(bytes);
-                stream.Append(text);
-            }
+            var tokenAggegater = Interlocked.CompareExchange(ref _tokenAggregator, null, null);
+            tokenAggegater?.Append(text);
         }
 
-        private static string ToString(byte[] value)
+        protected static string ToString(byte[] value)
         {
             try
             {
@@ -128,21 +126,43 @@ namespace BleCommands.Windows
             }
         }
 
-        public void AttachCommandStream(BleStream stream)
+        public void AttachTokenAggregator(TokenAggregator tokenAggegater)
         {
             if (!CanUpdate)
                 throw new InvalidOperationException("The characteristic is neither Update nor Indicate.");
 
-            ArgumentNullException.ThrowIfNull(stream);
+            ArgumentNullException.ThrowIfNull(tokenAggegater);
 
-            var original = Interlocked.CompareExchange(ref _stream, stream, null);
+            var original = Interlocked.CompareExchange(ref _tokenAggregator, tokenAggegater, null);
             if (original != null)
-                throw new InvalidOperationException("CommandStream is already attached. Call DetachCommandStream first.");
+                throw new InvalidOperationException("TokenAggegater is already attached. Call DetachTokenAggregator first.");
         }
 
-        public void DetachCommandStream()
+        public void DetachTokenAggregator()
         {
-            Interlocked.Exchange(ref _stream, null);
+            Interlocked.Exchange(ref _tokenAggregator, null);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    if (NativeCharacteristic != null)
+                    {
+                        NativeCharacteristic.ValueChanged -= NativeCharacteristic_ValueChanged;
+                    }
+                }
+
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

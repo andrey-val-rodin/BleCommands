@@ -1,12 +1,9 @@
 ﻿using BleCommands.Core.Enums;
-using BleCommands.Core.Events;
 
 namespace BleCommands.Core.Contracts
 {
-    public interface ICharacteristic<TCharacteristic>
+    public interface ICharacteristic<TCharacteristic> : IDisposable
     {
-        event EventHandler<ByteArrayEventArgs> ValueUpdated;
-
         Guid Id { get; }
 
         CharacteristicPropertyFlags Properties { get; }
@@ -19,7 +16,7 @@ namespace BleCommands.Core.Contracts
 
         bool CanUpdate { get; }
 
-        BleStream? Stream { get; }
+        TokenAggregator? TokenAggregator { get; }
 
         Task<byte[]> ReadAsync(CancellationToken token = default);
 
@@ -29,8 +26,8 @@ namespace BleCommands.Core.Contracts
 
         Task StopUpdatesAsync(CancellationToken token = default);
 
-        void AttachCommandStream(BleStream stream);
+        void AttachTokenAggregator(TokenAggregator tokenAggregator);
 
-        void DetachCommandStream();
+        void DetachTokenAggregator();
     }
 }

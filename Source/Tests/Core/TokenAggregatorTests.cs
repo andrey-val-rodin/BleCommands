@@ -1,32 +1,43 @@
 using BleCommands.Core;
 using BleCommands.Core.Events;
+using BleCommands.Core.Exceptions;
 using System.Text;
 
 namespace BleCommands.Tests.Core
 {
-    public sealed class BleStreamTests
+    public sealed class TokenAggregatorTests
     {
-        private const char N = Constants.Terminator;
+        private const char D = TokenAggregator.DefaultTokenDelimiter;
 
-        private BleStream Stream { get; } = new();
+        private TokenAggregator Aggregator { get; } = new();
 
         private List<string> Tokens { get; } = [];
+
+        [Fact]
+        public void Append_Null_ArgumentNullException()
+        {
+            var exception = Assert.Throws<ArgumentNullException>(() =>
+            {
+                Aggregator.Append(null!);
+            });
+            Assert.Equal("text", exception.ParamName);
+        }
 
         [Fact]
         public void Append_OneToken_ValidToken()
         {
             var token = "Token 1";
-            Stream.TokenReceived += Stream_TokenUpdated;
+            Aggregator.TokenReceived += Aggregator_TokenReceived;
             try
             {
-                Stream.Append($"{token}{N}");
+                Aggregator.Append($"{token}{D}");
 
                 Assert.Single(Tokens);
                 Assert.Equal(token, Tokens[0]);
             }
             finally
             {
-                Stream.TokenReceived -= Stream_TokenUpdated;
+                Aggregator.TokenReceived -= Aggregator_TokenReceived;
             }
         }
 
@@ -34,17 +45,17 @@ namespace BleCommands.Tests.Core
         public void Append_UnicodeToken_ValidToken()
         {
             var token = "Русский токен🔥";
-            Stream.TokenReceived += Stream_TokenUpdated;
+            Aggregator.TokenReceived += Aggregator_TokenReceived;
             try
             {
-                Stream.Append($"{token}{N}");
+                Aggregator.Append($"{token}{D}");
 
                 Assert.Single(Tokens);
                 Assert.Equal(token, Tokens[0]);
             }
             finally
             {
-                Stream.TokenReceived -= Stream_TokenUpdated;
+                Aggregator.TokenReceived -= Aggregator_TokenReceived;
             }
         }
 
@@ -54,12 +65,12 @@ namespace BleCommands.Tests.Core
             var token1 = "";
             var token2 = "Token 2";
             var token3 = "Token 3";
-            Stream.TokenReceived += Stream_TokenUpdated;
+            Aggregator.TokenReceived += Aggregator_TokenReceived;
             try
             {
-                Stream.Append($"{token1}{N}");
-                Stream.Append($"{token2}{N}");
-                Stream.Append($"{token3}{N}");
+                Aggregator.Append($"{token1}{D}");
+                Aggregator.Append($"{token2}{D}");
+                Aggregator.Append($"{token3}{D}");
 
                 Assert.Equal(3, Tokens.Count);
                 Assert.Equal(token1, Tokens[0]);
@@ -68,7 +79,7 @@ namespace BleCommands.Tests.Core
             }
             finally
             {
-                Stream.TokenReceived -= Stream_TokenUpdated;
+                Aggregator.TokenReceived -= Aggregator_TokenReceived;
             }
         }
 
@@ -78,12 +89,12 @@ namespace BleCommands.Tests.Core
             var token1 = "Token 1";
             var token2 = "Token 2";
             var token3 = "";
-            Stream.TokenReceived += Stream_TokenUpdated;
+            Aggregator.TokenReceived += Aggregator_TokenReceived;
             try
             {
-                Stream.Append($"{token1}{N}");
-                Stream.Append($"{token2}{N}");
-                Stream.Append($"{token3}{N}");
+                Aggregator.Append($"{token1}{D}");
+                Aggregator.Append($"{token2}{D}");
+                Aggregator.Append($"{token3}{D}");
 
                 Assert.Equal(3, Tokens.Count);
                 Assert.Equal(token1, Tokens[0]);
@@ -92,7 +103,7 @@ namespace BleCommands.Tests.Core
             }
             finally
             {
-                Stream.TokenReceived -= Stream_TokenUpdated;
+                Aggregator.TokenReceived -= Aggregator_TokenReceived;
             }
         }
 
@@ -103,12 +114,12 @@ namespace BleCommands.Tests.Core
             var token1 = "Token 1";
             var token2 = "";
             var token3 = "Token 3";
-            Stream.TokenReceived += Stream_TokenUpdated;
+            Aggregator.TokenReceived += Aggregator_TokenReceived;
             try
             {
-                Stream.Append($"{token1}{N}");
-                Stream.Append($"{token2}{N}");
-                Stream.Append($"{token3}{N}");
+                Aggregator.Append($"{token1}{D}");
+                Aggregator.Append($"{token2}{D}");
+                Aggregator.Append($"{token3}{D}");
 
                 Assert.Equal(3, Tokens.Count);
                 Assert.Equal(token1, Tokens[0]);
@@ -117,20 +128,44 @@ namespace BleCommands.Tests.Core
             }
             finally
             {
-                Stream.TokenReceived -= Stream_TokenUpdated;
+                Aggregator.TokenReceived -= Aggregator_TokenReceived;
+            }
+        }
+
+        [Fact]
+        public void Append_ThreeEmptyTokens_ValidTokens()
+        {
+            var token1 = "";
+            var token2 = "";
+            var token3 = "";
+            Aggregator.TokenReceived += Aggregator_TokenReceived;
+            try
+            {
+                Aggregator.Append($"{token1}{D}");
+                Aggregator.Append($"{token2}{D}");
+                Aggregator.Append($"{token3}{D}");
+
+                Assert.Equal(3, Tokens.Count);
+                Assert.Equal(token1, Tokens[0]);
+                Assert.Equal(token2, Tokens[1]);
+                Assert.Equal(token3, Tokens[2]);
+            }
+            finally
+            {
+                Aggregator.TokenReceived -= Aggregator_TokenReceived;
             }
         }
 
         [Fact]
         public void Append_DisruptedChain_ValidTokens()
         {
-            var chain1 = $"Token 1{N}Token 2";
-            var chain2 = $"{N}Token 3{N}";
-            Stream.TokenReceived += Stream_TokenUpdated;
+            var chain1 = $"Token 1{D}Token 2";
+            var chain2 = $"{D}Token 3{D}";
+            Aggregator.TokenReceived += Aggregator_TokenReceived;
             try
             {
-                Stream.Append(chain1);
-                Stream.Append(chain2);
+                Aggregator.Append(chain1);
+                Aggregator.Append(chain2);
 
                 Assert.Equal(3, Tokens.Count);
                 Assert.Equal("Token 1", Tokens[0]);
@@ -139,7 +174,7 @@ namespace BleCommands.Tests.Core
             }
             finally
             {
-                Stream.TokenReceived -= Stream_TokenUpdated;
+                Aggregator.TokenReceived -= Aggregator_TokenReceived;
             }
         }
 
@@ -149,16 +184,16 @@ namespace BleCommands.Tests.Core
             var builder = new StringBuilder();
             for (int i = 0; i < 100; i++)
             {
-                builder.Append($"Token {i}{N}");
+                builder.Append($"Token {i}{D}");
             }
             string str = builder.ToString();
-            Stream.TokenReceived += Stream_TokenUpdated;
+            Aggregator.TokenReceived += Aggregator_TokenReceived;
             try
             {
                 // Append big string by characters
                 for (int i = 0; i < str.Length; i++)
                 {
-                    Stream.Append(str[i].ToString());
+                    Aggregator.Append(str[i].ToString());
                 }
 
                 Assert.Equal(100, Tokens.Count);
@@ -169,11 +204,11 @@ namespace BleCommands.Tests.Core
             }
             finally
             {
-                Stream.TokenReceived -= Stream_TokenUpdated;
+                Aggregator.TokenReceived -= Aggregator_TokenReceived;
             }
         }
 
-        private void Stream_TokenUpdated(object? sender, TextEventArgs e)
+        private void Aggregator_TokenReceived(object? sender, TextEventArgs e)
         {
             Tokens.Add(e.Value);
         }

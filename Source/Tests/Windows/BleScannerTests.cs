@@ -3,7 +3,9 @@
 namespace BleCommands.Tests.Windows
 {
     /// <summary>
-    /// Temporary tests for Windows.BleScanner
+    /// Temporary tests for Windows.BleScanner. Will be moved to IntegrationTests.
+    /// These tests use device called Rotating Table:
+    /// <see href="https://table-360.ru/">https://table-360.ru/</see>
     /// </summary>
     public class BleScannerTests
     {

@@ -8,8 +8,8 @@ namespace BleCommands.Windows
 {
     public class Device : IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
     {
-        private readonly ulong _bluetoothAddress;
-        private GattSession? _gattSession;
+        protected readonly ulong _bluetoothAddress;
+        protected GattSession? _gattSession;
         private bool _disposed = false;
 
         public Device(string id)
@@ -26,16 +26,16 @@ namespace BleCommands.Windows
             _bluetoothAddress = bluetoothAddress;
         }
 
-        public string Id { get; private set; }
+        public string Id { get; protected set; }
 
         public string Name => NativeDevice?.Name ?? string.Empty;
 
-        public bool IsConnected { get; private set; }
+        public bool IsConnected { get; protected set; }
 
         /// <summary>
         /// Gets platform-specific device
         /// </summary>
-        public BluetoothLEDevice? NativeDevice { get; private set; }
+        public BluetoothLEDevice? NativeDevice { get; protected set; }
 
         /// <summary>
         /// Connects to the device by the specified id.
@@ -47,6 +47,10 @@ namespace BleCommands.Windows
         public async Task<bool> ConnectAsync(CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
+
+            // TODO: what about thread-safety?
+            if (IsConnected)
+                return true;
 
             try
             {
@@ -66,6 +70,9 @@ namespace BleCommands.Windows
                 result.ThrowIfError();
 
                 IsConnected = NativeDevice.ConnectionStatus == BluetoothConnectionStatus.Connected;
+                // Refresh Id with actual value
+                if (NativeDevice != null)
+                    Id = NativeDevice.DeviceId;
                 return IsConnected;
             }
             catch (Exception ex)
@@ -74,14 +81,14 @@ namespace BleCommands.Windows
             }
         }
 
-        private async Task<BluetoothLEDevice> GetNativeDeviceAsync()
+        protected async Task<BluetoothLEDevice> GetNativeDeviceAsync()
         {
             return string.IsNullOrEmpty(Id)
                 ? await BluetoothLEDevice.FromBluetoothAddressAsync(_bluetoothAddress)
                 : await BluetoothLEDevice.FromIdAsync(Id);
         }
 
-        private void OnConnectionStatusChanged(BluetoothLEDevice sender, object args)
+        protected void OnConnectionStatusChanged(BluetoothLEDevice sender, object args)
         {
             IsConnected = sender.ConnectionStatus == BluetoothConnectionStatus.Connected;
         }

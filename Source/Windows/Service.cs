@@ -56,7 +56,7 @@ namespace BleCommands.Windows
             }
         }
 
-        private void ThrowIfDisposed()
+        protected void ThrowIfDisposed()
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
         }

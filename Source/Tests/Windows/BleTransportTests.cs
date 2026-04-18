@@ -3,6 +3,7 @@ using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
 using BleCommands.Core.Events;
 using BleCommands.Windows;
+using Newtonsoft.Json.Linq;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
@@ -53,7 +54,10 @@ namespace BleCommands.Tests.Windows
                 ResponseCharacteristic,
                 ListeningCharacteristic,
                 '\n');
+
             await BleTransport.StartAsync();
+            BleTransport.StartListening();
+            await StopTableAsync();
         }
 
         public async ValueTask DisposeAsync()
@@ -63,6 +67,28 @@ namespace BleCommands.Tests.Windows
             Device?.Dispose();
             Service?.Dispose();
             BleTransport?.Dispose();
+        }
+
+        public async Task StopTableAsync()
+        {
+            var status = await BleTransport.SendCommandAsync("STATUS");
+            if (status != "BUSY")
+                return;
+
+            var tcs = new TaskCompletionSource<bool>();
+            BleTransport.ListeningTokenReceived += Handler;
+            void Handler(object? sender, TextEventArgs args)
+            {
+                if (args.Text == "END")
+                    tcs.TrySetResult(true);
+            }
+
+            var response = await BleTransport.SendCommandAsync("STOP");
+            if (response != "OK")
+                tcs.TrySetResult(true);
+
+            Assert.True(await tcs.Task);
+            BleTransport.ListeningTokenReceived -= Handler;
         }
     }
 
@@ -256,8 +282,7 @@ namespace BleCommands.Tests.Windows
         public async Task SendCommandAsync_Status_ValidResponse()
         {
             var cts = new CancellationTokenSource();
-            var response = await BleTransport.SendCommandAsync("STATUS", cts.Token);
-            Assert.Equal("READY", response);
+            Assert.Equal("READY", await BleTransport.SendCommandAsync("STATUS", cts.Token));
         }
 
         [Fact]
@@ -265,22 +290,33 @@ namespace BleCommands.Tests.Windows
         {
             var cts = new CancellationTokenSource();
             var oldTimeout = BleTransport.ResponseTimeout;
+            var tcs = new TaskCompletionSource<bool>();
+            void Handler(object? sender, TextEventArgs args)
+            {
+                tcs.SetResult(true);
+            }
+
             try
             {
                 BleTransport.ResponseTimeout = TimeSpan.FromMilliseconds(1);
-                var response = await BleTransport.SendCommandAsync("STATUS", cts.Token);
+                BleTransport.ListeningTokenReceived += Handler;
+                Assert.Null(await BleTransport.SendCommandAsync("STATUS", cts.Token));
 
-                Assert.Null(response);
+                // Wait until we receive an actual response
+                await tcs.Task;
             }
             finally
             {
+                BleTransport.ListeningTokenReceived -= Handler;
                 BleTransport.ResponseTimeout = oldTimeout;
             }
         }
 
         [Fact]
-        public async Task StartListening_ReceiveTokens()
+        public async Task ListeningIsInProgress_RotateTable_ReceiveTokens()
         {
+            Assert.True(BleTransport.IsListening, "StartListening() should be called in Fixture");
+
             var cts = new CancellationTokenSource();
             Assert.Equal("OK", await BleTransport.SendCommandAsync("RUN FM", cts.Token));
             var tokens = new List<string>();
@@ -295,16 +331,16 @@ namespace BleCommands.Tests.Windows
             try
             {
                 BleTransport.ListeningTokenReceived += Handler;
-                BleTransport.StartListening();
                 Assert.Equal("OK", await BleTransport.SendCommandAsync("FM 1", cts.Token));
                 Assert.True(await tcs.Task);
+                await Fixture.StopTableAsync();
             }
             finally
             {
                 BleTransport.ListeningTokenReceived -= Handler;
                 BleTransport.StopListening();
                 Assert.Contains(tokens, s => s.StartsWith("POS"));
-                Assert.Equal("OK", await BleTransport.SendCommandAsync("STOP", cts.Token));
+                Assert.Equal("READY", await BleTransport.SendCommandAsync("STATUS", cts.Token));
             }
         }
     }

@@ -242,6 +242,8 @@ namespace BleCommands.Windows
             {
                 if (disposing)
                 {
+                    _semaphore.Dispose();
+
                     ListeningTokenReceived -= ListeningHandler;
 
                     CommandCharacteristic?.Dispose();

@@ -40,6 +40,7 @@ namespace BleCommands.Core
 
             foreach (var token in tokensToRaise)
             {
+                System.Diagnostics.Debug.WriteLine("Token: " + text);
                 TokenReceived?.Invoke(this, new TextEventArgs(token));
             }
         }

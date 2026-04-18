@@ -21,9 +21,14 @@ namespace BleCommands.Core.Contracts
         event EventHandler<TextEventArgs>? ListeningTokenReceived;
 
         /// <summary>
-        /// Token separator. Typically, character '\n' is used.
+        /// Gets the token separator. The default is '\n'.
         /// </summary>
         char TokenDelimiter { get; }
+
+        /// <summary>
+        /// Specifies period of time to wait for a response to command.
+        /// </summary>
+        TimeSpan ResponseTimeout { get; set; }
 
         /// <summary>
         /// Gets the characteristic used for sending commands to the Bluetooth device.
@@ -55,11 +60,14 @@ namespace BleCommands.Core.Contracts
         /// Sends a command to the Bluetooth device and waits for the response.
         /// </summary>
         /// <param name="command">The command string to send.</param>
-        /// <returns>The response string received from the Bluetooth device.</returns>
+        /// <returns>
+        /// The response string received from the Bluetooth device,
+        /// or null if the device does not respond within <see cref="ResponseTimeout">.
+        /// </returns>
         /// <param name="token">A token to cancel the operation.</param>
         /// <exception cref="CharacteristicException">Thrown when Bluetooth errors occur/</exception>
         /// <exception cref="TimeoutException">Thrown when the device doesn't respond within the expected timeframe.</exception>
-        Task<string> SendCommandAsync(string command, CancellationToken token = default);
+        Task<string?> SendCommandAsync(string command, CancellationToken token = default);
 
         /// <summary>
         /// Starts listening for a token stream from the Bluetooth device.

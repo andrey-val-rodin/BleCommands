@@ -207,9 +207,9 @@ namespace BleCommands.Tests.Core
             }
         }
 
-        private void Aggregator_TokenReceived(object? sender, TextEventArgs e)
+        private void Aggregator_TokenReceived(object? sender, TextEventArgs args)
         {
-            Tokens.Add(e.Text);
+            Tokens.Add(args.Text);
         }
     }
 }

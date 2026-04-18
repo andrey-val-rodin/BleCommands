@@ -12,14 +12,14 @@ namespace BleCommands.Tests.Windows
         private BleScanner BleScanner { get; } = new BleScanner();
 
         [Fact]
-        public async Task FindDeviceWithCts_Cancel_OperationCanceledException()
+        public async Task FindDeviceWithCts_Cancel_TaskCanceledException()
         {
             using var cts = new CancellationTokenSource();
 
             // Cancel in 100 мс
             cts.CancelAfter(100);
 
-            await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            await Assert.ThrowsAsync<TaskCanceledException>(async () =>
             {
                 await BleScanner.FindDeviceAsync("Unexistent Device", cts.Token);
             });

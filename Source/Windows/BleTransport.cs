@@ -10,8 +10,8 @@ namespace BleCommands.Windows
     /// <inheritdoc />
     public class BleTransport : IBleTransport<GattCharacteristic>
     {
-        private TaskCompletionSource<string>? _pendingRequest;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
+        private System.Timers.Timer? _listeningTimer;
         private bool _disposed;
 
         /// <summary>
@@ -75,13 +75,39 @@ namespace BleCommands.Windows
         }
 
         /// <inheritdoc />
-        public event ElapsedEventHandler? ListeningTimeoutElapsed;
+        public event ElapsedEventHandler? ListeningTimeoutElapsed
+        {
+            add
+            {
+                if (_listeningTimer != null)
+                    _listeningTimer.Elapsed += value;
+            }
+            remove
+            {
+                if (_listeningTimer != null)
+                    _listeningTimer.Elapsed -= value;
+            }
+        }
 
         /// <inheritdoc />
-        public event EventHandler<TextEventArgs>? ListeningTokenReceived;
+        public event EventHandler<TextEventArgs>? ListeningTokenReceived
+        {
+            add
+            {
+                ListeningAggregator.TokenReceived += value;
+            }
+            remove
+            {
+                ListeningAggregator.TokenReceived -= value;
+            }
+        }
 
         /// <inheritdoc />
         public char TokenDelimiter { get; }
+
+        /// <inheritdoc />
+        public TimeSpan ResponseTimeout { get; set; } = TimeSpan.FromMilliseconds(500);
+
 
         /// <inheritdoc />
         public ICharacteristic<GattCharacteristic> CommandCharacteristic { get; }
@@ -89,12 +115,12 @@ namespace BleCommands.Windows
         /// <inheritdoc />
         public ICharacteristic<GattCharacteristic> ResponseCharacteristic { get; }
 
-        protected TokenAggregator? ResponseAggregator => ResponseCharacteristic.TokenAggregator;
+        protected TokenAggregator ResponseAggregator => ResponseCharacteristic.TokenAggregator!;
 
         /// <inheritdoc />
         public ICharacteristic<GattCharacteristic> ListeningCharacteristic { get; }
 
-        protected TokenAggregator? ListeningAggregator => ListeningCharacteristic.TokenAggregator;
+        protected TokenAggregator ListeningAggregator => ListeningCharacteristic.TokenAggregator!;
 
         /// <inheritdoc />
         public bool IsListening { get; protected set; }
@@ -105,6 +131,7 @@ namespace BleCommands.Windows
         /// <inheritdoc />
         public async Task StartAsync(CancellationToken token = default)
         {
+            ThrowIfDisposed();
             if (IsStarted)
                 return;
 
@@ -116,56 +143,97 @@ namespace BleCommands.Windows
         }
 
         /// <inheritdoc />
-        public async Task<string> SendCommandAsync(string command, CancellationToken token = default)
+        public async Task<string?> SendCommandAsync(string command, CancellationToken token = default)
         {
+            ThrowIfDisposed();
+            if (!IsStarted)
+                throw new InvalidOperationException("BleTransport has not been started.");
+
+#if DEBUG
             System.Diagnostics.Debug.WriteLine($"Command: {command}");
+            var stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+#endif
 
             await _semaphore.WaitAsync(token).ConfigureAwait(false);
 
-            if (ResponseAggregator != null)
-                ResponseAggregator.TokenReceived += BleTransport_TokenReceived;
             var tcs = new TaskCompletionSource<string>();
-            Interlocked.Exchange(ref _pendingRequest, tcs);
+
+            void Handler(object? sender, TextEventArgs args)
+            {
+                tcs.TrySetResult(args.Text);
+            }
 
             try
             {
-                // Append terminator
-                command += TokenDelimiter;
-                await CommandCharacteristic.WriteAsync(command, token).ConfigureAwait(false);
+                ResponseAggregator.TokenReceived += Handler;
+
+                // Append terminator and send command
+                await CommandCharacteristic.WriteAsync(command + TokenDelimiter, token).ConfigureAwait(false);
 
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-                cts.CancelAfter(TimeSpan.FromSeconds(5));
+                cts.CancelAfter(ResponseTimeout);
 
-                using (cts.Token.Register(() => _pendingRequest?.TrySetCanceled()))
+                using (cts.Token.Register(() => tcs.TrySetCanceled()))
                 {
-                    return await tcs.Task.ConfigureAwait(false);
+                    var result = await tcs.Task.ConfigureAwait(false);
+#if DEBUG
+                    stopwatch.Stop();
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[{command}] Elapsed time: {stopwatch.ElapsedMilliseconds} ms");
+#endif
+                    return result;
                 }
+            }
+            catch (TaskCanceledException)
+            {
+                return null;
             }
             finally
             {
-                _pendingRequest = null;
-                if (ResponseAggregator != null)
-                    ResponseAggregator.TokenReceived -= BleTransport_TokenReceived;
+                ResponseAggregator.TokenReceived -= Handler;
                 _semaphore.Release();
             }
-        }
-
-        private void BleTransport_TokenReceived(object? sender, TextEventArgs e)
-        {
-            var tcs = Interlocked.Exchange(ref _pendingRequest, null);
-            tcs?.TrySetResult(e.Text);
         }
 
         /// <inheritdoc />
         public void StartListening(TimeSpan? timeout = null)
         {
-            throw new NotImplementedException();
+            ThrowIfDisposed();
+            if (!IsStarted)
+                throw new InvalidOperationException("BleTransport has not been started.");
+            if (IsListening)
+                throw new InvalidOperationException("Listening is already in progress.");
+
+            if (timeout != null)
+            {
+                _listeningTimer = new System.Timers.Timer() { Interval = timeout.Value.TotalMilliseconds };
+                _listeningTimer.Start();
+            }
+
+            ListeningTokenReceived += ListeningHandler;
+            IsListening = true;
+        }
+
+        private void ListeningHandler(object? sender, TextEventArgs args)
+        {
+            // Reset timer
+            _listeningTimer?.Stop();
+            _listeningTimer?.Start();
         }
 
         /// <inheritdoc />
         public void StopListening()
         {
-            throw new NotImplementedException();
+            _listeningTimer?.Stop();
+            _listeningTimer?.Dispose();
+            _listeningTimer = null;
+            ListeningTokenReceived -= ListeningHandler;
+        }
+
+        protected void ThrowIfDisposed()
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -174,9 +242,15 @@ namespace BleCommands.Windows
             {
                 if (disposing)
                 {
+                    ListeningTokenReceived -= ListeningHandler;
+
                     CommandCharacteristic?.Dispose();
                     ResponseCharacteristic?.Dispose();
                     ListeningCharacteristic?.Dispose();
+
+                    _listeningTimer?.Stop();
+                    _listeningTimer?.Dispose();
+                    _listeningTimer = null;
                 }
 
                 _disposed = true;

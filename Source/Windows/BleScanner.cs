@@ -116,7 +116,7 @@ namespace BleCommands.Windows
                     deviceWatcher.Received += Handler;
                     deviceWatcher.Start();
 
-                    using (token.Register(() => tcs.TrySetException(new OperationCanceledException(token))))
+                    using (token.Register(() => tcs.TrySetCanceled()))
                     {
                         return await tcs.Task.ConfigureAwait(false);
                     }

@@ -1,6 +1,7 @@
 ﻿using BleCommands.Core;
 using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
+using BleCommands.Core.Events;
 using BleCommands.Windows;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
@@ -69,6 +70,7 @@ namespace BleCommands.Tests.Windows
         : IClassFixture<BleTransportFixture>
     {
         private BleTransportFixture Fixture { get; } = fixture;
+        private IBleTransport<GattCharacteristic> BleTransport => Fixture.BleTransport;
 
         [Fact]
         public void Constructor_CommandCharacteristicIsNull_ArgumentNullException()
@@ -175,11 +177,135 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
+        public async Task StartAsync_Disposed_ObjectDisposedException()
+        {
+            await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
+            {
+                var transport = new BleTransport(
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+                transport.Dispose();
+
+                var cts = new CancellationTokenSource();
+                await transport.StartAsync(cts.Token);
+            });
+        }
+
+        [Fact]
+        public async Task SendCommandAsync_Disposed_ObjectDisposedException()
+        {
+            await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
+            {
+                var transport = new BleTransport(
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+                transport.Dispose();
+
+                var cts = new CancellationTokenSource();
+                await transport.SendCommandAsync("STATUS", cts.Token);
+            });
+        }
+
+        [Fact]
+        public async Task SendCommandAsync_NotStarted_InvalidOperationException()
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                var transport = new BleTransport(
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+                var cts = new CancellationTokenSource();
+                await transport.SendCommandAsync("STATUS", cts.Token);
+            });
+        }
+
+        [Fact]
+        public void StartListening_NotStarted_InvalidOperationException()
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                var transport = new BleTransport(
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+                transport.StartListening();
+            });
+        }
+
+        [Fact]
+        public void StartListening_Disposed_ObjectDisposedException()
+        {
+            Assert.Throws<ObjectDisposedException>(() =>
+            {
+                var transport = new BleTransport(
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+                transport.Dispose();
+
+                transport.StartListening();
+            });
+        }
+
+        [Fact]
         public async Task SendCommandAsync_Status_ValidResponse()
         {
             var cts = new CancellationTokenSource();
-            var response = await Fixture.BleTransport.SendCommandAsync("STATUS", cts.Token);
+            var response = await BleTransport.SendCommandAsync("STATUS", cts.Token);
             Assert.Equal("READY", response);
+        }
+
+        [Fact]
+        public async Task SendCommandAsync_InsufficientTimeout_Null()
+        {
+            var cts = new CancellationTokenSource();
+            var oldTimeout = BleTransport.ResponseTimeout;
+            try
+            {
+                BleTransport.ResponseTimeout = TimeSpan.FromMilliseconds(1);
+                var response = await BleTransport.SendCommandAsync("STATUS", cts.Token);
+
+                Assert.Null(response);
+            }
+            finally
+            {
+                BleTransport.ResponseTimeout = oldTimeout;
+            }
+        }
+
+        [Fact]
+        public async Task StartListening_ReceiveTokens()
+        {
+            var cts = new CancellationTokenSource();
+            Assert.Equal("OK", await BleTransport.SendCommandAsync("RUN FM", cts.Token));
+            var tokens = new List<string>();
+            var tcs = new TaskCompletionSource<bool>();
+            void Handler(object? sender, TextEventArgs args)
+            {
+                tokens.Add(args.Text);
+                if (args.Text == "ENDSTEP")
+                    tcs.SetResult(true);
+            }
+
+            try
+            {
+                BleTransport.ListeningTokenReceived += Handler;
+                BleTransport.StartListening();
+                Assert.Equal("OK", await BleTransport.SendCommandAsync("FM 1", cts.Token));
+                Assert.True(await tcs.Task);
+            }
+            finally
+            {
+                BleTransport.ListeningTokenReceived -= Handler;
+                BleTransport.StopListening();
+                Assert.Contains(tokens, s => s.StartsWith("POS"));
+                Assert.Equal("OK", await BleTransport.SendCommandAsync("STOP", cts.Token));
+            }
         }
     }
 }

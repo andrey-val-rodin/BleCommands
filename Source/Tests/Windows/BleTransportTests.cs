@@ -3,7 +3,6 @@ using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
 using BleCommands.Core.Events;
 using BleCommands.Windows;
-using Newtonsoft.Json.Linq;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 

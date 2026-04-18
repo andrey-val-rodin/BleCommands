@@ -36,8 +36,8 @@ namespace BleCommands.Tests.Windows
         [Fact]
         public async Task FindDevice_Found()
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            using var device = await BleScanner.FindDeviceAsync("Rotating Table", cts.Token);
+            using var cts = new CancellationTokenSource();
+            using var device = await BleScanner.FindDeviceAsync("Rotating Table", TimeSpan.FromSeconds(3));
 
             Assert.NotNull(device);
             var n = device.Name;

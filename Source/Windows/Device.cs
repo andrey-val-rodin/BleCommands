@@ -75,7 +75,7 @@ namespace BleCommands.Windows
                     Id = NativeDevice.DeviceId;
                 return IsConnected;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not DeviceException)
             {
                 throw new DeviceException("Device connection error.", ex);
             }

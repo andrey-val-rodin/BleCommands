@@ -11,7 +11,7 @@
 // 3. Nullable types
 // 4. Minor changes in GetErrorMessage()
 // 5. new byte[0] -> Array.Empty<byte>()
-// 6. throw new Exception(errorMessage) -> throw new CharacteristicException(errorMessage)
+// 6. throw new Exception(errorMessage) -> throw new DeviceException(errorMessage)
 
 using BleCommands.Core.Exceptions;
 using System.Runtime.CompilerServices;
@@ -39,7 +39,7 @@ namespace BleCommands.Windows.Extensions
             var errorMessage = result.Status.GetErrorMessage(tag, result.ProtocolError);
             if (!string.IsNullOrEmpty(errorMessage))
             {
-                throw new CharacteristicException(errorMessage);
+                throw new DeviceException(errorMessage);
             }
 
             return result.Value?.ToArray() ?? Array.Empty<byte>();
@@ -50,7 +50,7 @@ namespace BleCommands.Windows.Extensions
             var errorMessage = status.GetErrorMessage(tag, protocolError);
             if (!string.IsNullOrEmpty(errorMessage))
             {
-                throw new CharacteristicException(errorMessage);
+                throw new DeviceException(errorMessage);
             }
         }
 

@@ -9,7 +9,7 @@ namespace BleCommands.Tests.Windows
         {
             using var cts = new CancellationTokenSource();
             using var client = new BleCommandsClient();
-            Assert.True(await client.StartAsync("BLECommands device", cts.Token));
+            Assert.True(await client.BeginAsync("BLECommands device", cts.Token));
             Assert.NotNull(client.Transport);
             var response = await client.Transport.SendCommandAsync("HELLO", cts.Token);
         }

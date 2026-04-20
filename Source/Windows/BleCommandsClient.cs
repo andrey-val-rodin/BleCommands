@@ -12,7 +12,7 @@ namespace BleCommands.Windows
         public static readonly Guid ListeningCharacteristicUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B904");
         private bool _disposed;
 
-        public async Task<bool> StartAsync(string deviceName, CancellationToken token)
+        public async Task<bool> BeginAsync(string deviceName, CancellationToken token)
         {
             if (!await BluetoothHelper.IsBluetoothAvailableAsync() ||
                 !await BluetoothHelper.IsBluetoothOnAsync())
@@ -53,7 +53,7 @@ namespace BleCommands.Windows
             }
 
             Transport = new BleTransport(commandCharacteristic, responseCharacteristic, listeningCharacteristic);
-            await Transport.StartAsync(token);
+            await Transport.BeginAsync(token);
 
             return true;
         }

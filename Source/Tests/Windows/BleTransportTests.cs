@@ -54,7 +54,7 @@ namespace BleCommands.Tests.Windows
                 ListeningCharacteristic,
                 '\n');
 
-            await BleTransport.StartAsync();
+            await BleTransport.BeginAsync();
             BleTransport.StartListening();
             await StopTableAsync();
         }
@@ -213,7 +213,7 @@ namespace BleCommands.Tests.Windows
                 transport.Dispose();
 
                 var cts = new CancellationTokenSource();
-                await transport.StartAsync(cts.Token);
+                await transport.BeginAsync(cts.Token);
             });
         }
 

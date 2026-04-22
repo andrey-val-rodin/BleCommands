@@ -44,17 +44,17 @@ namespace BleCommands.Tests.Windows
 
         public Task StartUpdatesAsync(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public Task StopUpdatesAsync(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public Task WriteAsync(string data, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public void Dispose()

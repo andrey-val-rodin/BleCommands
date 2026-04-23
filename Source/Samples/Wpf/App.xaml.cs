@@ -34,7 +34,8 @@ namespace Wpf
                     return;
                 }
 
-                await transportHolder.Transport.BeginAsync();
+                var transport = transportHolder.Transport;
+                await transport.BeginAsync();
                 var services = new ServiceCollection();
                 services.AddSingleton(transportHolder);
                 ServiceProvider = services.BuildServiceProvider();

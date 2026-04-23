@@ -2,7 +2,6 @@
 using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
 using BleCommands.Core.Events;
-using System.Text;
 using System.Timers;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 

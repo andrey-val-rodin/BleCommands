@@ -1,0 +1,97 @@
+﻿<Window x:Class="Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:local="clr-namespace:Wpf"
+        d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="54"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0"
+                    Orientation="Horizontal">
+            <Label FontSize="20"
+                   Margin="0,2"
+                   Content="Command:">
+            </Label>
+            <ComboBox ItemsSource="{Binding AvailableCommands}"
+                      FontSize="20"
+                      Foreground="Green"
+                      Height="34"
+                      Margin="10,4,0,0"
+                      SelectedItem="{Binding Command}"
+                      Width="100"/>
+            <Button FontSize="20"
+                    Content="Send"
+                    Background="Aqua"
+                    Width="100"
+                    Margin="10,4,0,0"
+                    Command="{Binding SendCommand}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0"
+                    Orientation="Horizontal"
+                    Margin="0,14,0,0"
+                    Height="40">
+                <Label Grid.Row="1"
+                   FontSize="20"
+                   Content="Response:"/>
+                <TextBlock Grid.Row="1"
+                       FontSize="20"
+                       Margin="5"
+                       Foreground="{Binding ResponseBrush}"
+                       Text="{Binding Response}"/>
+            </StackPanel>
+            <Button Grid.Column="1"
+                    FontSize="20"
+                    Margin="0,15,6,0"
+                    Content="Clear"
+                    Command="{Binding ClearCommand}"
+                    Height="36"
+                    Width="80"
+                    Background="White"
+                    HorizontalAlignment="Right"/>
+        </Grid>
+
+        <Border Grid.Row="2"
+                Margin="6,12,6,6"
+                BorderThickness="1"
+                          Background="Black"
+                BorderBrush="Black">
+            <ItemsControl ItemsSource="{Binding ListeningTokensList}"
+                          Foreground="{Binding ListeningTokensBrush}"
+                          Margin="6,0,0,0">
+                <i:Interaction.Behaviors>
+                    <local:ScrollToEndBehavior/>
+                </i:Interaction.Behaviors>
+
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.Template>
+                    <ControlTemplate TargetType="ItemsControl">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsPresenter/>
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </ItemsControl.Template>
+            </ItemsControl>
+        </Border>
+    </Grid>
+</Window>

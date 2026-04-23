@@ -12,13 +12,13 @@ namespace BleCommands.Windows
         public static readonly Guid ListeningCharacteristicUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B904");
         private bool _disposed;
 
-        public async Task<bool> BeginAsync(string deviceName, CancellationToken token)
+        public async Task<bool> BeginAsync(string deviceName, CancellationToken token = default)
         {
             if (!await BluetoothHelper.IsBluetoothAvailableAsync() ||
                 !await BluetoothHelper.IsBluetoothOnAsync())
                 return false;
 
-            var scanner = new BleScanner();
+            using var scanner = new BleScanner();
             var device = await scanner.FindDeviceAsync(deviceName, TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             if (device == null)
             {

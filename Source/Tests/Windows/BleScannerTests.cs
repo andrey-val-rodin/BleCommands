@@ -7,7 +7,7 @@ namespace BleCommands.Tests.Windows
     /// These tests use device called Rotating Table:
     /// <see href="https://table-360.ru/">https://table-360.ru/</see>
     /// </summary>
-    public class BleScannerTests
+    public class BleScannerTests : IDisposable
     {
         private BleScanner BleScanner { get; } = new BleScanner();
 
@@ -48,6 +48,12 @@ namespace BleCommands.Tests.Windows
             Assert.NotNull(service);
             var characteristics = await service.GetCharacteristicsAsync();
             Assert.Equal(2, characteristics?.Count);
+        }
+
+        public void Dispose()
+        {
+            BleScanner.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Samples/">
+    <Project Path="Samples/Console/Console.csproj" />
+  </Folder>
   <Project Path="Core/Core.csproj" />
   <Project Path="Maui/Maui.csproj" />
   <Project Path="Tests/Tests.csproj" />

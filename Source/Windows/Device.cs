@@ -71,8 +71,7 @@ namespace BleCommands.Windows
 
                 IsConnected = NativeDevice.ConnectionStatus == BluetoothConnectionStatus.Connected;
                 // Refresh Id with actual value
-                if (NativeDevice != null)
-                    Id = NativeDevice.DeviceId;
+                Id = NativeDevice.DeviceId;
                 return IsConnected;
             }
             catch (Exception ex) when (ex is not DeviceException)

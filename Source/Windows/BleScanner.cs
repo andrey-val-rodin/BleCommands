@@ -151,5 +151,11 @@ namespace BleCommands.Windows
             if (timeout > TimeSpan.FromSeconds(MaxTimeoutSeconds))
                 throw new ArgumentOutOfRangeException(nameof(timeout), $"Timeout too long. Maximum is {MaxTimeoutSeconds} seconds.");
         }
+
+        public void Dispose()
+        {
+            _scanLock.Dispose();
+            GC.SuppressFinalize(this);
+        }
     }
 }

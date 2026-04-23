@@ -6,7 +6,7 @@
     /// <typeparam name="TDevice">Platform-specific device type (e.g., BluetoothLEDevice on Windows, IDevice on MAUI).</typeparam>
     /// <typeparam name="TService">Platform-specific service type (e.g., GattDeviceService on Windows, IService on MAUI).</typeparam>
     /// <typeparam name="TCharacteristic">Platform-specific characteristic type (e.g., GattCharacteristic on Windows, ICharacteristic on MAUI).</typeparam>
-    public interface IBleScanner<TDevice, TService, TCharacteristic>
+    public interface IBleScanner<TDevice, TService, TCharacteristic> : IDisposable
     {
         /// <summary>
         /// Searches for a Bluetooth device by name with the default timeout (5 seconds).

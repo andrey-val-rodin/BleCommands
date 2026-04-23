@@ -37,7 +37,7 @@ namespace BleCommands.Windows
             if (!commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Write) &&
                 !commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse))
                 throw new ArgumentException(
-                    "{nameof(commandCharacteristic)} is neither Write nor Write without response.",
+                    $"{nameof(commandCharacteristic)} is neither Write nor Write without response.",
                     nameof(commandCharacteristic));
             if (!responseCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Notify) &&
                 !responseCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Indicate))

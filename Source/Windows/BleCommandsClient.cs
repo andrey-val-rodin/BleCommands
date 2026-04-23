@@ -1,90 +1,77 @@
-﻿using BleCommands.Core.Contracts;
-using Windows.Devices.Bluetooth;
-using Windows.Devices.Bluetooth.GenericAttributeProfile;
-
-namespace BleCommands.Windows
+﻿namespace BleCommands.Windows
 {
-    public class BleCommandsClient : IDisposable
+    public static class BleCommandsClient
     {
         public static readonly Guid ServiceUuid                 = new("DB341FB3-8977-4C2D-AC6C-74540BD8B901");
         public static readonly Guid CommandCharacteristicUuid   = new("DB341FB3-8977-4C2D-AC6C-74540BD8B902");
         public static readonly Guid ResponseCharacteristicUuid  = new("DB341FB3-8977-4C2D-AC6C-74540BD8B903");
         public static readonly Guid ListeningCharacteristicUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B904");
-        private bool _disposed;
 
-        public async Task<bool> BeginAsync(string deviceName, CancellationToken token = default)
+        public static async Task<BleTransportHolder?> CreateTransportAsync(string deviceName, CancellationToken token = default)
         {
             if (!await BluetoothHelper.IsBluetoothAvailableAsync() ||
                 !await BluetoothHelper.IsBluetoothOnAsync())
-                return false;
+                return null;
 
-            using var scanner = new BleScanner();
-            var device = await scanner.FindDeviceAsync(deviceName, TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+            var device = await CreateDeviceAsync(deviceName, token).ConfigureAwait(false);
             if (device == null)
+                return null;
+
+            var service = await CreateServiceAsync(device, token).ConfigureAwait(false);
+            if (service == null)
             {
-                // Device not found
-                return false;
+                device.Dispose();
+                return null;
             }
 
-            if (!await device.ConnectAsync(token))
-            {
-                // Unable to connect
-                return false;
-            }
-            Device = device;
-
-            Service = await device.GetServiceAsync(ServiceUuid, token).ConfigureAwait(false);
-            if (Service == null)
-            {
-                // Unable to get service
-                return false;
-            }
-
-            var commandCharacteristic = await Service.GetCharacteristicAsync(CommandCharacteristicUuid).ConfigureAwait(false);
-            var responseCharacteristic = await Service.GetCharacteristicAsync(ResponseCharacteristicUuid).ConfigureAwait(false);
-            var listeningCharacteristic = await Service.GetCharacteristicAsync(ListeningCharacteristicUuid).ConfigureAwait(false);
+            var commandCharacteristic = await service.GetCharacteristicAsync(CommandCharacteristicUuid).ConfigureAwait(false);
+            var responseCharacteristic = await service.GetCharacteristicAsync(ResponseCharacteristicUuid).ConfigureAwait(false);
+            var listeningCharacteristic = await service.GetCharacteristicAsync(ListeningCharacteristicUuid).ConfigureAwait(false);
 
             if (commandCharacteristic == null ||
                 responseCharacteristic == null ||
                 listeningCharacteristic == null)
             {
                 // Unable to get characteristics
-                return false;
+                device.Dispose();
+                service.Dispose();
+                return null;
             }
 
-            Transport = new BleTransport(commandCharacteristic, responseCharacteristic, listeningCharacteristic);
-            await Transport.BeginAsync(token);
-
-            return true;
+            var transport = new BleTransport(commandCharacteristic, responseCharacteristic, listeningCharacteristic);
+            return new BleTransportHolder(device, service, transport);
         }
 
-        public TimeSpan ScanTimeout { get; set; } = TimeSpan.FromSeconds(5);
-
-        public IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>? Device { get; private set; }
-
-        public IService<GattDeviceService, GattCharacteristic>? Service { get; private set; }
-
-        public BleTransport? Transport { get; private set; }
-
-        protected virtual void Dispose(bool disposing)
+        private static async Task<Device?> CreateDeviceAsync(string deviceName, CancellationToken token)
         {
-            if (!_disposed)
+            using var scanner = new BleScanner();
+            var device = await scanner.FindDeviceAsync(deviceName, TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+            if (device == null)
             {
-                if (disposing)
-                {
-                    Device?.Dispose();
-                    Service?.Dispose();
-                    Transport?.Dispose();
-                }
-
-                _disposed = true;
+                // Device not found
+                return null;
             }
+
+            if (!await device.ConnectAsync(token).ConfigureAwait(false))
+            {
+                // Unable to connect
+                return null;
+            }
+
+            return device as Device;
         }
 
-        public void Dispose()
+        private static async Task<Service?> CreateServiceAsync(Device device, CancellationToken token)
         {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            var service = await device.GetServiceAsync(ServiceUuid, token).ConfigureAwait(false);
+            if (service == null)
+            {
+                // Unable to get service
+                device.Dispose();
+                return null;
+            }
+
+            return service as Service;
         }
     }
 }

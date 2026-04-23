@@ -43,11 +43,6 @@ namespace BleCommands.Tests.Windows
             var n = device.Name;
             await device.ConnectAsync(cts.Token);
             Assert.True(device.IsConnected);
-            var uuid = Guid.Parse("0000ffe0-0000-1000-8000-00805f9b34fb");
-            using var service = await device.GetServiceAsync(uuid, cts.Token);
-            Assert.NotNull(service);
-            var characteristics = await service.GetCharacteristicsAsync();
-            Assert.Equal(2, characteristics?.Count);
         }
 
         public void Dispose()

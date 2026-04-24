@@ -21,11 +21,7 @@ namespace BleCommands.Tests.Windows
         private static readonly Guid UpdatesCharacteristicUuid = new("0000ffe1-0000-1000-8000-00805f9b34fb");
         private static readonly Guid WriteCharacteristicUuid = new("0000ffe2-0000-1000-8000-00805f9b34fb");
 
-        public IBleTransport<GattCharacteristic> BleTransport { get; private set; } = null!;
-
-        public IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic> Device { get; private set; } = null!;
-
-        public IService<GattDeviceService, GattCharacteristic> Service { get; private set; } = null!;
+        public IBleTransport<BluetoothLEDevice, GattDeviceService, GattCharacteristic> BleTransport { get; private set; } = null!;
 
         public ICharacteristic<GattCharacteristic> CommandCharacteristic { get; private set; } = null!;
 
@@ -37,25 +33,26 @@ namespace BleCommands.Tests.Windows
 
         public async ValueTask InitializeAsync()
         {
-            Device = new Device(Id);
-            Assert.True(await Device.ConnectAsync(), "Turn on Rotating Table! Also, make sure the device is paired in Windows parameters.");
-            Service = (await Device.GetServiceAsync(ServiceUuid))!;
-            Assert.NotNull(Service);
-            CommandCharacteristic = (await Service.GetCharacteristicAsync(WriteCharacteristicUuid))!;
+            var device = new Device(Id);
+            Assert.True(await device.ConnectAsync(), "Turn on Rotating Table! Also, make sure the device is paired in Windows parameters.");
+            var service = (await device.GetServiceAsync(ServiceUuid))!;
+            Assert.NotNull(service);
+            CommandCharacteristic = (await service.GetCharacteristicAsync(WriteCharacteristicUuid))!;
             Assert.NotNull(CommandCharacteristic);
-            ListeningCharacteristic = ResponseCharacteristic = (await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
+            ListeningCharacteristic = ResponseCharacteristic = (await service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
             Assert.NotNull(ResponseCharacteristic);
             Assert.NotNull(ListeningCharacteristic);
-            CharacteristicWithAttachedAggregator = (await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
+            CharacteristicWithAttachedAggregator = (await service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
             CharacteristicWithAttachedAggregator.AttachTokenAggregator(new TokenAggregator());
             BleTransport = new BleTransport(
+                device,
+                service,
                 CommandCharacteristic,
                 ResponseCharacteristic,
                 ListeningCharacteristic,
                 '\n');
 
             await BleTransport.BeginAsync();
-            BleTransport.StartListening();
             await StopTableAsync();
         }
 
@@ -63,8 +60,6 @@ namespace BleCommands.Tests.Windows
         {
             if (ResponseCharacteristic != null)
                 await ResponseCharacteristic.StopUpdatesAsync();
-            Device?.Dispose();
-            Service?.Dispose();
             BleTransport?.Dispose();
         }
 
@@ -95,7 +90,37 @@ namespace BleCommands.Tests.Windows
         : IClassFixture<BleTransportFixture>
     {
         private BleTransportFixture Fixture { get; } = fixture;
-        private IBleTransport<GattCharacteristic> BleTransport => Fixture.BleTransport;
+        private IBleTransport<BluetoothLEDevice, GattDeviceService, GattCharacteristic> BleTransport => Fixture.BleTransport;
+
+        [Fact]
+        public void Constructor_DeviceIsNull_ArgumentNullException()
+        {
+            var exception = Assert.Throws<ArgumentNullException>(() =>
+            {
+                new BleTransport(
+                    null!,
+                    new ServiceStub(),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Indicate),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Indicate));
+            });
+            Assert.Equal("device", exception.ParamName);
+        }
+
+        [Fact]
+        public void Constructor_ServiceIsNull_ArgumentNullException()
+        {
+            var exception = Assert.Throws<ArgumentNullException>(() =>
+            {
+                new BleTransport(
+                    new DeviceStub(),
+                    null!,
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Indicate),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Indicate));
+            });
+            Assert.Equal("service", exception.ParamName);
+        }
 
         [Fact]
         public void Constructor_CommandCharacteristicIsNull_ArgumentNullException()
@@ -103,6 +128,8 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
                 new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     null!,
                     new CharacteristicStub(CharacteristicPropertyFlags.Indicate),
                     new CharacteristicStub(CharacteristicPropertyFlags.Indicate));
@@ -116,6 +143,8 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentException>(() =>
             {
                 new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                     new CharacteristicStub(CharacteristicPropertyFlags.Indicate),
                     new CharacteristicStub(CharacteristicPropertyFlags.Indicate));
@@ -129,6 +158,8 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
                 new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     null!,
                     new CharacteristicStub(CharacteristicPropertyFlags.Indicate));
@@ -142,6 +173,8 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentException>(() =>
             {
                 new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     new CharacteristicStub(0),
                     new CharacteristicStub(CharacteristicPropertyFlags.Indicate));
@@ -155,6 +188,8 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentException>(() =>
             {
                 new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     Fixture.CharacteristicWithAttachedAggregator,
                     new CharacteristicStub(CharacteristicPropertyFlags.Indicate));
@@ -168,6 +203,8 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
                 new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                     null!);
@@ -181,6 +218,8 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentException>(() =>
             {
                 new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                     new CharacteristicStub(0));
@@ -194,6 +233,8 @@ namespace BleCommands.Tests.Windows
             var exception = Assert.Throws<ArgumentException>(() =>
             {
                 new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                     Fixture.CharacteristicWithAttachedAggregator);
@@ -207,6 +248,8 @@ namespace BleCommands.Tests.Windows
             await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
             {
                 var transport = new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify));
@@ -223,6 +266,8 @@ namespace BleCommands.Tests.Windows
             await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
             {
                 var transport = new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify));
@@ -239,6 +284,8 @@ namespace BleCommands.Tests.Windows
             await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             {
                 var transport = new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify));
@@ -254,11 +301,13 @@ namespace BleCommands.Tests.Windows
             Assert.Throws<InvalidOperationException>(() =>
             {
                 var transport = new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify));
 
-                transport.StartListening();
+                transport.StartListening(TimeSpan.FromSeconds(1));
             });
         }
 
@@ -268,12 +317,14 @@ namespace BleCommands.Tests.Windows
             Assert.Throws<ObjectDisposedException>(() =>
             {
                 var transport = new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify));
                 transport.Dispose();
 
-                transport.StartListening();
+                transport.StartListening(TimeSpan.FromSeconds(1));
             });
         }
 
@@ -314,8 +365,6 @@ namespace BleCommands.Tests.Windows
         [Fact]
         public async Task ListeningIsInProgress_RotateTable_ReceiveTokens()
         {
-            Assert.True(BleTransport.IsListening, "StartListening() should be called in Fixture");
-
             var cts = new CancellationTokenSource();
             Assert.Equal("OK", await BleTransport.SendCommandAsync("RUN FM", cts.Token));
             var tokens = new List<string>();
@@ -324,22 +373,31 @@ namespace BleCommands.Tests.Windows
             {
                 tokens.Add(args.Text);
                 if (args.Text == "ENDSTEP")
-                    tcs.SetResult(true);
+                    tcs.TrySetResult(true);
+            }
+
+            void TimeoutHandler(object? sender, System.Timers.ElapsedEventArgs e)
+            {
+                tcs.TrySetResult(false);
             }
 
             try
             {
                 BleTransport.ListeningTokenReceived += Handler;
+                BleTransport.ListeningTimeoutElapsed += TimeoutHandler;
+                BleTransport.StartListening(TimeSpan.FromSeconds(3));
                 Assert.Equal("OK", await BleTransport.SendCommandAsync("FM 1", cts.Token));
                 Assert.True(await tcs.Task);
                 await Fixture.StopTableAsync();
+                Assert.Contains(tokens, s => s.StartsWith("POS"));
+                Assert.Equal("READY", await BleTransport.SendCommandAsync("STATUS", cts.Token));
             }
             finally
             {
-                BleTransport.ListeningTokenReceived -= Handler;
                 BleTransport.StopListening();
-                Assert.Contains(tokens, s => s.StartsWith("POS"));
-                Assert.Equal("READY", await BleTransport.SendCommandAsync("STATUS", cts.Token));
+                BleTransport.ListeningTokenReceived -= Handler;
+                BleTransport.ListeningTimeoutElapsed -= TimeoutHandler;
+                BleTransport.StopListening();
             }
         }
     }

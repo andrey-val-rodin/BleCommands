@@ -7,7 +7,7 @@
         public static readonly Guid ResponseCharacteristicUuid  = new("DB341FB3-8977-4C2D-AC6C-74540BD8B903");
         public static readonly Guid ListeningCharacteristicUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B904");
 
-        public static async Task<BleTransportHolder?> CreateTransportAsync(string deviceName, CancellationToken token = default)
+        public static async Task<BleTransport?> CreateTransportAsync(string deviceName, CancellationToken token = default)
         {
             if (!await BluetoothHelper.IsBluetoothAvailableAsync() ||
                 !await BluetoothHelper.IsBluetoothOnAsync())
@@ -38,8 +38,7 @@
                 return null;
             }
 
-            var transport = new BleTransport(commandCharacteristic, responseCharacteristic, listeningCharacteristic);
-            return new BleTransportHolder(device, service, transport);
+            return new BleTransport(device, service, commandCharacteristic, responseCharacteristic, listeningCharacteristic);
         }
 
         private static async Task<Device?> CreateDeviceAsync(string deviceName, CancellationToken token)

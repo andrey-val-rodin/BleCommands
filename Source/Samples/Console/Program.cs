@@ -9,12 +9,11 @@ try
     string[] validResponses = ["OK", "ON", "OFF"];
     WriteLine("Connecting...");
 
-    using var holder = await BleCommandsClient.CreateTransportAsync(deviceName);
-    var transport = holder?.Transport;
+    using var transport = await BleCommandsClient.CreateTransportAsync(deviceName);
     if (transport == null)
     {
         // Failed to create transport
-        WriteLine($"Failed to connect with device '{deviceName}'", ConsoleColor.Yellow);
+        WriteLine($"Failed to connect to device '{deviceName}'", ConsoleColor.Yellow);
         return;
     }
 

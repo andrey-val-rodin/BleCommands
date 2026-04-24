@@ -1,7 +1,5 @@
 ﻿using BleCommands.Windows;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.Threading;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -12,6 +10,7 @@ namespace Wpf
 {
     public partial class MainWindowViewModel : INotifyPropertyChanged, IDisposable
     {
+        private string _error = string.Empty;
         private string _command = string.Empty;
         private string _response = string.Empty;
         private Brush _responseBrush = Brushes.Black;
@@ -20,21 +19,32 @@ namespace Wpf
 
         public MainWindowViewModel()
         {
-            if (BleTransport != null)
-            {
-                BleTransport.ListeningTimeoutElapsed += BleTransport_ListeningTimeoutElapsed;
-                BleTransport.ListeningTokenReceived += BleTransport_ListeningTokenReceived;
-                BleTransport.StartListening(TimeSpan.FromSeconds(1));
-            }
-
             Command = AvailableCommands[0];
         }
 
-        public BleTransport? BleTransport { get; } = App.ServiceProvider?.GetRequiredService<BleTransportHolder>()?.Transport;
+        public BleTransport? BleTransport { get; private set; }
 
         public ObservableCollection<string> AvailableCommands { get; set; } = ["START", "STOP"];
 
         public ObservableCollection<string> ListeningTokensList { get; } = [];
+
+        public string Error
+        {
+            get => _error;
+            set
+            {
+                if (SetProperty(ref _error, value))
+                {
+                    Response = string.Empty;
+                    RaisePropertyChanged(nameof(HasError));
+                    RaisePropertyChanged(nameof(ErrorVisibility));
+                }
+            }
+        }
+
+        public bool HasError => !string.IsNullOrEmpty(Error);
+
+        public Visibility ErrorVisibility => HasError ? Visibility.Visible : Visibility.Collapsed;
 
         public string Command
         {
@@ -69,19 +79,39 @@ namespace Wpf
             get => _isMessagingInProgress;
             set
             {
-                if (SetProperty(ref _isMessagingInProgress, value))
+                SetProperty(ref _isMessagingInProgress, value);
+                if (value)
                 {
-                    if (value)
-                    {
-                        ListeningTokensBrush = Brushes.White;
-                    }
-                    else
-                    {
-                        ListeningTokensBrush = Brushes.Gray;
-                        Response = string.Empty;
-                    }
+                    BleTransport?.StartListening(TimeSpan.FromSeconds(1));
+                    ListeningTokensBrush = Brushes.White;
+                }
+                else
+                {
+                    BleTransport?.StopListening();
+                    ListeningTokensBrush = Brushes.Gray;
+                    Response = string.Empty;
                 }
             }
+        }
+
+        public async Task<bool> BeginAsync(string deviceName)
+        {
+            BleTransport = await BleCommandsClient.CreateTransportAsync(deviceName);
+            if (BleTransport == null)
+            {
+                return false;
+            }
+
+            await BleTransport.BeginAsync();
+            BleTransport.ListeningTimeoutElapsed += BleTransport_ListeningTimeoutElapsed;
+            BleTransport.ListeningTokenReceived += BleTransport_ListeningTokenReceived;
+            return true;
+        }
+
+        [RelayCommand]
+        public static void Shutdown()
+        {
+            Environment.Exit(1);
         }
 
         [RelayCommand]
@@ -98,13 +128,13 @@ namespace Wpf
                 Response = response;
                 ResponseBrush = Brushes.Black;
             }
-            else 
+            else
             {
                 Response = response ?? string.Empty;
                 ResponseBrush = Brushes.Red;
             }
         }
-        
+
         [RelayCommand]
         public void Clear()
         {
@@ -119,7 +149,7 @@ namespace Wpf
             App.JoinableTaskFactory.Run(async delegate
             {
                 await App.JoinableTaskFactory.SwitchToMainThreadAsync();
-                MessageBox.Show("Listening timeout");
+                Error = "Listening timeout";
             });
         }
 
@@ -167,6 +197,7 @@ namespace Wpf
                 BleTransport.ListeningTimeoutElapsed -= BleTransport_ListeningTimeoutElapsed;
                 BleTransport.ListeningTokenReceived -= BleTransport_ListeningTokenReceived;
                 BleTransport.StopListening();
+                BleTransport.Dispose();
             }
             GC.SuppressFinalize(this);
         }

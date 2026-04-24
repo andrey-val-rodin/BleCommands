@@ -12,6 +12,8 @@ namespace BleCommands.Windows
         private GattSession? _gattSession;
         private bool _disposed = false;
 
+        public event EventHandler? Disconnected;
+
         public Device(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -63,7 +65,7 @@ namespace BleCommands.Windows
                 _gattSession.MaintainConnection = true;
 
                 // Monitor connection status
-                NativeDevice.ConnectionStatusChanged += OnConnectionStatusChanged;
+                NativeDevice.ConnectionStatusChanged += NativeDevice_ConnectionStatusChanged;
 
                 // Retrieve services to establish actual connection
                 var result = await NativeDevice.GetGattServicesAsync(BluetoothCacheMode.Uncached);
@@ -87,9 +89,11 @@ namespace BleCommands.Windows
                 : await BluetoothLEDevice.FromIdAsync(Id);
         }
 
-        protected void OnConnectionStatusChanged(BluetoothLEDevice sender, object args)
+        protected void NativeDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
         {
             IsConnected = sender.ConnectionStatus == BluetoothConnectionStatus.Connected;
+            if (!IsConnected)
+                Disconnected?.Invoke(this, EventArgs.Empty);
         }
 
         public async Task<IService<GattDeviceService, GattCharacteristic>?> GetServiceAsync(
@@ -146,7 +150,7 @@ namespace BleCommands.Windows
                 {
                     if (NativeDevice != null)
                     {
-                        NativeDevice.ConnectionStatusChanged -= OnConnectionStatusChanged;
+                        NativeDevice.ConnectionStatusChanged -= NativeDevice_ConnectionStatusChanged;
                         NativeDevice.Dispose();
                     }
 

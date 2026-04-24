@@ -6,9 +6,15 @@ namespace BleCommands.Core.Contracts
     /// <summary>
     /// Provides Bluetooth communication capabilities with a connected device.
     /// </summary>
+    /// <typeparam name="TDevice">Platform-specific device type.</typeparam>
+    /// <typeparam name="TService">Platform-specific service type.</typeparam>
     /// <typeparam name="TCharacteristic">Platform-specific characteristic type.</typeparam>
-    public interface IBleTransport<TCharacteristic> : IDisposable
+    public interface IBleTransport<TDevice, TService, TCharacteristic> : IDisposable
     {
+        /// <summary>
+        /// Occurs when the device connection is lost
+        /// </summary>
+        public event EventHandler? Disconnected;
         /// <summary>
         /// Occurs when the listening timeout is exceeded (no token received within the specified interval).
         /// </summary>
@@ -21,14 +27,14 @@ namespace BleCommands.Core.Contracts
         event EventHandler<TextEventArgs>? ListeningTokenReceived;
 
         /// <summary>
-        /// Gets the token separator. The default is '\n'.
+        /// Gets the Bluetooth LE device.
         /// </summary>
-        char TokenDelimiter { get; }
+        IDevice<TDevice, TService, TCharacteristic> Device { get; }
 
         /// <summary>
-        /// Specifies period of time to wait for a response to command.
+        /// Gets the service.
         /// </summary>
-        TimeSpan ResponseTimeout { get; set; }
+        IService<TService, TCharacteristic> Service { get; }
 
         /// <summary>
         /// Gets the characteristic used for sending commands to the Bluetooth device.
@@ -49,6 +55,16 @@ namespace BleCommands.Core.Contracts
         /// Gets a value indicating whether listening is currently in progress.
         /// </summary>
         bool IsListening { get; }
+
+        /// <summary>
+        /// Gets the token separator. The default is '\n'.
+        /// </summary>
+        char TokenDelimiter { get; }
+
+        /// <summary>
+        /// Specifies period of time to wait for a response to command.
+        /// </summary>
+        TimeSpan ResponseTimeout { get; set; }
 
         /// <summary>
         /// Starts process of communication between Bluetooth transport and device.
@@ -74,16 +90,15 @@ namespace BleCommands.Core.Contracts
         /// Each received token will raise the <see cref="ListeningTokenReceived"/> event.
         /// </summary>
         /// <param name="timeout">
-        /// Optional timeout that specifies the maximum allowed interval between consecutive tokens.
+        /// A timeout that specifies the maximum allowed interval between consecutive tokens.
         /// If the interval exceeds this value, the <see cref="ListeningTimeoutElapsed"/> event is raised.
-        /// Pass <c>null</c> to disable timeout checking.
         /// </param>
         /// <remarks>
         /// Subscribe to <see cref="ListeningTokenReceived"/> before calling this method.
         /// Listening continues until <see cref="StopListening"/> is called.
         /// </remarks>
         /// <exception cref="InvalidOperationException">Thrown when characteristics are not set.</exception>
-        void StartListening(TimeSpan? timeout = null);
+        void StartListening(TimeSpan timeout);
 
         /// <summary>
         /// Stops the ongoing listening process.

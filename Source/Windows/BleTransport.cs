@@ -3,20 +3,24 @@ using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
 using BleCommands.Core.Events;
 using System.Timers;
+using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace BleCommands.Windows
 {
     /// <inheritdoc />
-    public class BleTransport : IBleTransport<GattCharacteristic>
+    public class BleTransport : IBleTransport<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
     {
         private readonly SemaphoreSlim _semaphore = new(1, 1);
-        private System.Timers.Timer? _listeningTimer;
+        private readonly object _timerLock = new();
+        private readonly System.Timers.Timer _listeningTimer = new(3000) { AutoReset = false };
         private bool _disposed;
 
         /// <summary>
         /// A constructor.
         /// </summary>
+        /// <param name="device">A Bluetooth LE device.</param>
+        /// <param name="service"> A service.</param>
         /// <param name="commandCharacteristic">Characteristic for sending commands to the device (Write or WriteWithoutResponse).</param>
         /// <param name="responseCharacteristic">Characteristic for receiving command responses from the device (Notify or Indicate).</param>
         /// <param name="listeningCharacteristic">Characteristic for receiving token stream during listening (Notify or Indicate).</param>
@@ -24,11 +28,15 @@ namespace BleCommands.Windows
         /// <exception cref="ArgumentNullException">Thrown if any characteristic is null.</exception>
         /// <exception cref="ArgumentException">Thrown if any characteristic has invalid properties.</exception>
         public BleTransport(
+            IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic> device,
+            IService<GattDeviceService, GattCharacteristic> service,
             ICharacteristic<GattCharacteristic> commandCharacteristic,
             ICharacteristic<GattCharacteristic> responseCharacteristic,
             ICharacteristic<GattCharacteristic> listeningCharacteristic,
             char tokenDelimiter = TokenAggregator.DefaultTokenDelimiter)
         {
+            Device = device ?? throw new ArgumentNullException(nameof(device));
+            Service = service ?? throw new ArgumentNullException(nameof(service));
             ArgumentNullException.ThrowIfNull(commandCharacteristic);
             ArgumentNullException.ThrowIfNull(responseCharacteristic);
             ArgumentNullException.ThrowIfNull(listeningCharacteristic);
@@ -75,18 +83,17 @@ namespace BleCommands.Windows
         }
 
         /// <inheritdoc />
+        public event EventHandler? Disconnected
+        {
+            add => Device.Disconnected += value;
+            remove => Device.Disconnected -= value;
+        }
+
+        /// <inheritdoc />
         public event ElapsedEventHandler? ListeningTimeoutElapsed
         {
-            add
-            {
-                if (_listeningTimer != null)
-                    _listeningTimer.Elapsed += value;
-            }
-            remove
-            {
-                if (_listeningTimer != null)
-                    _listeningTimer.Elapsed -= value;
-            }
+            add => _listeningTimer.Elapsed += value;
+            remove => _listeningTimer.Elapsed -= value;
         }
 
         /// <inheritdoc />
@@ -103,11 +110,10 @@ namespace BleCommands.Windows
         }
 
         /// <inheritdoc />
-        public char TokenDelimiter { get; }
+        public IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic> Device { get; }
 
         /// <inheritdoc />
-        public TimeSpan ResponseTimeout { get; set; } = TimeSpan.FromMilliseconds(500);
-
+        public IService<GattDeviceService, GattCharacteristic> Service { get; }
 
         /// <inheritdoc />
         public ICharacteristic<GattCharacteristic> CommandCharacteristic { get; }
@@ -124,6 +130,12 @@ namespace BleCommands.Windows
 
         /// <inheritdoc />
         public bool IsListening { get; protected set; }
+
+        /// <inheritdoc />
+        public char TokenDelimiter { get; }
+
+        /// <inheritdoc />
+        public TimeSpan ResponseTimeout { get; set; } = TimeSpan.FromMilliseconds(500);
 
         public bool IsStarted { get; protected set; }
 
@@ -197,38 +209,49 @@ namespace BleCommands.Windows
         }
 
         /// <inheritdoc />
-        public void StartListening(TimeSpan? timeout = null)
+        public void StartListening(TimeSpan timeout)
         {
             ThrowIfDisposed();
             if (!IsStarted)
                 throw new InvalidOperationException("BleTransport has not been started.");
-            if (IsListening)
-                throw new InvalidOperationException("Listening is already in progress.");
 
-            if (timeout != null)
+            lock (_timerLock)
             {
-                _listeningTimer = new System.Timers.Timer() { Interval = timeout.Value.TotalMilliseconds };
+                if (IsListening)
+                    throw new InvalidOperationException("Listening is already in progress.");
+
+                _listeningTimer.Interval = timeout.TotalMilliseconds;
+                ListeningTokenReceived += ListeningHandler;
+                IsListening = true;
                 _listeningTimer.Start();
             }
-
-            ListeningTokenReceived += ListeningHandler;
-            IsListening = true;
         }
 
         private void ListeningHandler(object? sender, TextEventArgs args)
         {
-            // Reset timer
-            _listeningTimer?.Stop();
-            _listeningTimer?.Start();
+            if (_disposed)
+                return;
+
+            lock (_timerLock)
+            {
+                if (!IsListening)
+                    return;
+
+                // Reset timer
+                _listeningTimer.Stop();
+                _listeningTimer.Start();
+            }
         }
 
         /// <inheritdoc />
         public void StopListening()
         {
-            _listeningTimer?.Stop();
-            _listeningTimer?.Dispose();
-            _listeningTimer = null;
-            ListeningTokenReceived -= ListeningHandler;
+            lock (_timerLock)
+            {
+                _listeningTimer.Stop();
+                ListeningTokenReceived -= ListeningHandler;
+                IsListening = false;
+            }
         }
 
         protected void ThrowIfDisposed()
@@ -249,10 +272,11 @@ namespace BleCommands.Windows
                     CommandCharacteristic?.Dispose();
                     ResponseCharacteristic?.Dispose();
                     ListeningCharacteristic?.Dispose();
+                    Service?.Dispose();
+                    Device?.Dispose();
 
                     _listeningTimer?.Stop();
                     _listeningTimer?.Dispose();
-                    _listeningTimer = null;
                 }
 
                 _disposed = true;

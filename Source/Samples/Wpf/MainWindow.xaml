@@ -8,90 +8,131 @@
         d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid Margin="8">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="54"/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
+    
+    <Grid>
+        <Grid Margin="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="54"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0"
-                    Orientation="Horizontal">
-            <Label FontSize="20"
-                   Margin="0,2"
-                   Content="Command:">
-            </Label>
-            <ComboBox ItemsSource="{Binding AvailableCommands}"
-                      FontSize="20"
-                      Foreground="Green"
-                      Height="34"
-                      Margin="10,4,0,0"
-                      SelectedItem="{Binding Command}"
-                      Width="100"/>
-            <Button FontSize="20"
-                    Content="Send"
-                    Background="Aqua"
-                    Width="100"
-                    Margin="10,4,0,0"
-                    Command="{Binding SendCommand}"/>
-        </StackPanel>
-
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0"
-                    Orientation="Horizontal"
-                    Margin="0,14,0,0"
-                    Height="40">
-                <Label Grid.Row="1"
-                   FontSize="20"
-                   Content="Response:"/>
-                <TextBlock Grid.Row="1"
-                       FontSize="20"
-                       Margin="5"
-                       Foreground="{Binding ResponseBrush}"
-                       Text="{Binding Response}"/>
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal">
+                <Label FontSize="20"
+                       Margin="0,2"
+                       Content="Command:">
+                </Label>
+                <ComboBox ItemsSource="{Binding AvailableCommands}"
+                          FontSize="20"
+                          Foreground="Green"
+                          Height="34"
+                          Margin="10,4,0,0"
+                          SelectedItem="{Binding Command}"
+                          Width="100"/>
+                <Button FontSize="20"
+                        Content="Send"
+                        Foreground="White"
+                        Background="#1684F7"
+                        Width="100"
+                        Margin="10,4,0,0"
+                        Command="{Binding SendCommand}"/>
             </StackPanel>
-            <Button Grid.Column="1"
-                    FontSize="20"
-                    Margin="0,15,6,0"
-                    Content="Clear"
-                    Command="{Binding ClearCommand}"
-                    Height="36"
-                    Width="80"
-                    Background="White"
-                    HorizontalAlignment="Right"/>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0"
+                            Orientation="Horizontal"
+                            Margin="0,14,0,0"
+                            Height="40">
+                    <Label Grid.Row="1"
+                           FontSize="20"
+                           Content="Response:"/>
+                    <TextBlock Grid.Row="1"
+                               FontSize="20"
+                               Margin="5"
+                               Foreground="{Binding ResponseBrush}"
+                               Text="{Binding Response}"/>
+                </StackPanel>
+                <Button Grid.Column="1"
+                        FontSize="20"
+                        Margin="0,15,6,0"
+                        Content="Clear"
+                        Command="{Binding ClearCommand}"
+                        Height="36"
+                        Width="80"
+                        Background="White"
+                        HorizontalAlignment="Right"/>
+            </Grid>
+
+            <Border Grid.Row="2"
+                    Margin="6,12,6,6"
+                    BorderThickness="1"
+                    Background="Black"
+                    BorderBrush="Black">
+                <ItemsControl ItemsSource="{Binding ListeningTokensList}"
+                              Foreground="{Binding ListeningTokensBrush}"
+                              Margin="6,0,0,0">
+                    <i:Interaction.Behaviors>
+                        <local:ScrollToEndBehavior/>
+                    </i:Interaction.Behaviors>
+
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.Template>
+                        <ControlTemplate TargetType="ItemsControl">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ItemsPresenter/>
+                            </ScrollViewer>
+                        </ControlTemplate>
+                    </ItemsControl.Template>
+                </ItemsControl>
+            </Border>
         </Grid>
 
-        <Border Grid.Row="2"
-                Margin="6,12,6,6"
-                BorderThickness="1"
-                          Background="Black"
-                BorderBrush="Black">
-            <ItemsControl ItemsSource="{Binding ListeningTokensList}"
-                          Foreground="{Binding ListeningTokensBrush}"
-                          Margin="6,0,0,0">
-                <i:Interaction.Behaviors>
-                    <local:ScrollToEndBehavior/>
-                </i:Interaction.Behaviors>
+        <!-- Darkening background -->
+        <Border Background="#BB000000" 
+                Visibility="{Binding ErrorVisibility}"/>
 
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Vertical"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+        <!-- Popup -->
+        <Popup Visibility="{Binding ErrorVisibility}"
+               IsOpen="{Binding HasError, Mode=OneWay}"
+               Placement="Center"
+               Width="400"
+               Height="140"
+               StaysOpen="True"
+               AllowsTransparency="True">
+            <Border Background="White" 
+                    CornerRadius="10" 
+                    Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                <ItemsControl.Template>
-                    <ControlTemplate TargetType="ItemsControl">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <ItemsPresenter/>
-                        </ScrollViewer>
-                    </ControlTemplate>
-                </ItemsControl.Template>
-            </ItemsControl>
-        </Border>
+                    <TextBlock Grid.Row="0"
+                               FontSize="20"
+                               TextWrapping="Wrap"
+                               Text="{Binding Error}"/>
+                    
+                    <Button Grid.Row="1"
+                            Content="Close"
+                            Foreground="White"
+                            Background="#1684F7"
+                            FontSize="20"
+                            Command="{Binding ShutdownCommand}">
+                    </Button>
+                </Grid>
+            </Border>
+        </Popup>
     </Grid>
 </Window>

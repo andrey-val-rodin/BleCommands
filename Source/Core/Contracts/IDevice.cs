@@ -2,6 +2,8 @@
 {
     public interface IDevice<TDevice, TService, TCharacteristic> : IDisposable
     {
+        event EventHandler? Disconnected;
+
         string Id { get; }
 
         string Name { get; }

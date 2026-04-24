@@ -17,6 +17,8 @@ namespace BleCommands.Maui
         private readonly string? _id;
         private bool _disposed = false;
 
+        public event EventHandler? Disconnected;
+
         public Device(string id)
         {
             if (string.IsNullOrWhiteSpace(id))

@@ -1,8 +1,4 @@
-﻿using BleCommands.Core.Enums;
-using BleCommands.Core.Events;
-using BleCommands.Windows;
-
-namespace BleCommands.Tests.Windows
+﻿namespace BleCommands.Tests.Windows
 {
     public class BleCommandsClientTests
     {

@@ -105,6 +105,7 @@ namespace Wpf
             await BleTransport.BeginAsync();
             BleTransport.ListeningTimeoutElapsed += BleTransport_ListeningTimeoutElapsed;
             BleTransport.ListeningTokenReceived += BleTransport_ListeningTokenReceived;
+            BleTransport.Disconnected += BleTransport_Disconnected;
             return true;
         }
 
@@ -149,7 +150,16 @@ namespace Wpf
             App.JoinableTaskFactory.Run(async delegate
             {
                 await App.JoinableTaskFactory.SwitchToMainThreadAsync();
-                Error = "Listening timeout";
+                Error = "Listening timeout.";
+            });
+        }
+
+        private void BleTransport_Disconnected(object? sender, EventArgs e)
+        {
+            App.JoinableTaskFactory.Run(async delegate
+            {
+                await App.JoinableTaskFactory.SwitchToMainThreadAsync();
+                Error = "Lost connection with device.";
             });
         }
 

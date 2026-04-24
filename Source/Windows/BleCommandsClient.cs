@@ -33,6 +33,9 @@
                 listeningCharacteristic == null)
             {
                 // Unable to get characteristics
+                commandCharacteristic?.Dispose();
+                responseCharacteristic?.Dispose();
+                listeningCharacteristic?.Dispose();
                 device.Dispose();
                 service.Dispose();
                 return null;
@@ -66,7 +69,6 @@
             if (service == null)
             {
                 // Unable to get service
-                device.Dispose();
                 return null;
             }
 

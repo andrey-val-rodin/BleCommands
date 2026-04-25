@@ -1,47 +1,52 @@
-﻿using BleCommands.Windows;
+﻿
+using BleCommands.Maui;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace BleCommands.Tests.Windows
+namespace IntegrationTests.Uwp
 {
     /// <summary>
-    /// Temporary tests for Windows.BleScanner. Will be moved to IntegrationTests.
     /// These tests use device called Rotating Table:
     /// <see href="https://table-360.ru/">https://table-360.ru/</see>
     /// </summary>
+    [TestClass]
     public class BleScannerTests : IDisposable
     {
         private BleScanner BleScanner { get; } = new BleScanner();
 
-        [Fact]
-        public async Task FindDeviceWithCts_Cancel_TaskCanceledException()
+        [TestMethod]
+        public async Task FindDeviceWithCts_Cancel_TaskCanceledExceptionAsync()
         {
             using var cts = new CancellationTokenSource();
 
             // Cancel in 100 мс
             cts.CancelAfter(100);
 
-            await Assert.ThrowsAsync<TaskCanceledException>(async () =>
+            await Assert.ThrowsExceptionAsync<TaskCanceledException>(async () =>
             {
                 await BleScanner.FindDeviceAsync("Unexistent Device", cts.Token);
             });
         }
 
-        [Fact]
-        public async Task FindDeviceWithTimeout_Timeout_ReturnsNull()
+        [TestMethod]
+        public async Task FindDeviceWithTimeout_Timeout_ReturnsNullAsync()
         {
             // Timeout 1 second
             var device = await BleScanner.FindDeviceAsync("Unexistent Device", TimeSpan.FromSeconds(1));
-            Assert.Null(device);
+            Assert.IsNull(device);
         }
 
-        [Fact]
-        public async Task FindDevice_Found()
+        [TestMethod]
+        public async Task FindDevice_FoundAsync()
         {
             using var cts = new CancellationTokenSource();
             using var device = await BleScanner.FindDeviceAsync("Rotating Table", TimeSpan.FromSeconds(3));
 
-            Assert.NotNull(device);
+            Assert.IsNotNull(device);
             await device.ConnectAsync(cts.Token);
-            Assert.True(device.IsConnected);
+            Assert.IsTrue(device.IsConnected);
         }
 
         public void Dispose()

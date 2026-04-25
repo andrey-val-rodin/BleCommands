@@ -12,6 +12,9 @@ using IService = BleCommands.Core.Contracts.IService<
 
 namespace BleCommands.Maui
 {
+    /// <summary>
+    /// MAUI implementation of a Bluetooth Low Energy device.
+    /// </summary>
     public class Device : IDevice
     {
         private readonly string? _id;

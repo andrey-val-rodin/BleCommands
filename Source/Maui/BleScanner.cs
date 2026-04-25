@@ -81,7 +81,6 @@ namespace BleCommands.Maui
         /// For timeout-based scanning, use <see cref="FindDeviceAsync(string, TimeSpan)"/>.
         /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown if deviceName is null or empty.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the specified timeout is outside the range of 1 to 60 seconds.</exception>
         /// <exception cref="InvalidOperationException">Thrown when Bluetooth scanning is already in progress.</exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
         /// <exception cref="OperationCanceledException">Thrown when the operation is cancelled via <paramref name="token"/>.
@@ -120,7 +119,7 @@ namespace BleCommands.Maui
                         cancellationToken: token
                     ).ConfigureAwait(false);
 
-                    using (token.Register(() => tcs.TrySetException(new OperationCanceledException(token))))
+                    using (token.Register(() => tcs.TrySetCanceled()))
                     {
                         return await tcs.Task.ConfigureAwait(false);
                     }

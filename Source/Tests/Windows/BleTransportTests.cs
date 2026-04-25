@@ -372,13 +372,15 @@ namespace BleCommands.Tests.Windows
             void Handler(object? sender, TextEventArgs args)
             {
                 tokens.Add(args.Text);
-                if (args.Text == "ENDSTEP")
+                if (args.Text == "MOVERR")
+                    tcs.SetResult(false); // Is Rotating Table turned on?
+                else if (args.Text == "ENDSTEP")
                     tcs.TrySetResult(true);
             }
 
             void TimeoutHandler(object? sender, System.Timers.ElapsedEventArgs e)
             {
-                tcs.TrySetResult(false);
+                tcs.TrySetResult(false); // Listening timeout
             }
 
             try

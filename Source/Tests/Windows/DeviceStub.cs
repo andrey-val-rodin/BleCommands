@@ -14,7 +14,7 @@ namespace BleCommands.Tests.Windows
 
         public BluetoothLEDevice? NativeDevice => throw new NotImplementedException();
 
-        public event EventHandler? Disconnected;
+        public event EventHandler? Disconnected { add { } remove { } }
 
         public Task<bool> ConnectAsync(CancellationToken token = default)
         {

@@ -14,7 +14,7 @@ namespace Wpf
         {
             base.OnStartup(e);
 
-            var joinableTaskContext = new JoinableTaskContext();
+            using var joinableTaskContext = new JoinableTaskContext();
             JoinableTaskFactory = joinableTaskContext.Factory;
         }
     }

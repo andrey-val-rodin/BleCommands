@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.Threading;
 using System.Windows;
 
-namespace Wpf
+namespace WpfSample
 {
     /// <summary>
     /// Interaction logic for App.xaml

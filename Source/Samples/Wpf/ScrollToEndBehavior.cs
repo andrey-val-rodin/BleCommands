@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace Wpf
+namespace WpfSample
 {
     public class ScrollToEndBehavior : Behavior<ItemsControl>
     {

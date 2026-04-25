@@ -1,7 +1,8 @@
 <Solution>
   <Folder Name="/Samples/">
-    <Project Path="Samples/Console/Console.csproj" />
-    <Project Path="Samples/Wpf/Wpf.csproj" />
+    <Project Path="Samples/Console/ConsoleSample.csproj" />
+    <Project Path="Samples/Maui/MauiSample.csproj" />
+    <Project Path="Samples/Wpf/WpfSample.csproj" />
   </Folder>
   <Project Path="Core/Core.csproj" />
   <Project Path="Maui/Maui.csproj" />

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
 
-namespace Wpf
+namespace WpfSample
 {
     public partial class MainWindowViewModel : INotifyPropertyChanged, IDisposable
     {

@@ -3,7 +3,7 @@ using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
-namespace BleCommands.Tests.Windows
+namespace BleCommands.Tests
 {
     public sealed class CharacteristicStub(CharacteristicPropertyFlags properties)
         : ICharacteristic<GattCharacteristic>

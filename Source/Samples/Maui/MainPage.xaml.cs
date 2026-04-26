@@ -15,7 +15,7 @@ namespace MauiSample
         private async void MainPage_Loaded(object? sender, EventArgs e)
         {
             var scanner = new BleScanner();
-            var device = await scanner.FindDeviceAsync("Rotating Table", TimeSpan.FromSeconds(5));
+            using var device = await scanner.FindDeviceAsync("Rotating Table", TimeSpan.FromSeconds(1));
         }
 
         private void OnCounterClicked(object? sender, EventArgs e)

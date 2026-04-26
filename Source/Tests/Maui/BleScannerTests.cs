@@ -1,6 +1,6 @@
-﻿using BleCommands.Maui;
+﻿using BleCommands.Windows;
 
-namespace BleCommands.Tests.Windows
+namespace BleCommands.Tests.Maui
 {
     public class BleScannerTests
     {

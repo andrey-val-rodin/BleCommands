@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
-    <RootNamespace>BleCommands.Tests</RootNamespace>
+    <RootNamespace>BleCommands.IntegrationTests.Windows</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,8 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" />
-    <ProjectReference Include="..\Maui\Maui.csproj" />
     <ProjectReference Include="..\Windows\Windows.csproj" />
   </ItemGroup>
 	

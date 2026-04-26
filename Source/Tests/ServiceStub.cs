@@ -1,7 +1,7 @@
 ﻿using BleCommands.Core.Contracts;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
-namespace BleCommands.Tests.Windows
+namespace BleCommands.Tests
 {
     public sealed class ServiceStub : IService<GattDeviceService, GattCharacteristic>
     {

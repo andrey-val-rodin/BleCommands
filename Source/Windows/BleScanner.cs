@@ -42,7 +42,10 @@ namespace BleCommands.Windows
         /// <param name="timeout">Timeout.</param>
         /// <returns>Found device or null if timeout expired.</returns>
         /// <exception cref="ArgumentNullException">Thrown if deviceName is null or empty.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the specified timeout is outside the range of 1 to 60 seconds.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown if the specified timeout is less than or equal to zero,
+        /// or greater than 60 seconds.
+        /// </exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
         public async Task<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?> FindDeviceAsync(
             string deviceName, TimeSpan timeout)
@@ -146,7 +149,7 @@ namespace BleCommands.Windows
         private static void ValidateTimeout(TimeSpan timeout)
         {
             if (timeout <= TimeSpan.Zero)
-                throw new ArgumentOutOfRangeException(nameof(timeout), $"Timeout too short. Minimum is {MinTimeoutSeconds} second.");
+                throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout is less than or equal to zero.");
 
             if (timeout > TimeSpan.FromSeconds(MaxTimeoutSeconds))
                 throw new ArgumentOutOfRangeException(nameof(timeout), $"Timeout too long. Maximum is {MaxTimeoutSeconds} seconds.");

@@ -11,7 +11,7 @@ namespace BleCommands.Tests.Maui
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
                 string? deviceName = null!;
-                await FindDeviceWithTimeoutAsync(scanner, deviceName);
+                await scanner.FindDeviceAsync(deviceName);
             });
             Assert.Equal("deviceName", exception.ParamName);
         }
@@ -23,31 +23,7 @@ namespace BleCommands.Tests.Maui
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
                 string deviceName = string.Empty;
-                await FindDeviceWithTimeoutAsync(scanner, deviceName);
-            });
-            Assert.Equal("deviceName", exception.ParamName);
-        }
-
-        [Fact]
-        public async Task FindDeviceAsyncWithCancellationToken_DeviceNameIsNull_ArgumentNullException()
-        {
-            using var scanner = new BleScanner();
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            {
-                string? deviceName = null!;
-                await scanner.FindDeviceAsync(deviceName, TestContext.Current.CancellationToken);
-            });
-            Assert.Equal("deviceName", exception.ParamName);
-        }
-
-        [Fact]
-        public async Task FindDeviceAsyncWithCancellationToken_DeviceNameIsEmpty_ArgumentNullException()
-        {
-            using var scanner = new BleScanner();
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            {
-                string deviceName = string.Empty;
-                await scanner.FindDeviceAsync(deviceName, TestContext.Current.CancellationToken);
+                await scanner.FindDeviceAsync(deviceName);
             });
             Assert.Equal("deviceName", exception.ParamName);
         }
@@ -72,12 +48,6 @@ namespace BleCommands.Tests.Maui
                 await scanner.FindDeviceAsync("Some device", TimeSpan.Zero - TimeSpan.FromSeconds(1));
             });
             Assert.Equal("timeout", exception.ParamName);
-        }
-
-        // Just to avoid xUnit1051 "Calls to methods which accept CancellationToken should use TestContext.Current.CancellationToken"
-        private static async Task FindDeviceWithTimeoutAsync(BleScanner scanner, string deviceName)
-        {
-            await scanner.FindDeviceAsync(deviceName);
         }
     }
 }

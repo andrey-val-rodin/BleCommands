@@ -20,7 +20,6 @@ namespace BleCommands.Maui
     {
         private const int DefaultTimeoutSeconds = 5;
         private const int MaxTimeoutSeconds = 60;
-        private const int MinTimeoutSeconds = 1;
 
         private readonly AsyncSemaphore _scanLock = new(1);
 
@@ -62,7 +61,7 @@ namespace BleCommands.Maui
             using var cts = new CancellationTokenSource(timeout);
             try
             {
-                return await FindDeviceInternalAsync(deviceName, cts.Token).ConfigureAwait(false);
+                return await FindDeviceInternalAsync(deviceName, cts).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -71,34 +70,11 @@ namespace BleCommands.Maui
             }
         }
 
-        /// <summary>
-        /// Searches for a Bluetooth device by name with cancellation support.
-        /// </summary>
-        /// <param name="deviceName">Name to search for.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns>Found device or null if timeout expired.</returns>
-        /// <remarks>
-        /// This method does NOT have a built-in timeout. 
-        /// It runs indefinitely until either a device is found or the cancellation token is cancelled.
-        /// For timeout-based scanning, use <see cref="FindDeviceAsync(string, TimeSpan)"/>.
-        /// </remarks>
-        /// <exception cref="ArgumentNullException">Thrown if deviceName is null or empty.</exception>
-        /// <exception cref="InvalidOperationException">Thrown when Bluetooth scanning is already in progress.</exception>
-        /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
-        /// <exception cref="OperationCanceledException">Thrown when the operation is cancelled via <paramref name="token"/>.
-        /// </exception>
-        public async Task<IDevice<INativeDevice, INativeService, INativeCharacteristic>?> FindDeviceAsync(
-            string deviceName, CancellationToken token)
-        {
-            ValidateDeviceName(deviceName);
-            return await FindDeviceInternalAsync(deviceName, token).ConfigureAwait(false);
-        }
-
         private async Task<IDevice<INativeDevice, INativeService, INativeCharacteristic>?> FindDeviceInternalAsync(
             string deviceName,
-            CancellationToken token)
+            CancellationTokenSource tokenSource)
         {
-            var releaser = await _scanLock.EnterAsync(token).ConfigureAwait(false);
+            var releaser = await _scanLock.EnterAsync(tokenSource.Token).ConfigureAwait(false);
             try
             {
                 var tcs = new TaskCompletionSource<IDevice<INativeDevice, INativeService, INativeCharacteristic>?>();
@@ -107,7 +83,8 @@ namespace BleCommands.Maui
                 {
                     if (args.Device?.Name == deviceName)
                     {
-                        tcs.TrySetResult(new Device(args.Device));
+                        if (tcs.TrySetResult(new Device(args.Device)))
+                            tokenSource.Cancel();
                     }
                 }
 
@@ -118,10 +95,10 @@ namespace BleCommands.Maui
 
                     await Adapter.StartScanningForDevicesAsync(
                         scanFilterOptions: new ScanFilterOptions { DeviceNames = new[] { deviceName } },
-                        cancellationToken: token
+                        cancellationToken: tokenSource.Token
                     ).ConfigureAwait(false);
 
-                    using (token.Register(() => tcs.TrySetCanceled()))
+                    using (tokenSource.Token.Register(() => tcs.TrySetCanceled()))
                     {
                         return await tcs.Task.ConfigureAwait(false);
                     }

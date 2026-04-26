@@ -2,7 +2,6 @@
 using BleCommands.Maui;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace BleCommands.IntegrationTests.Uwp
@@ -17,20 +16,6 @@ namespace BleCommands.IntegrationTests.Uwp
         private BleScanner BleScanner { get; } = new BleScanner();
 
         [TestMethod]
-        public async Task FindDeviceWithCts_Cancel_TaskCanceledExceptionAsync()
-        {
-            using var cts = new CancellationTokenSource();
-
-            // Cancel in 100 мс
-            cts.CancelAfter(100);
-
-            await Assert.ThrowsExceptionAsync<TaskCanceledException>(async () =>
-            {
-                await BleScanner.FindDeviceAsync("Unexistent Device", cts.Token);
-            });
-        }
-
-        [TestMethod]
         public async Task FindDeviceWithTimeout_Timeout_ReturnsNullAsync()
         {
             // Timeout 1 second
@@ -39,7 +24,7 @@ namespace BleCommands.IntegrationTests.Uwp
         }
 
         [TestMethod]
-        public async Task FindDevice_FoundAsync()
+        public async Task FindDeviceAndConnect_SuccessAsync()
         {
             using var device = await BleScanner.FindDeviceAsync("Rotating Table", TimeSpan.FromSeconds(1));
 

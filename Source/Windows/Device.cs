@@ -13,39 +13,16 @@ namespace BleCommands.Windows
     {
         private readonly ulong _bluetoothAddress;
         private GattSession? _gattSession;
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
         private bool _disposed = false;
 
         /// <inheritdoc/>
         public event EventHandler? Disconnected;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Device"/> class using a device identifier.
-        /// </summary>
-        /// <param name="id">
-        /// The device identifier string.
-        /// For the first time, this value can be obtained from the device data returned by BleScanner.
-        /// </param>
-        /// <remarks>
-        /// The <see cref="ConnectAsync(CancellationToken)"/> method will fail
-        /// if the device isn't paired and it isn't found in the system cache.
-        /// The recommended way for obtaining a device is using <see cref="BleScanner"/>.
-        /// </remarks>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="id"/> is null or whitespace.</exception>
-        public Device(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-                throw new ArgumentNullException(nameof(id));
-
-            Id = id;
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Device"/> class using a Bluetooth address.
         /// </summary>
-        /// <param name="bluetoothAddress">
-        /// The Bluetooth address of the device.
-        /// For the first time, this value can be obtained from the device data returned by BleScanner.
-        /// </param>
+        /// <param name="bluetoothAddress">The Bluetooth address of the device.</param>
         /// <remarks>
         /// The <see cref="ConnectAsync(CancellationToken)"/> method will fail
         /// if the device isn't paired and it isn't found in the system cache.
@@ -53,12 +30,11 @@ namespace BleCommands.Windows
         /// </remarks>
         public Device(ulong bluetoothAddress)
         {
-            Id = string.Empty;
             _bluetoothAddress = bluetoothAddress;
         }
 
         /// <inheritdoc/>
-        public string Id { get; protected set; }
+        public string Id => NativeDevice?.DeviceId ?? string.Empty;
 
         /// <inheritdoc/>
         public string Name => NativeDevice?.Name ?? string.Empty;
@@ -85,51 +61,75 @@ namespace BleCommands.Windows
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
 
-            if (IsConnected)
+            await _semaphore.WaitAsync(token);
+            try
+            {
+                if (IsConnected)
+                    return true;
+
+                NativeDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(_bluetoothAddress);
+                if (NativeDevice == null)
+                    return false;
+
+                // Create and configure GATT session to maintain connection
+                _gattSession = await GattSession.FromDeviceIdAsync(NativeDevice.BluetoothDeviceId);
+                _gattSession.MaintainConnection = true;
+
+                // Monitor connection status
+                NativeDevice.ConnectionStatusChanged += NativeDevice_ConnectionStatusChanged;
+
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+                cts.CancelAfter(TimeSpan.FromSeconds(5));
+                IsConnected = await WaitForConnectedStatusAsync(cts.Token);
+
+                return IsConnected;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        private async Task<bool> WaitForConnectedStatusAsync(CancellationToken token)
+        {
+            if (NativeDevice == null)
+                throw new InvalidOperationException("NativeDevice is null");
+
+            if (NativeDevice.ConnectionStatus == BluetoothConnectionStatus.Connected)
                 return true;
 
-            NativeDevice = await GetNativeDeviceAsync();
-            if (NativeDevice == null)
-                return false;
+            var tcs = new TaskCompletionSource<bool>();
 
-            // Create and configure GATT session to maintain connection
-            _gattSession = await GattSession.FromDeviceIdAsync(NativeDevice.BluetoothDeviceId);
-            _gattSession.MaintainConnection = true;
-
-            // Monitor connection status
-            NativeDevice.ConnectionStatusChanged += NativeDevice_ConnectionStatusChanged;
-
-            // Retrieve services to establish actual connection
-            var result = await NativeDevice.GetGattServicesAsync(BluetoothCacheMode.Uncached);
-            result.ThrowIfError();
-
-            // Dispose obtained services; Windows cache will keep them
-            if (result.Services != null)
+            void handler(BluetoothLEDevice sender, object args)
             {
-                foreach (var service in result.Services)
+                if (sender.ConnectionStatus == BluetoothConnectionStatus.Connected)
                 {
-                    service.Dispose();
+                    IsConnected = true;
+                    tcs.TrySetResult(true);
                 }
             }
 
-            IsConnected = NativeDevice.ConnectionStatus == BluetoothConnectionStatus.Connected;
-            // Refresh Id with actual value
-            Id = NativeDevice.DeviceId;
-            return IsConnected;
-        }
-
-        protected async Task<BluetoothLEDevice> GetNativeDeviceAsync()
-        {
-            return string.IsNullOrEmpty(Id)
-                ? await BluetoothLEDevice.FromBluetoothAddressAsync(_bluetoothAddress)
-                : await BluetoothLEDevice.FromIdAsync(Id);
+            try
+            {
+                NativeDevice.ConnectionStatusChanged += handler;
+                using (token.Register(() => tcs.TrySetResult(false)))
+                {
+                    return await tcs.Task;
+                }
+            }
+            finally
+            {
+                NativeDevice.ConnectionStatusChanged -= handler;
+            }
         }
 
         protected void NativeDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
         {
-            IsConnected = sender.ConnectionStatus == BluetoothConnectionStatus.Connected;
-            if (!IsConnected)
+            if (sender.ConnectionStatus == BluetoothConnectionStatus.Disconnected)
+            {
+                IsConnected = false;
                 Disconnected?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         /// <inheritdoc/>
@@ -138,7 +138,7 @@ namespace BleCommands.Windows
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
 
-            if (NativeDevice == null)
+            if (!IsConnected || NativeDevice == null)
                 throw new InvalidOperationException("Device is not connected.");
 
             try
@@ -161,7 +161,7 @@ namespace BleCommands.Windows
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
 
-            if (NativeDevice == null)
+            if (!IsConnected || NativeDevice == null)
                 throw new InvalidOperationException("Device is not connected.");
 
             try
@@ -193,6 +193,7 @@ namespace BleCommands.Windows
                     }
 
                     _gattSession?.Dispose();
+                    _semaphore?.Dispose();
                 }
 
                 _disposed = true;

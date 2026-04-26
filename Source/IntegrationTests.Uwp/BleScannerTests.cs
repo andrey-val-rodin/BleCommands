@@ -26,11 +26,11 @@ namespace BleCommands.IntegrationTests.Uwp
         [TestMethod]
         public async Task FindDeviceAndConnect_SuccessAsync()
         {
-            using var device = await BleScanner.FindDeviceAsync("Rotating Table", TimeSpan.FromSeconds(1));
+            using var device = await BleScanner.FindDeviceAsync("Rotating Table");
 
             Assert.IsNotNull(device);
             await device.ConnectAsync();
-            Assert.IsTrue(device.IsConnected);
+            Assert.IsTrue(device.IsConnected, "Device should be connected");
         }
 
         public void Dispose()

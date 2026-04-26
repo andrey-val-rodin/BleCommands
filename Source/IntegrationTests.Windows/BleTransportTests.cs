@@ -13,8 +13,8 @@ namespace BleCommands.IntegrationTests.Windows
     /// </summary>
     public sealed class BleTransportFixture : IAsyncLifetime
     {
-        private const string Id = "BluetoothLE#BluetoothLE90:e8:68:ad:f0:54-f8:b3:b7:22:09:3e";
-        private const ulong MacAddress = 0xf8b3b722093e;
+        //private const string Id = "BluetoothLE#BluetoothLE90:e8:68:ad:f0:54-f8:b3:b7:22:09:3e";
+        //private const ulong MacAddress = 0xf8b3b722093e;
         private static readonly Guid ServiceUuid                = new("0000ffe0-0000-1000-8000-00805f9b34fb");
         private static readonly Guid UpdatesCharacteristicUuid  = new("0000ffe1-0000-1000-8000-00805f9b34fb");
         private static readonly Guid WriteCharacteristicUuid    = new("0000ffe2-0000-1000-8000-00805f9b34fb");
@@ -31,8 +31,10 @@ namespace BleCommands.IntegrationTests.Windows
 
         public async ValueTask InitializeAsync()
         {
-            var device = new Device(Id);
-            Assert.True(await device.ConnectAsync(), "Turn on Rotating Table! Also, make sure the device is paired in Windows parameters.");
+            var scanner = new BleScanner();
+            var device = await scanner.FindDeviceAsync("Rotating Table");
+            Assert.True(device != null, "Turn on Rotating Table!");
+            Assert.True(await device.ConnectAsync(), "Connection failed");
             var service = (await device.GetServiceAsync(ServiceUuid))!;
             Assert.NotNull(service);
             CommandCharacteristic = (await service.GetCharacteristicAsync(WriteCharacteristicUuid))!;

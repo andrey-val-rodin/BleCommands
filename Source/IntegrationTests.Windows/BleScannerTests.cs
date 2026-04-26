@@ -21,11 +21,11 @@ namespace BleCommands.IntegrationTests.Windows
         [Fact]
         public async Task FindDeviceAndConnect_Success()
         {
-            using var device = await BleScanner.FindDeviceAsync("Rotating Table", TimeSpan.FromSeconds(1));
+            using var device = await BleScanner.FindDeviceAsync("Rotating Table");
 
             Assert.NotNull(device);
             await device.ConnectAsync(TestContext.Current.CancellationToken);
-            Assert.True(device.IsConnected);
+            Assert.True(device.IsConnected, "Device should be connected");
         }
 
         public void Dispose()

@@ -1,11 +1,10 @@
-﻿using BleCommands.Core.Exceptions;
+﻿using BleCommands.Core.Contracts;
 using Plugin.BLE.Abstractions;
+using Plugin.BLE.Abstractions.Exceptions;
 using Plugin.BLE.Abstractions.Contracts;
-using IDevice = BleCommands.Core.Contracts.IDevice<
-    Plugin.BLE.Abstractions.Contracts.IDevice,
-    Plugin.BLE.Abstractions.Contracts.IService,
-    Plugin.BLE.Abstractions.Contracts.ICharacteristic>;
 using INativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
+using INativeService = Plugin.BLE.Abstractions.Contracts.IService;
+using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 using IService = BleCommands.Core.Contracts.IService<
     Plugin.BLE.Abstractions.Contracts.IService,
     Plugin.BLE.Abstractions.Contracts.ICharacteristic>;
@@ -15,29 +14,32 @@ namespace BleCommands.Maui
     /// <summary>
     /// MAUI implementation of a Bluetooth Low Energy device.
     /// </summary>
-    public class Device : IDevice
+    public class Device : IDevice<INativeDevice, INativeService, INativeCharacteristic>
     {
-        private readonly string? _id;
+        private readonly Guid? _guid;
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
         private bool _disposed = false;
 
         public event EventHandler? Disconnected;
 
-        public Device(string id)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Device"/> class using device Guid.
+        /// </summary>
+        /// <param name="guid">A device Guid</param>
+        public Device(Guid guid)
         {
-            if (string.IsNullOrWhiteSpace(id))
-                throw new ArgumentNullException(nameof(id));
-            if (Guid.TryParse(id, out Guid _))
-                throw new ArgumentException("The specified id is not Guid.");
-
-            _id = id;
+            _guid = guid;
         }
 
+        /// <summary>
+        /// Internal constructor used by <see cref="BleScanner"/>.
+        /// </summary>
         internal Device(INativeDevice nativeDevice)
         {
             NativeDevice = nativeDevice ?? throw new ArgumentNullException(nameof(nativeDevice));
         }
 
-        public string Id => _id ?? NativeDevice?.Id.ToString() ?? string.Empty;
+        public string Id => NativeDevice?.Id.ToString() ?? string.Empty;
 
         public string Name => NativeDevice?.Name ?? string.Empty;
 
@@ -48,56 +50,54 @@ namespace BleCommands.Maui
 
         private static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
 
-        public bool IsConnected { get; private set; }
-
-        public async Task<bool> ConnectAsync(CancellationToken token = default)
+        /// <summary>
+        /// Connects to the device.
+        /// </summary>
+        /// <param name="token">Cancellation token to cancel the operation.</param>
+        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
+        /// <exception cref="DeviceConnectionException">Thrown on device connection errors.</exception>
+        /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
+        public async Task ConnectAsync(CancellationToken token = default)
         {
-            if (NativeDevice != null)
-            {
-                IsConnected = await ConnectAsync(NativeDevice, token).ConfigureAwait(false);
-            }
-            else if (_id != null)
-            {
-                IsConnected = await ConnectAsync(_id, token).ConfigureAwait(false);
-            }
+            ThrowIfDisposed();
 
-            return IsConnected;
+            await _semaphore.WaitAsync(token);
+            try
+            {
+                if (NativeDevice != null)
+                {
+                    await ConnectAsync(NativeDevice, token).ConfigureAwait(false);
+                }
+                else if (_guid != null)
+                {
+                    await ConnectAsync(_guid.Value, token).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
-        private static async Task<bool> ConnectAsync(
+        private static async Task ConnectAsync(
             INativeDevice nativeDevice, CancellationToken token = default)
         {
             var parameters = new ConnectParameters(false, forceBleTransport: true);
-            try
-            {
-                await Adapter.ConnectToDeviceAsync(nativeDevice, parameters, token);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new DeviceException("Device connection error.", ex);
-            }
+            await Adapter.ConnectToDeviceAsync(nativeDevice, parameters, token);
         }
 
-        private async Task<bool> ConnectAsync(string id, CancellationToken token = default)
+        private async Task ConnectAsync(Guid guid, CancellationToken token = default)
         {
-            try
-            {
-                Guid guid = Guid.Parse(id);
-                NativeDevice = await Adapter.ConnectToKnownDeviceAsync(guid,
-                    new ConnectParameters(false, forceBleTransport: true), token);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new DeviceException("Device connection error.", ex);
-            }
+            NativeDevice = await Adapter.ConnectToKnownDeviceAsync(guid,
+                new ConnectParameters(false, forceBleTransport: true), token);
         }
 
+        /// <inheritdoc/>
         public async Task<IReadOnlyList<IService>> GetServicesAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
-            if (!IsConnected || NativeDevice == null)
+
+            if (NativeDevice == null)
                 throw new InvalidOperationException("Device not connected.");
 
             var nativeServices = await NativeDevice.GetServicesAsync(token);
@@ -106,10 +106,11 @@ namespace BleCommands.Maui
                 : nativeServices.Select(s => new Service(s)).ToList<IService>();
         }
 
+        /// <inheritdoc/>
         public async Task<IService?> GetServiceAsync(Guid id, CancellationToken token = default)
         {
             ThrowIfDisposed();
-            if (!IsConnected || NativeDevice == null)
+            if (NativeDevice == null)
                 throw new InvalidOperationException("Device not connected.");
 
             var nativeService = await NativeDevice.GetServiceAsync(id, token);
@@ -135,6 +136,10 @@ namespace BleCommands.Maui
             }
         }
 
+        /// <summary>
+        /// Releases the unmanaged resources used by the device.
+        /// Don't forget to call Dispose or use a using statement to free all system resources of the BLE device.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);

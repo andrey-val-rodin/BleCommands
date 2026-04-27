@@ -44,22 +44,18 @@
             return new BleTransport(device, service, commandCharacteristic, responseCharacteristic, listeningCharacteristic);
         }
 
+        // TODO: must be called from UI-thread
         private static async Task<Device?> CreateDeviceAsync(string deviceName, CancellationToken token)
         {
             using var scanner = new BleScanner();
-            var device = await scanner.FindDeviceAsync(deviceName).ConfigureAwait(false);
+            var device = await scanner.FindDeviceAsync(deviceName);
             if (device == null)
             {
                 // Device not found
                 return null;
             }
 
-            if (!await device.ConnectAsync(token).ConfigureAwait(false))
-            {
-                // Unable to connect
-                return null;
-            }
-
+            await device.ConnectAsync(token);
             return device as Device;
         }
 

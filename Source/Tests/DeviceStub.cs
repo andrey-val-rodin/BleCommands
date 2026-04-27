@@ -16,7 +16,7 @@ namespace BleCommands.Tests
 
         public event EventHandler? Disconnected { add { } remove { } }
 
-        public Task<bool> ConnectAsync(CancellationToken token = default)
+        public Task ConnectAsync(CancellationToken token = default)
         {
             throw new NotImplementedException();
         }

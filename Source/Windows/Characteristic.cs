@@ -1,6 +1,7 @@
 ﻿using BleCommands.Core;
 using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
+using BleCommands.Core.Events;
 using BleCommands.Windows.Extensions;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
@@ -19,6 +20,8 @@ namespace BleCommands.Windows
         {
             NativeCharacteristic = characteristic ?? throw new ArgumentNullException(nameof(characteristic));
         }
+
+        public event EventHandler<ByteArrayEventArgs>? ValueReceived;
 
         public GattCharacteristic NativeCharacteristic { get; }
 
@@ -110,6 +113,7 @@ namespace BleCommands.Windows
         protected void NativeCharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
         {
             var bytes = args.CharacteristicValue.ToArray();
+            ValueReceived?.Invoke(this, new ByteArrayEventArgs(bytes));
             var text = ConvertToString(bytes);
 
             var tokenAggegater = Interlocked.CompareExchange(ref _tokenAggregator, null, null);

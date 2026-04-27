@@ -1,9 +1,12 @@
 ﻿using BleCommands.Core.Enums;
+using BleCommands.Core.Events;
 
 namespace BleCommands.Core.Contracts
 {
     public interface ICharacteristic<TCharacteristic> : IDisposable
     {
+        event EventHandler<ByteArrayEventArgs>? ValueReceived;
+
         Guid Id { get; }
 
         CharacteristicPropertyFlags Properties { get; }

@@ -39,9 +39,6 @@ namespace BleCommands.Windows
         /// <inheritdoc/>
         public string Name => NativeDevice?.Name ?? string.Empty;
 
-        /// <inheritdoc/>
-        public bool IsConnected => NativeDevice?.ConnectionStatus == BluetoothConnectionStatus.Connected;
-
         /// <summary>
         /// Gets the platform-specific Windows Bluetooth LE device.
         /// </summary>
@@ -51,26 +48,24 @@ namespace BleCommands.Windows
         /// Connects to the device.
         /// </summary>
         /// <param name="token">Cancellation token to cancel the operation.</param>
-        /// <returns>True if the device is successfully connected; false otherwise.</returns>
         /// <remarks>
         /// This method must be called from a UI thread.
         /// </remarks>
         /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
         /// <exception cref="DeviceException">Thrown on device connection errors.</exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
-        public async Task<bool> ConnectAsync(CancellationToken token = default)
+        public async Task ConnectAsync(CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
 
             await _semaphore.WaitAsync(token);
             try
             {
-                if (IsConnected)
-                    return true;
-
                 NativeDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(_bluetoothAddress);
                 if (NativeDevice == null)
-                    return false;
+                    throw new DeviceException("Unable to find the device identified by bluetooth address " +
+                        $"{_bluetoothAddress}. Specifically, if the device isn't paired " +
+                        "and it isn't found in the system cache.");
 
                 // Create and configure GATT session to maintain connection
                 _gattSession = await GattSession.FromDeviceIdAsync(NativeDevice.BluetoothDeviceId);
@@ -81,7 +76,6 @@ namespace BleCommands.Windows
 
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
                 cts.CancelAfter(TimeSpan.FromSeconds(5));
-                return await WaitForConnectedStatusAsync(cts.Token);
             }
             finally
             {
@@ -89,88 +83,63 @@ namespace BleCommands.Windows
             }
         }
 
-        private async Task<bool> WaitForConnectedStatusAsync(CancellationToken token)
-        {
-            if (NativeDevice == null)
-                throw new InvalidOperationException("NativeDevice is null");
-
-            if (NativeDevice.ConnectionStatus == BluetoothConnectionStatus.Connected)
-                return true;
-
-            var tcs = new TaskCompletionSource<bool>();
-
-            void handler(BluetoothLEDevice sender, object args)
-            {
-                if (sender.ConnectionStatus == BluetoothConnectionStatus.Connected)
-                    tcs.TrySetResult(true);
-            }
-
-            try
-            {
-                NativeDevice.ConnectionStatusChanged += handler;
-                using (token.Register(() => tcs.TrySetResult(false)))
-                {
-                    return await tcs.Task;
-                }
-            }
-            finally
-            {
-                NativeDevice.ConnectionStatusChanged -= handler;
-            }
-        }
-
-        protected void NativeDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
+        private void NativeDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
         {
             if (sender.ConnectionStatus == BluetoothConnectionStatus.Disconnected)
                 Disconnected?.Invoke(this, EventArgs.Empty);
         }
 
-        /// <inheritdoc/>
-        public async Task<IService<GattDeviceService, GattCharacteristic>?> GetServiceAsync(
-            Guid id, CancellationToken token = default)
-        {
-            ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
-
-            if (!IsConnected || NativeDevice == null)
-                throw new InvalidOperationException("Device is not connected.");
-
-            try
-            {
-                var result = await NativeDevice.GetGattServicesForUuidAsync(id, BluetoothCacheMode.Cached);
-                result.ThrowIfError();
-                var nativeService = result.Services?.Count > 0 ? result.Services[0] : null;
-
-                return nativeService == null ? null : new Service(nativeService);
-            }
-            catch (Exception ex)
-            {
-                throw new DeviceException("Failed to get service.", ex);
-            }
-        }
-
-        /// <inheritdoc/>
+        /// <summary>
+        /// Retrieves all GATT services available on the device asynchronously.
+        /// </summary>
+        /// <param name="token">Cancellation token to cancel the operation.</param>
+        /// <returns>A read-only list of services exposed by the device.</returns>
+        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="ConnectAsync(CancellationToken)"/> has not been called
+        /// </exception>
+        /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task<IReadOnlyList<IService<GattDeviceService, GattCharacteristic>>> GetServicesAsync(
             CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
 
-            if (!IsConnected || NativeDevice == null)
+            if (NativeDevice == null)
                 throw new InvalidOperationException("Device is not connected.");
 
-            try
-            {
-                var result = await NativeDevice.GetGattServicesAsync(BluetoothCacheMode.Cached);
-                result.ThrowIfError();
-                var nativeServices = result.Services;
+            var result = await NativeDevice.GetGattServicesAsync(BluetoothCacheMode.Cached);
+            result.ThrowIfError();
+            var nativeServices = result.Services;
 
-                return nativeServices == null
-                    ? new List<IService<GattDeviceService, GattCharacteristic>>()
-                    : nativeServices.Select(s => new Service(s)).ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new DeviceException("Failed to get services.", ex);
-            }
+            return nativeServices == null
+                ? new List<IService<GattDeviceService, GattCharacteristic>>()
+                : nativeServices.Select(s => new Service(s)).ToList();
+        }
+
+        /// <summary>
+        /// Retrieves a specific GATT service by its UUID asynchronously.
+        /// </summary>
+        /// <param name="id">The UUID of the service to retrieve.</param>
+        /// <param name="token">Cancellation token to cancel the operation.</param>
+        /// <returns>The requested service, or null if not found.</returns>
+        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="ConnectAsync(CancellationToken)"/> has not been called
+        /// </exception>
+        /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
+        public async Task<IService<GattDeviceService, GattCharacteristic>?> GetServiceAsync(
+            Guid id, CancellationToken token = default)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
+
+            if (NativeDevice == null)
+                throw new InvalidOperationException("Device is not connected.");
+
+            var result = await NativeDevice.GetGattServicesForUuidAsync(id, BluetoothCacheMode.Cached);
+            result.ThrowIfError();
+            var nativeService = result.Services?.Count > 0 ? result.Services[0] : null;
+
+            return nativeService == null ? null : new Service(nativeService);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -183,6 +152,7 @@ namespace BleCommands.Windows
                     {
                         NativeDevice.ConnectionStatusChanged -= NativeDevice_ConnectionStatusChanged;
                         NativeDevice.Dispose();
+                        NativeDevice = null;
                     }
 
                     _gattSession?.Dispose();

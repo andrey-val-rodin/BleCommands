@@ -2,10 +2,6 @@
 {
     public class DeviceException : Exception
     {
-        public DeviceException() : base()
-        {
-        }
-
         public DeviceException(string message) : base(message)
         {
         }

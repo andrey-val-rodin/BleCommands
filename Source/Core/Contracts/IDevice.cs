@@ -24,11 +24,6 @@
         string Name { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the device is currently connected.
-        /// </summary>
-        bool IsConnected { get; }
-
-        /// <summary>
         /// Gets the platform-specific native device instance.
         /// </summary>
         TDevice? NativeDevice { get; }
@@ -37,8 +32,7 @@
         /// Establishes a connection to the Bluetooth device asynchronously.
         /// </summary>
         /// <param name="token">Cancellation token to cancel the operation.</param>
-        /// <returns>True if the device is successfully connected; otherwise, false.</returns>
-        Task<bool> ConnectAsync(CancellationToken token = default);
+        Task ConnectAsync(CancellationToken token = default);
 
         /// <summary>
         /// Retrieves all GATT services available on the device asynchronously.

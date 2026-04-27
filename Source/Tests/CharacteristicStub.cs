@@ -1,6 +1,7 @@
 ﻿using BleCommands.Core;
 using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
+using BleCommands.Core.Events;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace BleCommands.Tests
@@ -8,6 +9,8 @@ namespace BleCommands.Tests
     public sealed class CharacteristicStub(CharacteristicPropertyFlags properties)
         : ICharacteristic<GattCharacteristic>
     {
+        public event EventHandler<ByteArrayEventArgs>? ValueReceived { add { } remove { } }
+
         public Guid Id { get; set; }
 
         public CharacteristicPropertyFlags Properties { get; } = properties;

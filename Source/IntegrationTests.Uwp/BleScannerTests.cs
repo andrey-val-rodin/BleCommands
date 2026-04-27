@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace BleCommands.IntegrationTests.Uwp
 {
     /// <summary>
-    /// These tests use device called Rotating Table:
+    /// These tests use real device called Rotating Table:
     /// <see href="https://table-360.ru/">https://table-360.ru/</see>
     /// </summary>
     [TestClass]
@@ -30,7 +30,6 @@ namespace BleCommands.IntegrationTests.Uwp
 
             Assert.IsNotNull(device);
             await device.ConnectAsync();
-            Assert.IsTrue(device.IsConnected, "Device should be connected");
         }
 
         public void Dispose()

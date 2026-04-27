@@ -40,7 +40,7 @@ namespace BleCommands.Windows
         public string Name => NativeDevice?.Name ?? string.Empty;
 
         /// <inheritdoc/>
-        public bool IsConnected { get; protected set; }
+        public bool IsConnected => NativeDevice?.ConnectionStatus == BluetoothConnectionStatus.Connected;
 
         /// <summary>
         /// Gets the platform-specific Windows Bluetooth LE device.
@@ -56,7 +56,8 @@ namespace BleCommands.Windows
         /// This method must be called from a UI thread.
         /// </remarks>
         /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
-        /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
+        /// <exception cref="DeviceException">Thrown on device connection errors.</exception>
+        /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task<bool> ConnectAsync(CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(Device));
@@ -80,9 +81,7 @@ namespace BleCommands.Windows
 
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
                 cts.CancelAfter(TimeSpan.FromSeconds(5));
-                IsConnected = await WaitForConnectedStatusAsync(cts.Token);
-
-                return IsConnected;
+                return await WaitForConnectedStatusAsync(cts.Token);
             }
             finally
             {
@@ -103,10 +102,7 @@ namespace BleCommands.Windows
             void handler(BluetoothLEDevice sender, object args)
             {
                 if (sender.ConnectionStatus == BluetoothConnectionStatus.Connected)
-                {
-                    IsConnected = true;
                     tcs.TrySetResult(true);
-                }
             }
 
             try
@@ -126,10 +122,7 @@ namespace BleCommands.Windows
         protected void NativeDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
         {
             if (sender.ConnectionStatus == BluetoothConnectionStatus.Disconnected)
-            {
-                IsConnected = false;
                 Disconnected?.Invoke(this, EventArgs.Empty);
-            }
         }
 
         /// <inheritdoc/>

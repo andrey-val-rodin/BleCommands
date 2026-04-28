@@ -2,9 +2,7 @@
 using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
 using BleCommands.Core.Events;
-using BleCommands.Core.Exceptions;
 using Plugin.BLE.Abstractions.EventArgs;
-using Plugin.BLE.Abstractions.Exceptions;
 using System.Text;
 using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 
@@ -51,51 +49,30 @@ namespace BleCommands.Maui
             Properties = properties;
         }
 
-        /// <summary>
-        /// Occurs when the characteristic value is received from the device.
-        /// </summary>
-        /// <remarks>
-        /// This event is raised when the device sends a notification or indication
-        /// with the characteristic's new value. To receive these events, you must first
-        /// call <see cref="StartReceivingAsync"/>.
-        /// </remarks>
+        /// <inheritdoc/>
         public event EventHandler<ByteArrayEventArgs>? ValueReceived;
 
-        /// <summary>
-        /// Gets the native <see cref="INativeCharacteristic"/> object.
-        /// </summary>
+        /// <inheritdoc/>
         public INativeCharacteristic NativeCharacteristic { get; }
 
-        /// <summary>
-        /// Gets the unique identifier (UUID) of the characteristic.
-        /// </summary>
+        /// <inheritdoc/>
         public Guid Id { get; private set; }
 
-        /// <summary>
-        /// Gets the properties of the characteristic.
-        /// </summary>
+        /// <inheritdoc/>
         public CharacteristicPropertyFlags Properties { get; private set; }
 
-        /// <summary>
-        /// Gets a value indicating whether the characteristic can be read.
-        /// </summary>
+        /// <inheritdoc/>
         public bool CanRead => Properties.HasFlag(CharacteristicPropertyFlags.Read);
 
-        /// <summary>
-        /// Gets a value indicating whether the characteristic supports notifications or indications.
-        /// </summary>
+        /// <inheritdoc/>
         public bool CanUpdate => Properties.HasFlag(CharacteristicPropertyFlags.Notify) ||
                                  Properties.HasFlag(CharacteristicPropertyFlags.Indicate);
 
-        /// <summary>
-        /// Gets a value indicating whether the characteristic can be written.
-        /// </summary>
+        /// <inheritdoc/>
         public bool CanWrite => Properties.HasFlag(CharacteristicPropertyFlags.Write) ||
                                 Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse);
 
-        /// <summary>
-        /// Gets the token aggregator attached to this characteristic.
-        /// </summary>
+        /// <inheritdoc/>
         public TokenAggregator? TokenAggregator => _tokenAggregator;
 
         /// <summary>
@@ -175,7 +152,7 @@ namespace BleCommands.Maui
         public void AttachTokenAggregator(TokenAggregator tokenAggregator)
         {
             ThrowIfDisposed();
-			
+
             if (!CanUpdate)
                 throw new InvalidOperationException("The characteristic is neither Notify nor Indicate.");
 
@@ -187,9 +164,7 @@ namespace BleCommands.Maui
                 throw new InvalidOperationException("TokenAggregator is already attached. Call DetachTokenAggregator first.");
         }
 
-        /// <summary>
-        /// Detaches the currently attached token aggregator.
-        /// </summary>
+        /// <inheritdoc/>
         public void DetachTokenAggregator()
         {
             Interlocked.Exchange(ref _tokenAggregator, null);
@@ -206,7 +181,7 @@ namespace BleCommands.Maui
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="Exception">
         /// Thrown if the operation fails at the Bluetooth level.
         /// </exception>
         public async Task StartReceivingAsync(CancellationToken token = default)
@@ -221,7 +196,7 @@ namespace BleCommands.Maui
         }
 
         /// <summary>
-        /// Handles the ValueChanged event from the native GATT characteristic.
+        /// Handles the ValueUpdated event from the native characteristic.
         /// </summary>
         /// <remarks>
         /// This method converts the received bytes to a UTF-8 string, raises the
@@ -246,7 +221,7 @@ namespace BleCommands.Maui
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="Exception">
         /// Thrown if the operation fails at the Bluetooth level.
         /// </exception>
         public async Task StopReceivingAsync(CancellationToken token = default)

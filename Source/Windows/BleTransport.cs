@@ -99,14 +99,8 @@ namespace BleCommands.Windows
         /// <inheritdoc />
         public event EventHandler<TextEventArgs>? ListeningTokenReceived
         {
-            add
-            {
-                ListeningAggregator.TokenReceived += value;
-            }
-            remove
-            {
-                ListeningAggregator.TokenReceived -= value;
-            }
+            add => ListeningAggregator.TokenReceived += value;
+            remove => ListeningAggregator.TokenReceived -= value;
         }
 
         /// <inheritdoc />

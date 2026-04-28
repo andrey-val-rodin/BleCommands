@@ -13,16 +13,14 @@ namespace BleCommands.Core
     public class TokenAggregator
     {
         public const char DefaultTokenDelimiter = '\n';
-
-        private readonly char _delimiter;
         private readonly StringBuilder _buffer = new();
 
         public TokenAggregator(char delimiter = DefaultTokenDelimiter)
         {
-            _delimiter = delimiter;
+            TokenDelimiter = delimiter;
         }
 
-        public char TokenDelimiter => _delimiter;
+        public char TokenDelimiter { get; }
 
         public event EventHandler<TextEventArgs>? TokenReceived;
 

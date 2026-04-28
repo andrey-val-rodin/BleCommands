@@ -4,7 +4,7 @@ using Plugin.BLE.Abstractions.EventArgs;
 
 namespace BleCommands.Tests.Maui
 {
-    #nullable disable
+#nullable disable
     public class AdapterStub : IAdapter
     {
         public bool IsScanning => throw new NotImplementedException();
@@ -88,5 +88,5 @@ namespace BleCommands.Tests.Maui
             throw new NotImplementedException();
         }
     }
-    #nullable restore
+#nullable restore
 }

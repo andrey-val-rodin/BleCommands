@@ -2,7 +2,6 @@
 using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
 using BleCommands.Core.Events;
-using BleCommands.Core.Exceptions;
 using BleCommands.Windows.Extensions;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
@@ -13,7 +12,7 @@ using Windows.Storage.Streams;
 namespace BleCommands.Windows
 {
     /// <summary>
-    /// Represents a GATT characteristic.
+    /// Represents a GATT characteristic on a Bluetooth LE device.
     /// </summary>
     /// <remarks>
     /// This class wraps the Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristic
@@ -53,51 +52,30 @@ namespace BleCommands.Windows
             Properties = properties;
         }
 
-        /// <summary>
-        /// Occurs when the characteristic value is received from the device.
-        /// </summary>
-        /// <remarks>
-        /// This event is raised when the device sends a notification or indication
-        /// with the characteristic's new value. To receive these events, you must first
-        /// call <see cref="StartReceivingAsync"/>.
-        /// </remarks>
+        /// <inheritdoc/>
         public event EventHandler<ByteArrayEventArgs>? ValueReceived;
 
-        /// <summary>
-        /// Gets the native GATT characteristic object.
-        /// </summary>
+        /// <inheritdoc/>
         public GattCharacteristic NativeCharacteristic { get; }
 
-        /// <summary>
-        /// Gets the unique identifier (UUID) of the characteristic.
-        /// </summary>
+        /// <inheritdoc/>
         public Guid Id { get; private set; }
 
-        /// <summary>
-        /// Gets the properties of the characteristic.
-        /// </summary>
+        /// <inheritdoc/>
         public CharacteristicPropertyFlags Properties { get; private set; }
 
-        /// <summary>
-        /// Gets a value indicating whether the characteristic can be read.
-        /// </summary>
+        /// <inheritdoc/>
         public bool CanRead => Properties.HasFlag(CharacteristicPropertyFlags.Read);
 
-        /// <summary>
-        /// Gets a value indicating whether the characteristic supports notifications or indications.
-        /// </summary>
+        /// <inheritdoc/>
         public bool CanUpdate => Properties.HasFlag(CharacteristicPropertyFlags.Notify) ||
                                  Properties.HasFlag(CharacteristicPropertyFlags.Indicate);
 
-        /// <summary>
-        /// Gets a value indicating whether the characteristic can be written.
-        /// </summary>
+        /// <inheritdoc/>
         public bool CanWrite => Properties.HasFlag(CharacteristicPropertyFlags.Write) ||
                                 Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse);
 
-        /// <summary>
-        /// Gets the token aggregator attached to this characteristic.
-        /// </summary>
+        /// <inheritdoc/>
         public TokenAggregator? TokenAggregator => _tokenAggregator;
 
         /// <summary>
@@ -218,9 +196,7 @@ namespace BleCommands.Windows
                 throw new InvalidOperationException("TokenAggregator is already attached. Call DetachTokenAggregator first.");
         }
 
-        /// <summary>
-        /// Detaches the currently attached token aggregator.
-        /// </summary>
+        /// <inheritdoc/>
         public void DetachTokenAggregator()
         {
             Interlocked.Exchange(ref _tokenAggregator, null);
@@ -237,14 +213,13 @@ namespace BleCommands.Windows
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="Exception">
         /// Thrown if the operation fails at the Bluetooth level.
         /// </exception>
         public async Task StartReceivingAsync(CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
 
-            // Logic as in Plugin.BLE.Windows.Characteristic:
             GattClientCharacteristicConfigurationDescriptorValue descriptor;
             if (Properties.HasFlag(CharacteristicPropertyFlags.Notify))
                 descriptor = GattClientCharacteristicConfigurationDescriptorValue.Notify;
@@ -288,7 +263,7 @@ namespace BleCommands.Windows
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="Exception">
         /// Thrown if the operation fails at the Bluetooth level.
         /// </exception>
         public async Task StopReceivingAsync(CancellationToken token = default)

@@ -34,10 +34,7 @@ namespace BleCommands.Windows
                     return false;
 
                 var radio = await adapter.GetRadioAsync();
-                if (radio == null)
-                    return false;
-
-                return radio.State == RadioState.On;
+                return radio != null && radio.State == RadioState.On;
             }
             catch (Exception ex)
             {

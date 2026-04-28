@@ -12,7 +12,7 @@ namespace BleCommands.Tests.Windows
             CharacteristicWithAttachedAggregator.AttachTokenAggregator(new TokenAggregator());
         }
 
-        CharacteristicStub CharacteristicWithAttachedAggregator { get; }
+        private CharacteristicStub CharacteristicWithAttachedAggregator { get; }
 
         [Fact]
         public void Constructor_DeviceIsNull_ArgumentNullException()

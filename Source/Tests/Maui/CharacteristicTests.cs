@@ -1,8 +1,8 @@
 ﻿using BleCommands.Core;
 using BleCommands.Core.Enums;
-using BleCommands.Windows;
+using BleCommands.Maui;
 
-namespace BleCommands.Tests.Windows
+namespace BleCommands.Tests.Maui
 {
     public class CharacteristicTests
     {
@@ -256,7 +256,7 @@ namespace BleCommands.Tests.Windows
                 await characteristic.WriteAsync("test", TestContext.Current.CancellationToken);
             });
 
-            Assert.Equal("BleCommands.Windows.Characteristic", exception.ObjectName);
+            Assert.Equal("BleCommands.Maui.Characteristic", exception.ObjectName);
         }
 
         [Fact]
@@ -272,7 +272,7 @@ namespace BleCommands.Tests.Windows
                 characteristic.AttachTokenAggregator(new TokenAggregator());
             });
 
-            Assert.Equal("BleCommands.Windows.Characteristic", exception.ObjectName);
+            Assert.Equal("BleCommands.Maui.Characteristic", exception.ObjectName);
         }
 
         [Fact]
@@ -288,7 +288,7 @@ namespace BleCommands.Tests.Windows
                 await characteristic.StartReceivingAsync(TestContext.Current.CancellationToken);
             });
 
-            Assert.Equal("BleCommands.Windows.Characteristic", exception.ObjectName);
+            Assert.Equal("BleCommands.Maui.Characteristic", exception.ObjectName);
         }
 
         [Fact]
@@ -304,7 +304,7 @@ namespace BleCommands.Tests.Windows
                 await characteristic.StopReceivingAsync(TestContext.Current.CancellationToken);
             });
 
-            Assert.Equal("BleCommands.Windows.Characteristic", exception.ObjectName);
+            Assert.Equal("BleCommands.Maui.Characteristic", exception.ObjectName);
         }
 
         [Fact]

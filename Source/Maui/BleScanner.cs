@@ -30,7 +30,7 @@ namespace BleCommands.Maui
         /// </summary>
         /// <param name="deviceName">Name to search for.</param>
         /// <returns>Found device or null if timeout expired.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if deviceName is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="deviceName"/> is <c>null or empty.</exception>
         /// <exception cref="InvalidOperationException">Thrown when Bluetooth scanning is already in progress.</exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
         public async Task<IDevice<INativeDevice, INativeService, INativeCharacteristic>?> FindDeviceAsync(
@@ -45,7 +45,7 @@ namespace BleCommands.Maui
         /// <param name="deviceName">Name to search for.</param>
         /// <param name="timeout">Timeout.</param>
         /// <returns>Found device or null if timeout expired.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if deviceName is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="deviceName"/> is <c>null or empty.</exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown if the specified timeout is less than or equal to zero,
         /// or greater than 60 seconds.

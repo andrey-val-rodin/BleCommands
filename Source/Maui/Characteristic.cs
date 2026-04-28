@@ -3,40 +3,38 @@ using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
 using BleCommands.Core.Events;
 using BleCommands.Core.Exceptions;
-using BleCommands.Windows.Extensions;
-using System.Runtime.InteropServices.WindowsRuntime;
+using Plugin.BLE.Abstractions.EventArgs;
+using Plugin.BLE.Abstractions.Exceptions;
 using System.Text;
-using Windows.Devices.Bluetooth.GenericAttributeProfile;
-using Windows.Security.Cryptography;
-using Windows.Storage.Streams;
+using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 
-namespace BleCommands.Windows
+namespace BleCommands.Maui
 {
     /// <summary>
     /// Represents a GATT characteristic.
     /// </summary>
     /// <remarks>
-    /// This class wraps the Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristic
+    /// This class wraps the Plugin.BLE.Abstractions.Contracts.ICharacteristic
     /// and provides a higher-level interface for BLE operations.
     /// </remarks>
-    public class Characteristic : ICharacteristic<GattCharacteristic>
+    public class Characteristic : ICharacteristic<INativeCharacteristic>
     {
         private TokenAggregator? _tokenAggregator;
         private bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Characteristic"/> class
-        /// using a native GATT characteristic.
+        /// using a native <see cref="INativeCharacteristic"/>.
         /// </summary>
-        /// <param name="characteristic">The native GATT characteristic to wrap.</param>
+        /// <param name="characteristic">The <see cref="INativeCharacteristic"/> to wrap.</param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="characteristic"/> is <c>null</c>.
         /// </exception>
-        public Characteristic(GattCharacteristic characteristic)
+        public Characteristic(INativeCharacteristic characteristic)
         {
             NativeCharacteristic = characteristic ?? throw new ArgumentNullException(nameof(characteristic));
-            Id = NativeCharacteristic.Uuid;
-            Properties = (CharacteristicPropertyFlags)NativeCharacteristic.CharacteristicProperties;
+            Id = NativeCharacteristic.Id;
+            Properties = (CharacteristicPropertyFlags)NativeCharacteristic.Properties;
         }
 
         /// <summary>
@@ -64,9 +62,9 @@ namespace BleCommands.Windows
         public event EventHandler<ByteArrayEventArgs>? ValueReceived;
 
         /// <summary>
-        /// Gets the native GATT characteristic object.
+        /// Gets the native <see cref="INativeCharacteristic"/> object.
         /// </summary>
-        public GattCharacteristic NativeCharacteristic { get; }
+        public INativeCharacteristic NativeCharacteristic { get; }
 
         /// <summary>
         /// Gets the unique identifier (UUID) of the characteristic.
@@ -119,17 +117,13 @@ namespace BleCommands.Windows
         /// </exception>
         public async Task<string> ReadAsync(CancellationToken token = default)
         {
-            ObjectDisposedException.ThrowIf(_disposed, this);
+            ThrowIfDisposed();
 
             if (!CanRead)
                 throw new InvalidOperationException("The characteristic is not Read.");
 
-            var result = await NativeCharacteristic
-                .ReadValueAsync()
-                .AsTask(token)
-                .ConfigureAwait(false);
-            var bytes = result.GetValueOrThrowIfError();
-            return ConvertToString(bytes);
+            await NativeCharacteristic.ReadAsync(token).ConfigureAwait(false);
+            return NativeCharacteristic.StringValue;
         }
 
         /// <summary>
@@ -152,42 +146,16 @@ namespace BleCommands.Windows
         /// </exception>
         public async Task WriteAsync(string text, CancellationToken token = default)
         {
-            ObjectDisposedException.ThrowIf(_disposed, this);
+            ThrowIfDisposed();
 
             if (!CanWrite)
                 throw new InvalidOperationException("The characteristic is neither Write nor WriteWithoutResponse.");
 
-            ArgumentNullException.ThrowIfNull(text);
+            if (text == null)
+                throw new ArgumentNullException(nameof(text));
 
             var bytes = Encoding.UTF8.GetBytes(text);
-            IBuffer value = CryptographicBuffer.CreateFromByteArray(bytes);
-            GattWriteOption option = Properties.HasFlag(CharacteristicPropertyFlags.Write)
-                ? GattWriteOption.WriteWithResponse
-                : GattWriteOption.WriteWithoutResponse;
-            var result = await NativeCharacteristic
-                .WriteValueWithResultAsync(value, option)
-                .AsTask(token)
-                .ConfigureAwait(false);
-            result.ThrowIfError();
-        }
-
-        /// <summary>
-        /// Converts a byte array to a UTF-8 string.
-        /// </summary>
-        /// <param name="value">The byte array to convert.</param>
-        /// <returns>
-        /// The converted string, or an empty string if the conversion fails.
-        /// </returns>
-        protected static string ConvertToString(byte[] value)
-        {
-            try
-            {
-                return Encoding.UTF8.GetString(value);
-            }
-            catch (Exception ex) when (ex is DecoderFallbackException or ArgumentException or ArgumentNullException)
-            {
-                return string.Empty;
-            }
+            await NativeCharacteristic.WriteAsync(bytes, token);
         }
 
         /// <summary>
@@ -206,12 +174,13 @@ namespace BleCommands.Windows
         /// </exception>
         public void AttachTokenAggregator(TokenAggregator tokenAggregator)
         {
-            ObjectDisposedException.ThrowIf(_disposed, this);
-
+            ThrowIfDisposed();
+			
             if (!CanUpdate)
                 throw new InvalidOperationException("The characteristic is neither Notify nor Indicate.");
 
-            ArgumentNullException.ThrowIfNull(tokenAggregator);
+            if (tokenAggregator == null)
+                throw new ArgumentNullException(nameof(tokenAggregator));
 
             var original = Interlocked.CompareExchange(ref _tokenAggregator, tokenAggregator, null);
             if (original != null)
@@ -242,24 +211,13 @@ namespace BleCommands.Windows
         /// </exception>
         public async Task StartReceivingAsync(CancellationToken token = default)
         {
-            ObjectDisposedException.ThrowIf(_disposed, this);
+            ThrowIfDisposed();
 
-            // Logic as in Plugin.BLE.Windows.Characteristic:
-            GattClientCharacteristicConfigurationDescriptorValue descriptor;
-            if (Properties.HasFlag(CharacteristicPropertyFlags.Notify))
-                descriptor = GattClientCharacteristicConfigurationDescriptorValue.Notify;
-            else if (Properties.HasFlag(CharacteristicPropertyFlags.Indicate))
-                descriptor = GattClientCharacteristicConfigurationDescriptorValue.Indicate;
-            else
+            if (!CanUpdate)
                 throw new InvalidOperationException("The characteristic is neither Notify nor Indicate.");
 
-            var result = await NativeCharacteristic
-                .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(descriptor)
-                .AsTask(token)
-                .ConfigureAwait(false);
-            result.ThrowIfError();
-
-            NativeCharacteristic.ValueChanged += NativeCharacteristic_ValueChanged;
+            await NativeCharacteristic.StartUpdatesAsync(token);
+            NativeCharacteristic.ValueUpdated += NativeCharacteristic_ValueUpdated;
         }
 
         /// <summary>
@@ -270,14 +228,14 @@ namespace BleCommands.Windows
         /// <see cref="ValueReceived"/> event, and appends the string to the attached
         /// token aggregator if one exists.
         /// </remarks>
-        protected void NativeCharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
+        private void NativeCharacteristic_ValueUpdated(object sender, CharacteristicUpdatedEventArgs e)
         {
-            var bytes = args.CharacteristicValue.ToArray();
+            var bytes = e.Characteristic.Value;
             ValueReceived?.Invoke(this, new ByteArrayEventArgs(bytes));
-            var text = ConvertToString(bytes);
+            var text = e.Characteristic.StringValue;
 
-            var tokenAggregator = Interlocked.CompareExchange(ref _tokenAggregator, null, null);
-            tokenAggregator?.Append(text);
+            var tokenAggegater = Interlocked.CompareExchange(ref _tokenAggregator, null, null);
+            tokenAggegater?.Append(text);
         }
 
         /// <summary>
@@ -293,16 +251,16 @@ namespace BleCommands.Windows
         /// </exception>
         public async Task StopReceivingAsync(CancellationToken token = default)
         {
-            ObjectDisposedException.ThrowIf(_disposed, this);
+            ThrowIfDisposed();
 
-            var result = await NativeCharacteristic
-                .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(
-                    GattClientCharacteristicConfigurationDescriptorValue.None)
-                .AsTask(token)
-                .ConfigureAwait(false);
-            result.ThrowIfError();
+            await NativeCharacteristic.StopUpdatesAsync(token);
+            NativeCharacteristic.ValueUpdated -= NativeCharacteristic_ValueUpdated;
+        }
 
-            NativeCharacteristic.ValueChanged -= NativeCharacteristic_ValueChanged;
+        private void ThrowIfDisposed()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException("BleCommands.Maui.Characteristic");
         }
 
         protected virtual void Dispose(bool disposing)
@@ -313,7 +271,7 @@ namespace BleCommands.Windows
                 {
                     if (NativeCharacteristic != null)
                     {
-                        NativeCharacteristic.ValueChanged -= NativeCharacteristic_ValueChanged;
+                        NativeCharacteristic.ValueUpdated -= NativeCharacteristic_ValueUpdated;
                     }
                 }
 

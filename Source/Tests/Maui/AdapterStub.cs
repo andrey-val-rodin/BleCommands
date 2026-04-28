@@ -19,14 +19,14 @@ namespace BleCommands.Tests.Maui
 
         public IReadOnlyList<IDevice> BondedDevices => throw new NotImplementedException();
 
-        public event EventHandler<DeviceEventArgs> DeviceAdvertised;
-        public event EventHandler<DeviceEventArgs> DeviceDiscovered;
-        public event EventHandler<DeviceEventArgs> DeviceConnected;
-        public event EventHandler<DeviceEventArgs> DeviceDisconnected;
-        public event EventHandler<DeviceErrorEventArgs> DeviceConnectionLost;
-        public event EventHandler<DeviceErrorEventArgs> DeviceConnectionError;
-        public event EventHandler<DeviceBondStateChangedEventArgs> DeviceBondStateChanged;
-        public event EventHandler ScanTimeoutElapsed;
+        public event EventHandler<DeviceEventArgs> DeviceAdvertised { add { } remove { } }
+        public event EventHandler<DeviceEventArgs> DeviceDiscovered { add { } remove { } }
+        public event EventHandler<DeviceEventArgs> DeviceConnected { add { } remove { } }
+        public event EventHandler<DeviceEventArgs> DeviceDisconnected { add { } remove { } }
+        public event EventHandler<DeviceErrorEventArgs> DeviceConnectionLost { add { } remove { } }
+        public event EventHandler<DeviceErrorEventArgs> DeviceConnectionError { add { } remove { } }
+        public event EventHandler<DeviceBondStateChangedEventArgs> DeviceBondStateChanged { add { } remove { } }
+        public event EventHandler ScanTimeoutElapsed { add { } remove { } }
 
         public Task BondAsync(IDevice device)
         {

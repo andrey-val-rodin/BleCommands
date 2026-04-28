@@ -31,8 +31,8 @@ namespace BleCommands.Maui
         /// </summary>
         /// <param name="guid">A device Guid</param>
         /// <remarks>
-        /// The <see cref="ConnectAsync(CancellationToken)"/> method will use
-        /// <see cref="IAdapter.ConnectToKnownDeviceAsync(Guid, ConnectParameters, CancellationToken)"/>
+        /// The <see cref="ConnectAsync"/> method will use
+        /// <see cref="IAdapter.ConnectToKnownDeviceAsync"/>
         /// The recommended way for obtaining a device is using <see cref="BleScanner"/>.
         /// </remarks>
         public Device(Guid guid)

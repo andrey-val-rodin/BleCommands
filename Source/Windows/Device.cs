@@ -24,7 +24,7 @@ namespace BleCommands.Windows
         /// </summary>
         /// <param name="bluetoothAddress">The Bluetooth address of the device.</param>
         /// <remarks>
-        /// The <see cref="ConnectAsync(CancellationToken)"/> method will fail
+        /// The <see cref="ConnectAsync"/> method will fail
         /// if the device isn't paired and it isn't found in the system cache.
         /// The recommended way for obtaining a device is using <see cref="BleScanner"/>.
         /// </remarks>
@@ -103,7 +103,7 @@ namespace BleCommands.Windows
         /// <returns>A read-only list of services exposed by the device.</returns>
         /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="ConnectAsync(CancellationToken)"/> has not been called
+        /// Thrown when <see cref="ConnectAsync"/> has not been called
         /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task<IReadOnlyList<IService<GattDeviceService, GattCharacteristic>>> GetServicesAsync(
@@ -132,7 +132,7 @@ namespace BleCommands.Windows
         /// <returns>The requested service, or null if not found.</returns>
         /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="ConnectAsync(CancellationToken)"/> has not been called
+        /// Thrown when <see cref="ConnectAsync"/> has not been called
         /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task<IService<GattDeviceService, GattCharacteristic>?> GetServiceAsync(

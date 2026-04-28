@@ -147,9 +147,9 @@ namespace BleCommands.Windows
             if (IsStarted)
                 return;
 
-            await ResponseCharacteristic.StartUpdatesAsync(token).ConfigureAwait(false);
+            await ResponseCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
             if (ResponseCharacteristic != ListeningCharacteristic)
-                await ListeningCharacteristic.StartUpdatesAsync(token).ConfigureAwait(false);
+                await ListeningCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
 
             IsStarted = true;
         }

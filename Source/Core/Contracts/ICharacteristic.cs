@@ -25,12 +25,12 @@ namespace BleCommands.Core.Contracts
 
         Task WriteAsync(string data, CancellationToken token = default);
 
-        Task StartUpdatesAsync(CancellationToken token = default);
-
-        Task StopUpdatesAsync(CancellationToken token = default);
-
         void AttachTokenAggregator(TokenAggregator tokenAggregator);
 
         void DetachTokenAggregator();
+
+        Task StartReceivingAsync(CancellationToken token = default);
+
+        Task StopReceivingAsync(CancellationToken token = default);
     }
 }

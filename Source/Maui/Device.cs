@@ -1,5 +1,6 @@
 ﻿using BleCommands.Core.Contracts;
 using Plugin.BLE.Abstractions;
+using Plugin.BLE.Abstractions.EventArgs;
 using Plugin.BLE.Abstractions.Exceptions;
 using Plugin.BLE.Abstractions.Contracts;
 using INativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
@@ -17,7 +18,10 @@ namespace BleCommands.Maui
     public class Device : IDevice<INativeDevice, INativeService, INativeCharacteristic>
     {
         private readonly Guid? _guid;
+        private bool _connectionInvoked;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
+        private bool _disconnected;
+        private readonly object _lock = new object();
         private bool _disposed = false;
 
         public event EventHandler? Disconnected;
@@ -26,15 +30,21 @@ namespace BleCommands.Maui
         /// Initializes a new instance of the <see cref="Device"/> class using device Guid.
         /// </summary>
         /// <param name="guid">A device Guid</param>
+        /// <remarks>
+        /// The <see cref="ConnectAsync(CancellationToken)"/> method will use
+        /// <see cref="IAdapter.ConnectToKnownDeviceAsync(Guid, ConnectParameters, CancellationToken)"/>
+        /// The recommended way for obtaining a device is using <see cref="BleScanner"/>.
+        /// </remarks>
         public Device(Guid guid)
         {
             _guid = guid;
         }
 
         /// <summary>
-        /// Internal constructor used by <see cref="BleScanner"/>.
+        /// Initializes a new instance of the <see cref="Device"/> class using native device.
+        /// The native device object is passed to the <see cref="IAdapter.DeviceDiscovered"/> event handler.
         /// </summary>
-        internal Device(INativeDevice nativeDevice)
+        public Device(INativeDevice nativeDevice)
         {
             NativeDevice = nativeDevice ?? throw new ArgumentNullException(nameof(nativeDevice));
         }
@@ -51,7 +61,7 @@ namespace BleCommands.Maui
         private static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
 
         /// <summary>
-        /// Connects to the device.
+        /// Initiates process of connection to the device.
         /// </summary>
         /// <param name="token">Cancellation token to cancel the operation.</param>
         /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
@@ -64,6 +74,13 @@ namespace BleCommands.Maui
             await _semaphore.WaitAsync(token);
             try
             {
+                if (_connectionInvoked)
+                    return;
+
+                // Different events can be fired on different platforms
+                Adapter.DeviceDisconnected += Adapter_DeviceDisconnected;
+                Adapter.DeviceConnectionLost += Adapter_DeviceDisconnected;
+
                 if (NativeDevice != null)
                 {
                     await ConnectAsync(NativeDevice, token).ConfigureAwait(false);
@@ -72,10 +89,29 @@ namespace BleCommands.Maui
                 {
                     await ConnectAsync(_guid.Value, token).ConfigureAwait(false);
                 }
+
+                _connectionInvoked = true;
             }
             finally
             {
                 _semaphore.Release();
+            }
+        }
+
+        private void Adapter_DeviceDisconnected(object sender, DeviceEventArgs e)
+        {
+            if (e.Device?.Id == NativeDevice?.Id)
+            {
+                lock (_lock)
+                {
+                    if (_disconnected)
+                        return; // Disconnected event fired already
+
+                    NativeDevice?.Dispose();
+                    NativeDevice = null;
+                    Disconnected?.Invoke(this, e);
+                    _disconnected = true;
+                }
             }
         }
 
@@ -129,6 +165,8 @@ namespace BleCommands.Maui
             {
                 if (disposing)
                 {
+                    Adapter.DeviceDisconnected -= Adapter_DeviceDisconnected;
+                    Adapter.DeviceConnectionLost -= Adapter_DeviceDisconnected;
                     NativeDevice?.Dispose();
                 }
 

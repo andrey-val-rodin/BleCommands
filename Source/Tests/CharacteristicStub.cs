@@ -45,12 +45,12 @@ namespace BleCommands.Tests
             throw new NotImplementedException();
         }
 
-        public Task StartUpdatesAsync(CancellationToken token = default)
+        public Task StartReceivingAsync(CancellationToken token = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task StopUpdatesAsync(CancellationToken token = default)
+        public Task StopReceivingAsync(CancellationToken token = default)
         {
             return Task.CompletedTask;
         }

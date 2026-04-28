@@ -59,38 +59,6 @@ namespace BleCommands.Windows
             return ConvertToString(bytes);
         }
 
-        public async Task StartUpdatesAsync(CancellationToken token = default)
-        {
-            // Logic as in Plugin.BLE.Windows.Characteristic:
-            GattClientCharacteristicConfigurationDescriptorValue descriptor;
-            if (Properties.HasFlag(CharacteristicPropertyFlags.Notify))
-                descriptor = GattClientCharacteristicConfigurationDescriptorValue.Notify;
-            else if (Properties.HasFlag(CharacteristicPropertyFlags.Indicate))
-                descriptor = GattClientCharacteristicConfigurationDescriptorValue.Indicate;
-            else
-                throw new InvalidOperationException("The characteristic is neither Update nor Indicate.");
-
-            var result = await NativeCharacteristic
-                .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(descriptor)
-                .AsTask(token)
-                .ConfigureAwait(false);
-            result.ThrowIfError();
-
-            NativeCharacteristic.ValueChanged += NativeCharacteristic_ValueChanged;
-        }
-
-        public async Task StopUpdatesAsync(CancellationToken token = default)
-        {
-            var result = await NativeCharacteristic
-                .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(
-                    GattClientCharacteristicConfigurationDescriptorValue.None)
-                .AsTask(token)
-                .ConfigureAwait(false);
-            result.ThrowIfError();
-
-            NativeCharacteristic.ValueChanged -= NativeCharacteristic_ValueChanged;
-        }
-
         public async Task WriteAsync(string text, CancellationToken token = default)
         {
             if (!CanWrite)
@@ -147,6 +115,38 @@ namespace BleCommands.Windows
         public void DetachTokenAggregator()
         {
             Interlocked.Exchange(ref _tokenAggregator, null);
+        }
+
+        public async Task StartReceivingAsync(CancellationToken token = default)
+        {
+            // Logic as in Plugin.BLE.Windows.Characteristic:
+            GattClientCharacteristicConfigurationDescriptorValue descriptor;
+            if (Properties.HasFlag(CharacteristicPropertyFlags.Notify))
+                descriptor = GattClientCharacteristicConfigurationDescriptorValue.Notify;
+            else if (Properties.HasFlag(CharacteristicPropertyFlags.Indicate))
+                descriptor = GattClientCharacteristicConfigurationDescriptorValue.Indicate;
+            else
+                throw new InvalidOperationException("The characteristic is neither Update nor Indicate.");
+
+            var result = await NativeCharacteristic
+                .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(descriptor)
+                .AsTask(token)
+                .ConfigureAwait(false);
+            result.ThrowIfError();
+
+            NativeCharacteristic.ValueChanged += NativeCharacteristic_ValueChanged;
+        }
+
+        public async Task StopReceivingAsync(CancellationToken token = default)
+        {
+            var result = await NativeCharacteristic
+                .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(
+                    GattClientCharacteristicConfigurationDescriptorValue.None)
+                .AsTask(token)
+                .ConfigureAwait(false);
+            result.ThrowIfError();
+
+            NativeCharacteristic.ValueChanged -= NativeCharacteristic_ValueChanged;
         }
 
         protected virtual void Dispose(bool disposing)

@@ -45,7 +45,7 @@ namespace BleCommands.Windows
         public BluetoothLEDevice? NativeDevice { get; protected set; }
 
         /// <summary>
-        /// Connects to the device.
+        /// Initiates process of connection to the device.
         /// </summary>
         /// <param name="token">Cancellation token to cancel the operation.</param>
         /// <remarks>
@@ -61,21 +61,25 @@ namespace BleCommands.Windows
             await _semaphore.WaitAsync(token);
             try
             {
-                NativeDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(_bluetoothAddress);
+                if (NativeDevice != null)
+                    return;
+
+                NativeDevice = await BluetoothLEDevice
+                    .FromBluetoothAddressAsync(_bluetoothAddress)
+                    .AsTask(token);
+
                 if (NativeDevice == null)
                     throw new DeviceException("Unable to find the device identified by bluetooth address " +
                         $"{_bluetoothAddress}. Specifically, if the device isn't paired " +
                         "and it isn't found in the system cache.");
 
                 // Create and configure GATT session to maintain connection
-                _gattSession = await GattSession.FromDeviceIdAsync(NativeDevice.BluetoothDeviceId);
+                _gattSession = await GattSession.FromDeviceIdAsync(NativeDevice.BluetoothDeviceId)
+                    .AsTask(token);
                 _gattSession.MaintainConnection = true;
 
                 // Monitor connection status
                 NativeDevice.ConnectionStatusChanged += NativeDevice_ConnectionStatusChanged;
-
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-                cts.CancelAfter(TimeSpan.FromSeconds(5));
             }
             finally
             {
@@ -107,7 +111,8 @@ namespace BleCommands.Windows
             if (NativeDevice == null)
                 throw new InvalidOperationException("Device is not connected.");
 
-            var result = await NativeDevice.GetGattServicesAsync(BluetoothCacheMode.Cached);
+            var result = await NativeDevice.GetGattServicesAsync(BluetoothCacheMode.Cached)
+                .AsTask(token);
             result.ThrowIfError();
             var nativeServices = result.Services;
 
@@ -135,7 +140,8 @@ namespace BleCommands.Windows
             if (NativeDevice == null)
                 throw new InvalidOperationException("Device is not connected.");
 
-            var result = await NativeDevice.GetGattServicesForUuidAsync(id, BluetoothCacheMode.Cached);
+            var result = await NativeDevice.GetGattServicesForUuidAsync(id, BluetoothCacheMode.Cached)
+                .AsTask(token);
             result.ThrowIfError();
             var nativeService = result.Services?.Count > 0 ? result.Services[0] : null;
 

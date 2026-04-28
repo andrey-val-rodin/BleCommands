@@ -24,6 +24,11 @@
         string Name { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the device is currently connected.
+        /// </summary>
+        bool IsConnected { get; }
+
+        /// <summary>
         /// Gets the platform-specific native device instance.
         /// </summary>
         TDevice? NativeDevice { get; }

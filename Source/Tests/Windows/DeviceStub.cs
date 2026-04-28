@@ -2,7 +2,7 @@
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
-namespace BleCommands.Tests
+namespace BleCommands.Tests.Windows
 {
     public sealed class DeviceStub : IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
     {

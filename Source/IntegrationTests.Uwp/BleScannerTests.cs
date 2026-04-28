@@ -30,6 +30,20 @@ namespace BleCommands.IntegrationTests.Uwp
 
             Assert.IsNotNull(device);
             await device.ConnectAsync();
+            Assert.IsTrue(device.IsConnected);
+            /*
+             * TODO: Instead of checking the connection status immediately, you should use the following code:
+            var timeout = TimeSpan.FromSeconds(5);
+            var start = DateTime.UtcNow;
+
+            while (!device.IsConnected && DateTime.UtcNow - start < timeout)
+            {
+                await Task.Delay(50, TestContext.Current.CancellationToken);
+            }
+
+            if (!device.IsConnected)
+                throw new TimeoutException("Device did not connect within timeout");
+            */
         }
 
         public void Dispose()

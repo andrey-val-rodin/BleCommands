@@ -1,11 +1,11 @@
 ﻿using BleCommands.Core.Contracts;
 using Plugin.BLE.Abstractions;
+using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
 using Plugin.BLE.Abstractions.Exceptions;
-using Plugin.BLE.Abstractions.Contracts;
+using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 using INativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
 using INativeService = Plugin.BLE.Abstractions.Contracts.IService;
-using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 using IService = BleCommands.Core.Contracts.IService<
     Plugin.BLE.Abstractions.Contracts.IService,
     Plugin.BLE.Abstractions.Contracts.ICharacteristic>;
@@ -21,7 +21,7 @@ namespace BleCommands.Maui
         private bool _connectionInvoked;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
         private bool _disconnected;
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
         private bool _disposed = false;
 
         public event EventHandler? Disconnected;
@@ -36,8 +36,8 @@ namespace BleCommands.Maui
         /// The recommended way for obtaining a device is using <see cref="BleScanner"/>.
         /// </remarks>
         public Device(Guid guid)
+            : this(guid, Plugin.BLE.CrossBluetoothLE.Current.Adapter)
         {
-            _guid = guid;
         }
 
         /// <summary>
@@ -45,20 +45,37 @@ namespace BleCommands.Maui
         /// The native device object is passed to the <see cref="IAdapter.DeviceDiscovered"/> event handler.
         /// </summary>
         public Device(INativeDevice nativeDevice)
+            : this(nativeDevice, Plugin.BLE.CrossBluetoothLE.Current.Adapter)
         {
+        }
+
+        internal Device(Guid guid, IAdapter adapter)
+        {
+            Adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
+            _guid = guid;
+        }
+
+        internal Device(INativeDevice nativeDevice, IAdapter adapter)
+        {
+            Adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
             NativeDevice = nativeDevice ?? throw new ArgumentNullException(nameof(nativeDevice));
         }
 
+        /// <inheritdoc/>
         public string Id => NativeDevice?.Id.ToString() ?? string.Empty;
 
+        /// <inheritdoc/>
         public string Name => NativeDevice?.Name ?? string.Empty;
+
+        /// <inheritdoc/>
+        public bool IsConnected => NativeDevice?.State == DeviceState.Connected;
 
         /// <summary>
         /// Gets platform-specific device
         /// </summary>
         public INativeDevice? NativeDevice { get; private set; }
 
-        private static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
+        internal IAdapter Adapter { get; private set; }
 
         /// <summary>
         /// Initiates process of connection to the device.
@@ -115,7 +132,7 @@ namespace BleCommands.Maui
             }
         }
 
-        private static async Task ConnectAsync(
+        private async Task ConnectAsync(
             INativeDevice nativeDevice, CancellationToken token = default)
         {
             var parameters = new ConnectParameters(false, forceBleTransport: true);

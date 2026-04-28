@@ -2,6 +2,7 @@
 using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
 using BleCommands.Core.Events;
+using BleCommands.Core.Exceptions;
 using BleCommands.Windows.Extensions;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
@@ -19,16 +20,26 @@ namespace BleCommands.Windows
         public Characteristic(GattCharacteristic characteristic)
         {
             NativeCharacteristic = characteristic ?? throw new ArgumentNullException(nameof(characteristic));
+            Id = NativeCharacteristic.Uuid;
+            Properties = (CharacteristicPropertyFlags)NativeCharacteristic.CharacteristicProperties;
+        }
+
+        /// <summary>
+        /// A constructor for testing.
+        /// </summary>
+        internal Characteristic(CharacteristicPropertyFlags properties)
+        {
+            NativeCharacteristic = null!;
+            Properties = properties;
         }
 
         public event EventHandler<ByteArrayEventArgs>? ValueReceived;
 
         public GattCharacteristic NativeCharacteristic { get; }
 
-        public Guid Id => NativeCharacteristic.Uuid;
+        public Guid Id { get; private set; }
 
-        public CharacteristicPropertyFlags Properties =>
-            (CharacteristicPropertyFlags)NativeCharacteristic.CharacteristicProperties;
+        public CharacteristicPropertyFlags Properties { get; private set; }
 
         /// <summary>
         /// Indicates whether the characteristic can be read or not.
@@ -49,8 +60,21 @@ namespace BleCommands.Windows
 
         public TokenAggregator? TokenAggregator => _tokenAggregator;
 
+        /// <summary>
+        /// Reads the characteristic value from the device.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if characteristic doesn't support read. See: <see cref="CanRead"/>
+        /// </exception>
+        /// <exception cref="DeviceException">Thrown if the reading of the value failed.</exception>
         public async Task<string> ReadAsync(CancellationToken token = default)
         {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
+            if (!CanRead)
+                throw new InvalidOperationException("The characteristic is not Read.");
+
             var result = await NativeCharacteristic
                 .ReadValueAsync()
                 .AsTask(token)
@@ -61,6 +85,8 @@ namespace BleCommands.Windows
 
         public async Task WriteAsync(string text, CancellationToken token = default)
         {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
             if (!CanWrite)
                 throw new InvalidOperationException("The characteristic is neither Write nor Write without response.");
 
@@ -84,8 +110,8 @@ namespace BleCommands.Windows
             ValueReceived?.Invoke(this, new ByteArrayEventArgs(bytes));
             var text = ConvertToString(bytes);
 
-            var tokenAggegater = Interlocked.CompareExchange(ref _tokenAggregator, null, null);
-            tokenAggegater?.Append(text);
+            var tokenAggregator = Interlocked.CompareExchange(ref _tokenAggregator, null, null);
+            tokenAggregator?.Append(text);
         }
 
         protected static string ConvertToString(byte[] value)
@@ -100,16 +126,18 @@ namespace BleCommands.Windows
             }
         }
 
-        public void AttachTokenAggregator(TokenAggregator tokenAggegater)
+        public void AttachTokenAggregator(TokenAggregator tokenAggregator)
         {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
             if (!CanUpdate)
                 throw new InvalidOperationException("The characteristic is neither Update nor Indicate.");
 
-            ArgumentNullException.ThrowIfNull(tokenAggegater);
+            ArgumentNullException.ThrowIfNull(tokenAggregator);
 
-            var original = Interlocked.CompareExchange(ref _tokenAggregator, tokenAggegater, null);
+            var original = Interlocked.CompareExchange(ref _tokenAggregator, tokenAggregator, null);
             if (original != null)
-                throw new InvalidOperationException("TokenAggegater is already attached. Call DetachTokenAggregator first.");
+                throw new InvalidOperationException("TokenAggregator is already attached. Call DetachTokenAggregator first.");
         }
 
         public void DetachTokenAggregator()
@@ -119,6 +147,8 @@ namespace BleCommands.Windows
 
         public async Task StartReceivingAsync(CancellationToken token = default)
         {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
             // Logic as in Plugin.BLE.Windows.Characteristic:
             GattClientCharacteristicConfigurationDescriptorValue descriptor;
             if (Properties.HasFlag(CharacteristicPropertyFlags.Notify))
@@ -139,6 +169,8 @@ namespace BleCommands.Windows
 
         public async Task StopReceivingAsync(CancellationToken token = default)
         {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
             var result = await NativeCharacteristic
                 .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(
                     GattClientCharacteristicConfigurationDescriptorValue.None)

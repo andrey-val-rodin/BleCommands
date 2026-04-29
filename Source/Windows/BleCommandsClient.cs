@@ -17,7 +17,7 @@
             if (device == null)
                 return null;
 
-            var service = await CreateServiceAsync(device, token).ConfigureAwait(false);
+            var service = await device.GetServiceAsync(ServiceUuid, token).ConfigureAwait(false);
             if (service == null)
             {
                 device.Dispose();
@@ -47,7 +47,6 @@
             return new BleTransport(device, service, commandCharacteristic, responseCharacteristic, listeningCharacteristic);
         }
 
-        // TODO: must be called from UI-thread
         private static async Task<Device?> CreateDeviceAsync(string deviceName, CancellationToken token)
         {
             using var scanner = new BleScanner();
@@ -60,18 +59,6 @@
 
             await device.ConnectAsync(token);
             return device as Device;
-        }
-
-        private static async Task<Service?> CreateServiceAsync(Device device, CancellationToken token)
-        {
-            var service = await device.GetServiceAsync(ServiceUuid, token).ConfigureAwait(false);
-            if (service == null)
-            {
-                // Unable to get service
-                return null;
-            }
-
-            return service as Service;
         }
     }
 }

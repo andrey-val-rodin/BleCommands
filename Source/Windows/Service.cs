@@ -81,8 +81,8 @@ namespace BleCommands.Windows
             var nativeCharacteristics = result.Characteristics;
 
             return nativeCharacteristics == null
-                ? new List<ICharacteristic<GattCharacteristic>>()
-                : nativeCharacteristics.Select(c => new Characteristic(c)).ToList<ICharacteristic<GattCharacteristic>>();
+                ? new List<Characteristic>()
+                : nativeCharacteristics.Select(static c => new Characteristic(c)).ToList<Characteristic>();
         }
 
         protected virtual void Dispose(bool disposing)

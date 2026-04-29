@@ -70,8 +70,8 @@ namespace BleCommands.Maui
 
             var nativeCharacteristics = await NativeService.GetCharacteristicsAsync(token);
             return nativeCharacteristics == null
-                ? new List<ICharacteristic<INativeCharacteristic>>()
-                : nativeCharacteristics.Select(c => new Characteristic(c)).ToList<ICharacteristic<INativeCharacteristic>>();
+                ? new List<Characteristic>()
+                : nativeCharacteristics.Select(static c => new Characteristic(c)).ToList<ICharacteristic<INativeCharacteristic>>();
         }
 
         private void ThrowIfDisposed()

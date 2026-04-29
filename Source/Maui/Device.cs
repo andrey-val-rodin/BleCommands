@@ -3,19 +3,19 @@ using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
 using Plugin.BLE.Abstractions.Exceptions;
-using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
-using INativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
-using INativeService = Plugin.BLE.Abstractions.Contracts.IService;
 using IService = BleCommands.Core.Contracts.IService<
     Plugin.BLE.Abstractions.Contracts.IService,
     Plugin.BLE.Abstractions.Contracts.ICharacteristic>;
+using NativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
+using NativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
+using NativeService = Plugin.BLE.Abstractions.Contracts.IService;
 
 namespace BleCommands.Maui
 {
     /// <summary>
     /// MAUI implementation of a Bluetooth Low Energy device.
     /// </summary>
-    public class Device : IDevice<INativeDevice, INativeService, INativeCharacteristic>
+    public class Device : IDevice<NativeDevice, NativeService, NativeCharacteristic>
     {
         private readonly Guid? _guid;
         private bool _connectionInvoked;
@@ -45,7 +45,7 @@ namespace BleCommands.Maui
         /// Initializes a new instance of the <see cref="Device"/> class using native device.
         /// The native device object is passed to the <see cref="IAdapter.DeviceDiscovered"/> event handler.
         /// </summary>
-        public Device(INativeDevice nativeDevice)
+        public Device(NativeDevice nativeDevice)
             : this(nativeDevice, Plugin.BLE.CrossBluetoothLE.Current.Adapter)
         {
         }
@@ -56,7 +56,7 @@ namespace BleCommands.Maui
             _guid = guid;
         }
 
-        internal Device(INativeDevice nativeDevice, IAdapter adapter)
+        internal Device(NativeDevice nativeDevice, IAdapter adapter)
         {
             Adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
             NativeDevice = nativeDevice ?? throw new ArgumentNullException(nameof(nativeDevice));
@@ -74,7 +74,7 @@ namespace BleCommands.Maui
         /// <summary>
         /// Gets platform-specific device
         /// </summary>
-        public INativeDevice? NativeDevice { get; private set; }
+        public NativeDevice? NativeDevice { get; private set; }
 
         internal IAdapter Adapter { get; private set; }
 
@@ -132,7 +132,7 @@ namespace BleCommands.Maui
         }
 
         private async Task ConnectAsync(
-            INativeDevice nativeDevice, CancellationToken token = default)
+            NativeDevice nativeDevice, CancellationToken token = default)
         {
             var parameters = new ConnectParameters(false, forceBleTransport: true);
             await Adapter.ConnectToDeviceAsync(nativeDevice, parameters, token);

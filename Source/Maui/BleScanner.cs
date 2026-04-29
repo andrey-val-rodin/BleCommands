@@ -4,9 +4,9 @@ using Microsoft.VisualStudio.Threading;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
-using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
-using INativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
-using INativeService = Plugin.BLE.Abstractions.Contracts.IService;
+using NativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
+using NativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
+using NativeService = Plugin.BLE.Abstractions.Contracts.IService;
 
 namespace BleCommands.Maui
 {
@@ -16,7 +16,7 @@ namespace BleCommands.Maui
     /// <typeparam name="TDevice">Platform-specific device type.</typeparam>
     /// <typeparam name="TService">Platform-specific service type.</typeparam>
     /// <typeparam name="TCharacteristic">Platform-specific characteristic type.</typeparam>
-    public class BleScanner : IBleScanner<INativeDevice, INativeService, INativeCharacteristic>
+    public class BleScanner : IBleScanner<NativeDevice, NativeService, NativeCharacteristic>
     {
         private const int DefaultTimeoutSeconds = 5;
         private const int MaxTimeoutSeconds = 60;
@@ -33,7 +33,7 @@ namespace BleCommands.Maui
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="deviceName"/> is <c>null or empty.</exception>
         /// <exception cref="InvalidOperationException">Thrown when Bluetooth scanning is already in progress.</exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
-        public async Task<IDevice<INativeDevice, INativeService, INativeCharacteristic>?> FindDeviceAsync(
+        public async Task<IDevice<NativeDevice, NativeService, NativeCharacteristic>?> FindDeviceAsync(
             string deviceName)
         {
             return await FindDeviceAsync(deviceName, TimeSpan.FromSeconds(DefaultTimeoutSeconds)).ConfigureAwait(false);
@@ -52,7 +52,7 @@ namespace BleCommands.Maui
         /// </exception>
         /// <exception cref="InvalidOperationException">Thrown when Bluetooth scanning is already in progress.</exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
-        public async Task<IDevice<INativeDevice, INativeService, INativeCharacteristic>?> FindDeviceAsync(
+        public async Task<IDevice<NativeDevice, NativeService, NativeCharacteristic>?> FindDeviceAsync(
             string deviceName, TimeSpan timeout)
         {
             ValidateDeviceName(deviceName);
@@ -70,14 +70,14 @@ namespace BleCommands.Maui
             }
         }
 
-        private async Task<IDevice<INativeDevice, INativeService, INativeCharacteristic>?> FindDeviceInternalAsync(
+        private async Task<IDevice<NativeDevice, NativeService, NativeCharacteristic>?> FindDeviceInternalAsync(
             string deviceName,
             CancellationTokenSource tokenSource)
         {
             var releaser = await _scanLock.EnterAsync(tokenSource.Token).ConfigureAwait(false);
             try
             {
-                var tcs = new TaskCompletionSource<IDevice<INativeDevice, INativeService, INativeCharacteristic>?>();
+                var tcs = new TaskCompletionSource<IDevice<NativeDevice, NativeService, NativeCharacteristic>?>();
 
                 void Handler(object sender, DeviceEventArgs args)
                 {

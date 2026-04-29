@@ -4,7 +4,7 @@ using BleCommands.Core.Enums;
 using BleCommands.Core.Events;
 using Plugin.BLE.Abstractions.EventArgs;
 using System.Text;
-using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
+using NativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 
 namespace BleCommands.Maui
 {
@@ -15,20 +15,20 @@ namespace BleCommands.Maui
     /// This class wraps the Plugin.BLE.Abstractions.Contracts.ICharacteristic
     /// and provides a higher-level interface for BLE operations.
     /// </remarks>
-    public class Characteristic : ICharacteristic<INativeCharacteristic>
+    public class Characteristic : ICharacteristic<NativeCharacteristic>
     {
         private TokenAggregator? _tokenAggregator;
         private bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Characteristic"/> class
-        /// using a native <see cref="INativeCharacteristic"/>.
+        /// using a native <see cref="Plugin.BLE.Abstractions.Contracts.ICharacteristic"/>.
         /// </summary>
-        /// <param name="characteristic">The <see cref="INativeCharacteristic"/> to wrap.</param>
+        /// <param name="characteristic">The <see cref="Plugin.BLE.Abstractions.Contracts.ICharacteristic"/> to wrap.</param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="characteristic"/> is <c>null</c>.
         /// </exception>
-        public Characteristic(INativeCharacteristic characteristic)
+        public Characteristic(NativeCharacteristic characteristic)
         {
             NativeCharacteristic = characteristic ?? throw new ArgumentNullException(nameof(characteristic));
             Id = NativeCharacteristic.Id;
@@ -53,7 +53,7 @@ namespace BleCommands.Maui
         public event EventHandler<ByteArrayEventArgs>? ValueReceived;
 
         /// <inheritdoc/>
-        public INativeCharacteristic NativeCharacteristic { get; }
+        public NativeCharacteristic NativeCharacteristic { get; }
 
         /// <inheritdoc/>
         public Guid Id { get; private set; }

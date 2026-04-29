@@ -1,6 +1,6 @@
 ﻿using BleCommands.Core.Contracts;
-using INativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
-using INativeService = Plugin.BLE.Abstractions.Contracts.IService;
+using NativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
+using NativeService = Plugin.BLE.Abstractions.Contracts.IService;
 
 namespace BleCommands.Maui
 {
@@ -8,7 +8,7 @@ namespace BleCommands.Maui
     /// MAUI implementation of <see cref="IService{TService,TCharacteristic}"/>
     /// using the Plugin.BLE abstraction layer.
     /// </summary>
-    public class Service : IService<INativeService, INativeCharacteristic>
+    public class Service : IService<NativeService, NativeCharacteristic>
     {
         private bool _disposed = false;
 
@@ -19,7 +19,7 @@ namespace BleCommands.Maui
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="nativeService"/> is <c>null</c>.
         /// </exception>
-        public Service(INativeService nativeService)
+        public Service(NativeService nativeService)
         {
             NativeService = nativeService ?? throw new ArgumentNullException(nameof(nativeService));
             Id = NativeService.Id;
@@ -42,14 +42,14 @@ namespace BleCommands.Maui
         public Guid Id { get; private set; }
 
         /// <inheritdoc/>
-        public INativeService NativeService { get; }
+        public NativeService NativeService { get; }
 
         /// <inheritdoc/>
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the service has been disposed.
         /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth-level errors.</exception>
-        public async Task<ICharacteristic<INativeCharacteristic>?> GetCharacteristicAsync(
+        public async Task<ICharacteristic<NativeCharacteristic>?> GetCharacteristicAsync(
             Guid id, CancellationToken token = default)
         {
             ThrowIfDisposed();
@@ -63,7 +63,7 @@ namespace BleCommands.Maui
         /// Thrown if the service has been disposed.
         /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth-level errors.</exception>
-        public async Task<IReadOnlyList<ICharacteristic<INativeCharacteristic>>> GetCharacteristicsAsync(
+        public async Task<IReadOnlyList<ICharacteristic<NativeCharacteristic>>> GetCharacteristicsAsync(
             CancellationToken token = default)
         {
             ThrowIfDisposed();
@@ -71,7 +71,7 @@ namespace BleCommands.Maui
             var nativeCharacteristics = await NativeService.GetCharacteristicsAsync(token);
             return nativeCharacteristics == null
                 ? new List<Characteristic>()
-                : nativeCharacteristics.Select(static c => new Characteristic(c)).ToList<ICharacteristic<INativeCharacteristic>>();
+                : nativeCharacteristics.Select(static c => new Characteristic(c)).ToList<ICharacteristic<NativeCharacteristic>>();
         }
 
         private void ThrowIfDisposed()

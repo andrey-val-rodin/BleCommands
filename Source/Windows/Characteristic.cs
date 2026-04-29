@@ -255,31 +255,6 @@ namespace BleCommands.Windows
             tokenAggregator?.Append(text);
         }
 
-        /// <summary>
-        /// Stops receiving notifications or indications from the characteristic.
-        /// </summary>
-        /// <param name="token">A cancellation token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown if the characteristic has been disposed.
-        /// </exception>
-        /// <exception cref="Exception">
-        /// Thrown if the operation fails at the Bluetooth level.
-        /// </exception>
-        public async Task StopReceivingAsync(CancellationToken token = default)
-        {
-            ObjectDisposedException.ThrowIf(_disposed, this);
-
-            var result = await NativeCharacteristic
-                .WriteClientCharacteristicConfigurationDescriptorWithResultAsync(
-                    GattClientCharacteristicConfigurationDescriptorValue.None)
-                .AsTask(token)
-                .ConfigureAwait(false);
-            result.ThrowIfError();
-
-            NativeCharacteristic.ValueChanged -= NativeCharacteristic_ValueChanged;
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)

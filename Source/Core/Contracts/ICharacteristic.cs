@@ -91,12 +91,5 @@ namespace BleCommands.Core.Contracts
         /// <exception cref="InvalidOperationException">Thrown when <see cref="CanUpdate"/> is <c>false</c>.</exception>
         /// <exception cref="ObjectDisposedException">Thrown if the characteristic has been disposed.</exception>
         Task StartReceivingAsync(CancellationToken token = default);
-
-        /// <summary>
-        /// Stops receiving notifications from the characteristic.
-        /// </summary>
-        /// <param name="token">Cancellation token for the operation.</param>
-        /// <exception cref="ObjectDisposedException">Thrown if the characteristic has been disposed.</exception>
-        Task StopReceivingAsync(CancellationToken token = default);
     }
 }

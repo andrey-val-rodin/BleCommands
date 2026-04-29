@@ -45,17 +45,12 @@ namespace BleCommands.Tests.Windows
             throw new NotImplementedException();
         }
 
-        public Task StartReceivingAsync(CancellationToken token = default)
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task StopReceivingAsync(CancellationToken token = default)
-        {
-            return Task.CompletedTask;
-        }
-
         public Task WriteAsync(string data, CancellationToken token = default)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task StartReceivingAsync(CancellationToken token = default)
         {
             return Task.CompletedTask;
         }

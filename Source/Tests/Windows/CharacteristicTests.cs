@@ -292,22 +292,6 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
-        public async Task StopReceivingAsync_WhenDisposed_ThrowsObjectDisposedException()
-        {
-            // Arrange
-            var characteristic = new Characteristic(CharacteristicPropertyFlags.Notify);
-            characteristic.Dispose();
-
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
-            {
-                await characteristic.StopReceivingAsync(TestContext.Current.CancellationToken);
-            });
-
-            Assert.Equal("BleCommands.Windows.Characteristic", exception.ObjectName);
-        }
-
-        [Fact]
         public void Dispose_WhenCalledMultipleTimes_DoesNotThrowException()
         {
             // Arrange

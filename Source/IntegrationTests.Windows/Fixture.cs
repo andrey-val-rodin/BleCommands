@@ -57,7 +57,7 @@ namespace BleCommands.IntegrationTests.Windows
                 ListeningCharacteristic,
                 '\n');
 
-            await BleTransport.BeginAsync();
+            await BleTransport.StartAsync();
             await StopTableAsync();
         }
 

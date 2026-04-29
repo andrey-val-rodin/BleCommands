@@ -70,7 +70,7 @@ namespace BleCommands.Core.Contracts
         /// Starts process of communication between Bluetooth transport and device.
         /// </summary>
         /// <param name="token">A token to cancel the operation.</param>
-        Task BeginAsync(CancellationToken token = default);
+        Task StartAsync(CancellationToken token = default);
 
         /// <summary>
         /// Sends a command to the Bluetooth device and waits for the response.

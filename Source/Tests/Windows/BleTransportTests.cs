@@ -177,7 +177,7 @@ namespace BleCommands.Tests.Windows
                     new CharacteristicStub(CharacteristicPropertyFlags.Notify));
                 transport.Dispose();
 
-                await transport.BeginAsync(TestContext.Current.CancellationToken);
+                await transport.StartAsync(TestContext.Current.CancellationToken);
             });
         }
 

@@ -102,7 +102,7 @@ namespace WpfSample
                 return false;
             }
 
-            await BleTransport.BeginAsync();
+            await BleTransport.StartAsync();
             BleTransport.ListeningTimeoutElapsed += BleTransport_ListeningTimeoutElapsed;
             BleTransport.ListeningTokenReceived += BleTransport_ListeningTokenReceived;
             BleTransport.Disconnected += BleTransport_Disconnected;

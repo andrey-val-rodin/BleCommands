@@ -135,7 +135,7 @@ namespace BleCommands.Windows
 
         // TODO: describe exceptions
         /// <inheritdoc />
-        public async Task BeginAsync(CancellationToken token = default)
+        public async Task StartAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
             if (IsStarted)

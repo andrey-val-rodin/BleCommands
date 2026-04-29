@@ -213,25 +213,6 @@ namespace BleCommands.Maui
             tokenAggegater?.Append(text);
         }
 
-        /// <summary>
-        /// Stops receiving notifications or indications from the characteristic.
-        /// </summary>
-        /// <param name="token">A cancellation token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown if the characteristic has been disposed.
-        /// </exception>
-        /// <exception cref="Exception">
-        /// Thrown if the operation fails at the Bluetooth level.
-        /// </exception>
-        public async Task StopReceivingAsync(CancellationToken token = default)
-        {
-            ThrowIfDisposed();
-
-            await NativeCharacteristic.StopUpdatesAsync(token);
-            NativeCharacteristic.ValueUpdated -= NativeCharacteristic_ValueUpdated;
-        }
-
         private void ThrowIfDisposed()
         {
             if (_disposed)

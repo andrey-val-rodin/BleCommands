@@ -24,9 +24,12 @@
                 return null;
             }
 
-            var commandCharacteristic = await service.GetCharacteristicAsync(CommandCharacteristicUuid).ConfigureAwait(false);
-            var responseCharacteristic = await service.GetCharacteristicAsync(ResponseCharacteristicUuid).ConfigureAwait(false);
-            var listeningCharacteristic = await service.GetCharacteristicAsync(ListeningCharacteristicUuid).ConfigureAwait(false);
+            var commandCharacteristic = await service.GetCharacteristicAsync(
+                CommandCharacteristicUuid, token).ConfigureAwait(false);
+            var responseCharacteristic = await service.GetCharacteristicAsync(
+                ResponseCharacteristicUuid, token).ConfigureAwait(false);
+            var listeningCharacteristic = await service.GetCharacteristicAsync(
+                ListeningCharacteristicUuid, token).ConfigureAwait(false);
 
             if (commandCharacteristic == null ||
                 responseCharacteristic == null ||

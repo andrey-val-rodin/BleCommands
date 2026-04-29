@@ -59,7 +59,7 @@ namespace BleCommands.Windows
         public GattCharacteristic NativeCharacteristic { get; }
 
         /// <inheritdoc/>
-        public Guid Id { get; private set; }
+        public Guid Id { get; private init; }
 
         /// <inheritdoc/>
         public CharacteristicPropertyFlags Properties { get; private set; }

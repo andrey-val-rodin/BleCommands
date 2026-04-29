@@ -24,6 +24,7 @@ namespace BleCommands.Maui
         private readonly object _lock = new();
         private bool _disposed = false;
 
+        /// <inheritdoc/>
         public event EventHandler? Disconnected;
 
         /// <summary>
@@ -124,8 +125,6 @@ namespace BleCommands.Maui
                     if (_disconnected)
                         return; // Disconnected event fired already
 
-                    NativeDevice?.Dispose();
-                    NativeDevice = null;
                     Disconnected?.Invoke(this, e);
                     _disconnected = true;
                 }
@@ -146,6 +145,11 @@ namespace BleCommands.Maui
         }
 
         /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="ConnectAsync"/> has not been called
+        /// </exception>
+        /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task<IReadOnlyList<IService>> GetServicesAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
@@ -160,9 +164,15 @@ namespace BleCommands.Maui
         }
 
         /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="ConnectAsync"/> has not been called
+        /// </exception>
+        /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task<IService?> GetServiceAsync(Guid id, CancellationToken token = default)
         {
             ThrowIfDisposed();
+
             if (NativeDevice == null)
                 throw new InvalidOperationException("Device not connected.");
 
@@ -173,7 +183,7 @@ namespace BleCommands.Maui
         private void ThrowIfDisposed()
         {
             if (_disposed)
-                throw new ObjectDisposedException(nameof(Device));
+                throw new ObjectDisposedException(typeof(Device).FullName);
         }
 
         protected virtual void Dispose(bool disposing)

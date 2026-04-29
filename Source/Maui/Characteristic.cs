@@ -209,14 +209,14 @@ namespace BleCommands.Maui
             ValueReceived?.Invoke(this, new ByteArrayEventArgs(bytes));
             var text = e.Characteristic.StringValue;
 
-            var tokenAggegater = Interlocked.CompareExchange(ref _tokenAggregator, null, null);
-            tokenAggegater?.Append(text);
+            var tokenAggregator = Interlocked.CompareExchange(ref _tokenAggregator, null, null);
+            tokenAggregator?.Append(text);
         }
 
         private void ThrowIfDisposed()
         {
             if (_disposed)
-                throw new ObjectDisposedException("BleCommands.Maui.Characteristic");
+                throw new ObjectDisposedException(typeof(Characteristic).FullName);
         }
 
         protected virtual void Dispose(bool disposing)

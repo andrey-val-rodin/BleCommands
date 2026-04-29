@@ -137,7 +137,8 @@ namespace BleCommands.Windows
         /// <inheritdoc />
         public async Task StartAsync(CancellationToken token = default)
         {
-            ThrowIfDisposed();
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
             if (IsStarted)
                 return;
 
@@ -151,7 +152,8 @@ namespace BleCommands.Windows
         /// <inheritdoc />
         public async Task<string?> SendCommandAsync(string command, CancellationToken token = default)
         {
-            ThrowIfDisposed();
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
             if (!IsStarted)
                 throw new InvalidOperationException("BleTransport has not been started.");
 
@@ -205,7 +207,8 @@ namespace BleCommands.Windows
         /// <inheritdoc />
         public void StartListening(TimeSpan timeout)
         {
-            ThrowIfDisposed();
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
             if (!IsStarted)
                 throw new InvalidOperationException("BleTransport has not been started.");
 
@@ -246,11 +249,6 @@ namespace BleCommands.Windows
                 ListeningTokenReceived -= ListeningHandler;
                 IsListening = false;
             }
-        }
-
-        protected void ThrowIfDisposed()
-        {
-            ObjectDisposedException.ThrowIf(_disposed, this);
         }
 
         protected virtual void Dispose(bool disposing)

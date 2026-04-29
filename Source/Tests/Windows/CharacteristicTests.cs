@@ -256,7 +256,7 @@ namespace BleCommands.Tests.Windows
                 await characteristic.WriteAsync("test", TestContext.Current.CancellationToken);
             });
 
-            Assert.Equal("BleCommands.Windows.Characteristic", exception.ObjectName);
+            Assert.Equal(typeof(Characteristic).FullName, exception.ObjectName);
         }
 
         [Fact]
@@ -272,7 +272,7 @@ namespace BleCommands.Tests.Windows
                 characteristic.AttachTokenAggregator(new TokenAggregator());
             });
 
-            Assert.Equal("BleCommands.Windows.Characteristic", exception.ObjectName);
+            Assert.Equal(typeof(Characteristic).FullName, exception.ObjectName);
         }
 
         [Fact]
@@ -288,7 +288,7 @@ namespace BleCommands.Tests.Windows
                 await characteristic.StartReceivingAsync(TestContext.Current.CancellationToken);
             });
 
-            Assert.Equal("BleCommands.Windows.Characteristic", exception.ObjectName);
+            Assert.Equal(typeof(Characteristic).FullName, exception.ObjectName);
         }
 
         [Fact]

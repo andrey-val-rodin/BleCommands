@@ -29,7 +29,7 @@ namespace BleCommands.IntegrationTests.Uwp
             using var device = await BleScanner.FindDeviceAsync("Rotating Table");
 
             Assert.IsNotNull(device);
-            await device.ConnectAsync();
+            await device.ConnectAsync(TestContext.CancellationToken);
             Assert.IsTrue(device.IsConnected);
             /*
              * TODO: Instead of checking the connection status immediately, you should use the following code:
@@ -51,5 +51,7 @@ namespace BleCommands.IntegrationTests.Uwp
             BleScanner.Dispose();
             GC.SuppressFinalize(this);
         }
+
+        public TestContext TestContext { get; set; }
     }
 }

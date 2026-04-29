@@ -6,7 +6,7 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace BleCommands.Tests.Windows
 {
-    public sealed class CharacteristicStub(CharacteristicPropertyFlags properties)
+    internal class CharacteristicStub(CharacteristicPropertyFlags properties)
         : ICharacteristic<GattCharacteristic>
     {
         public event EventHandler<ByteArrayEventArgs>? ValueReceived { add { } remove { } }

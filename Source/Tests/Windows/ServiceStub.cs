@@ -9,12 +9,14 @@ namespace BleCommands.Tests.Windows
 
         public GattDeviceService NativeService => throw new NotImplementedException();
 
-        public Task<ICharacteristic<GattCharacteristic>?> GetCharacteristicAsync(Guid id)
+        public Task<ICharacteristic<GattCharacteristic>?> GetCharacteristicAsync(
+            Guid id, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<ICharacteristic<GattCharacteristic>>> GetCharacteristicsAsync()
+        public Task<IReadOnlyList<ICharacteristic<GattCharacteristic>>> GetCharacteristicsAsync(
+            CancellationToken token = default)
         {
             throw new NotImplementedException();
         }

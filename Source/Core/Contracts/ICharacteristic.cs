@@ -54,8 +54,12 @@ namespace BleCommands.Core.Contracts
         /// </summary>
         /// <param name="token">Cancellation token for the operation.</param>
         /// <returns>The characteristic value as a UTF-8 string.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when <see cref="CanRead"/> is <c>false</c>.</exception>
-        /// <exception cref="ObjectDisposedException">Thrown if the characteristic has been disposed.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="CanRead"/> is <c>false</c>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the characteristic has been disposed.
+        /// </exception>
         Task<string> ReadAsync(CancellationToken token = default);
 
         /// <summary>
@@ -63,9 +67,15 @@ namespace BleCommands.Core.Contracts
         /// </summary>
         /// <param name="data">The string value to write.</param>
         /// <param name="token">Cancellation token for the operation.</param>
-        /// <exception cref="InvalidOperationException">Thrown when <see cref="CanWrite"/> is <c>false</c>.</exception>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="data"/> is <c>null</c>.</exception>
-        /// <exception cref="ObjectDisposedException">Thrown if the characteristic has been disposed.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="CanWrite"/> is <c>false</c>.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="data"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the characteristic has been disposed.
+        /// </exception>
         Task WriteAsync(string data, CancellationToken token = default);
 
         /// <summary>
@@ -75,8 +85,12 @@ namespace BleCommands.Core.Contracts
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="CanUpdate"/> is <c>false</c> or an aggregator is already attached.
         /// </exception>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="tokenAggregator"/> is <c>null</c>.</exception>
-        /// <exception cref="ObjectDisposedException">Thrown if the characteristic has been disposed.</exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="tokenAggregator"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the characteristic has been disposed.
+        /// </exception>
         void AttachTokenAggregator(TokenAggregator tokenAggregator);
 
         /// <summary>
@@ -88,8 +102,12 @@ namespace BleCommands.Core.Contracts
         /// Starts receiving notifications from the characteristic.
         /// </summary>
         /// <param name="token">Cancellation token for the operation.</param>
-        /// <exception cref="InvalidOperationException">Thrown when <see cref="CanUpdate"/> is <c>false</c>.</exception>
-        /// <exception cref="ObjectDisposedException">Thrown if the characteristic has been disposed.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="CanUpdate"/> is <c>false</c>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the characteristic has been disposed.
+        /// </exception>
         Task StartReceivingAsync(CancellationToken token = default);
     }
 }

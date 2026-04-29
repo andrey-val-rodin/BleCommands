@@ -44,7 +44,8 @@
         /// </summary>
         /// <param name="token">Cancellation token to cancel the operation.</param>
         /// <returns>A read-only list of services exposed by the device.</returns>
-        Task<IReadOnlyList<IService<TService, TCharacteristic>>> GetServicesAsync(CancellationToken token = default);
+        Task<IReadOnlyList<IService<TService, TCharacteristic>>> GetServicesAsync(
+            CancellationToken token = default);
 
         /// <summary>
         /// Retrieves a specific GATT service by its UUID asynchronously.
@@ -52,6 +53,7 @@
         /// <param name="id">The UUID of the service to retrieve.</param>
         /// <param name="token">Cancellation token to cancel the operation.</param>
         /// <returns>The requested service, or null if not found.</returns>
-        Task<IService<TService, TCharacteristic>?> GetServiceAsync(Guid id, CancellationToken token = default);
+        Task<IService<TService, TCharacteristic>?> GetServiceAsync(
+            Guid id, CancellationToken token = default);
     }
 }

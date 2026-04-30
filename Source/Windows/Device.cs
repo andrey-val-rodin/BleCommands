@@ -162,10 +162,7 @@ namespace BleCommands.Windows
             }
         }
 
-        /// <summary>
-        /// Releases the unmanaged resources used by the device.
-        /// Don't forget to call Dispose or use a using statement to free all system resources of the BLE device.
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);

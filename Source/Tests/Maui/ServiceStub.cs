@@ -1,0 +1,29 @@
+﻿using BleCommands.Core.Contracts;
+using BleCommands.Maui;
+using NativeService = Plugin.BLE.Abstractions.Contracts.IService;
+
+namespace BleCommands.Tests.Maui
+{
+    public sealed class ServiceStub : IService<NativeService, Characteristic>
+    {
+        public Guid Id => throw new NotImplementedException();
+
+        public NativeService NativeService => throw new NotImplementedException();
+
+        public Task<Characteristic?> GetCharacteristicAsync(
+            Guid id, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IReadOnlyList<Characteristic>> GetCharacteristicsAsync(
+            CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+}

@@ -74,7 +74,7 @@ namespace BleCommands.Maui
             ListeningCharacteristic = listeningCharacteristic;
             TokenDelimiter = tokenDelimiter;
 
-            if (ReferenceEquals(ResponseCharacteristic, ListeningCharacteristic))
+            if (ResponseCharacteristic == ListeningCharacteristic)
             {
                 ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator());
             }

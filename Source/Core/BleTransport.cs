@@ -80,7 +80,7 @@ namespace BleCommands.Core
                 return;
 
             await ResponseCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
-            if (!ReferenceEquals(ResponseCharacteristic, ListeningCharacteristic))
+            if (ResponseCharacteristic != ListeningCharacteristic)
                 await ListeningCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
 
             IsStarted = true;

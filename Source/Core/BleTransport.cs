@@ -7,6 +7,9 @@ namespace BleCommands.Core
     /// <inheritdoc />
     public abstract class BleTransport<TDevice, TService, TCharacteristic>
         : IBleTransport<TDevice, TService, TCharacteristic>
+        where TDevice : IDevice
+        where TService : IService
+        where TCharacteristic : ICharacteristic
     {
         private readonly SemaphoreSlim _semaphore = new(1, 1);
         private readonly object _timerLock = new();
@@ -35,23 +38,27 @@ namespace BleCommands.Core
         }
 
         /// <inheritdoc />
-        abstract public IDevice<TDevice, TService, TCharacteristic> Device { get; }
+        abstract public TDevice Device { get; }
 
         /// <inheritdoc />
-        abstract public IService<TService, TCharacteristic> Service { get; }
+        abstract public TService Service { get; }
 
         /// <inheritdoc />
-        abstract public ICharacteristic<TCharacteristic> CommandCharacteristic { get; }
+        abstract public TCharacteristic CommandCharacteristic { get; }
 
         /// <inheritdoc />
-        abstract public ICharacteristic<TCharacteristic> ResponseCharacteristic { get; }
+        abstract public TCharacteristic ResponseCharacteristic { get; }
 
-        protected TokenAggregator ResponseAggregator => ResponseCharacteristic.TokenAggregator!;
+        protected TokenAggregator ResponseAggregator =>
+            ResponseCharacteristic.TokenAggregator ??
+            throw new InvalidOperationException("TokenAggregator not attached to ResponseCharacteristic");
 
         /// <inheritdoc />
-        abstract public ICharacteristic<TCharacteristic> ListeningCharacteristic { get; }
+        abstract public TCharacteristic ListeningCharacteristic { get; }
 
-        protected TokenAggregator ListeningAggregator => ListeningCharacteristic.TokenAggregator!;
+        protected TokenAggregator ListeningAggregator =>
+            ListeningCharacteristic.TokenAggregator ??
+            throw new InvalidOperationException("TokenAggregator not attached to ListeningCharacteristic");
 
         /// <inheritdoc />
         public bool IsListening { get; protected set; }
@@ -73,7 +80,7 @@ namespace BleCommands.Core
                 return;
 
             await ResponseCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
-            if (ResponseCharacteristic != ListeningCharacteristic)
+            if (!ReferenceEquals(ResponseCharacteristic, ListeningCharacteristic))
                 await ListeningCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
 
             IsStarted = true;

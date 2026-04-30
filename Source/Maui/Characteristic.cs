@@ -9,12 +9,9 @@ using NativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 namespace BleCommands.Maui
 {
     /// <summary>
-    /// Represents a GATT characteristic.
+    /// MAUI implementation of <see cref="ICharacteristic{TNativeCharacteristic}"/>
+    /// using the Plugin.BLE abstraction layer.
     /// </summary>
-    /// <remarks>
-    /// This class wraps the Plugin.BLE.Abstractions.Contracts.ICharacteristic
-    /// and provides a higher-level interface for BLE operations.
-    /// </remarks>
     public class Characteristic : ICharacteristic<NativeCharacteristic>
     {
         private TokenAggregator? _tokenAggregator;

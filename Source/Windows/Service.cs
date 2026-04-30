@@ -6,10 +6,10 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 namespace BleCommands.Windows
 {
     /// <summary>
-    /// Windows implementation of <see cref="IService{TService,TCharacteristic}"/>
-    /// using <see cref="GattDeviceService"/> and <see cref="GattCharacteristic"/>.
+    /// Windows implementation of <see cref="IService{TNativeService, TCharacteristic}"/>
+    /// using the Windows.Devices.Bluetooth.GenericAttributeProfile abstraction layer.
     /// </summary>
-    public class Service : IService<GattDeviceService, GattCharacteristic>
+    public class Service : IService<GattDeviceService, Characteristic>
     {
         private bool _disposed = false;
 
@@ -51,7 +51,7 @@ namespace BleCommands.Windows
         /// </exception>
         /// <exception cref="DeviceException">Thrown on GATT-protocol errors.</exception>
         /// <exception cref="Exception">Thrown on Bluetooth-level errors.</exception>
-        public async Task<ICharacteristic<GattCharacteristic>?> GetCharacteristicAsync(
+        public async Task<Characteristic?> GetCharacteristicAsync(
             Guid id, CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
@@ -70,7 +70,7 @@ namespace BleCommands.Windows
         /// </exception>
         /// <exception cref="DeviceException">Thrown on GATT-protocol errors.</exception>
         /// <exception cref="Exception">Thrown on Bluetooth-level errors.</exception>
-        public async Task<IReadOnlyList<ICharacteristic<GattCharacteristic>>> GetCharacteristicsAsync(
+        public async Task<IReadOnlyList<Characteristic>> GetCharacteristicsAsync(
             CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
@@ -82,7 +82,7 @@ namespace BleCommands.Windows
 
             return nativeCharacteristics == null
                 ? new List<Characteristic>()
-                : nativeCharacteristics.Select(static c => new Characteristic(c)).ToList<Characteristic>();
+                : nativeCharacteristics.Select(static c => new Characteristic(c)).ToList();
         }
 
         protected virtual void Dispose(bool disposing)

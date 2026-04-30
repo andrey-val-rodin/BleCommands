@@ -1,19 +1,14 @@
 ﻿using BleCommands.Core.Contracts;
 using BleCommands.Core.Exceptions;
 using Microsoft.VisualStudio.Threading;
-using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Advertisement;
-using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace BleCommands.Windows
 {
     /// <summary>
     /// Bluetooth Low Energy scanner.
     /// </summary>
-    /// <typeparam name="TDevice">Platform-specific device type.</typeparam>
-    /// <typeparam name="TService">Platform-specific service type.</typeparam>
-    /// <typeparam name="TCharacteristic">Platform-specific characteristic type.</typeparam>
-    public class BleScanner : IBleScanner<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
+    public class BleScanner : IBleScanner<Device>
     {
         private const int DefaultTimeoutSeconds = 5;
         private const int MaxTimeoutSeconds = 60;
@@ -25,10 +20,9 @@ namespace BleCommands.Windows
         /// </summary>
         /// <param name="deviceName">Name to search for.</param>
         /// <returns>Found device or null if timeout expired.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if deviceName is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="deviceName"/> is <c>null or empty.</exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
-        public async Task<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?> FindDeviceAsync(
-            string deviceName)
+        public async Task<Device?> FindDeviceAsync(string deviceName)
         {
             return await FindDeviceAsync(deviceName, TimeSpan.FromSeconds(DefaultTimeoutSeconds)).ConfigureAwait(false);
         }
@@ -39,14 +33,13 @@ namespace BleCommands.Windows
         /// <param name="deviceName">Name to search for.</param>
         /// <param name="timeout">Timeout.</param>
         /// <returns>Found device or null if timeout expired.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if deviceName is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="deviceName"/> is <c>null or empty.</exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown if the specified timeout is less than or equal to zero,
         /// or greater than 60 seconds.
         /// </exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
-        public async Task<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?> FindDeviceAsync(
-            string deviceName, TimeSpan timeout)
+        public async Task<Device?> FindDeviceAsync(string deviceName, TimeSpan timeout)
         {
             ValidateDeviceName(deviceName);
             ValidateTimeout(timeout);
@@ -63,14 +56,14 @@ namespace BleCommands.Windows
             }
         }
 
-        private async Task<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?> FindDeviceInternalAsync(
+        private async Task<Device?> FindDeviceInternalAsync(
             string deviceName,
             CancellationToken token)
         {
             var releaser = await _scanLock.EnterAsync(token).ConfigureAwait(false);
             try
             {
-                var tcs = new TaskCompletionSource<IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>?>();
+                var tcs = new TaskCompletionSource<Device?>();
 
                 var deviceWatcher = new BluetoothLEAdvertisementWatcher
                 {

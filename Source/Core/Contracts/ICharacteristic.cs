@@ -6,8 +6,7 @@ namespace BleCommands.Core.Contracts
     /// <summary>
     /// Represents a GATT characteristic on a Bluetooth LE device.
     /// </summary>
-    /// <typeparam name="TCharacteristic">The platform-specific native characteristic type.</typeparam>
-    public interface ICharacteristic<TCharacteristic> : IDisposable
+    public interface ICharacteristic : IDisposable
     {
         /// <summary>
         /// Occurs when the characteristic value is received via notification.
@@ -23,11 +22,6 @@ namespace BleCommands.Core.Contracts
         /// Gets the properties (Read, Write, Notify, etc.) supported by this characteristic.
         /// </summary>
         CharacteristicPropertyFlags Properties { get; }
-
-        /// <summary>
-        /// Gets the platform-specific native characteristic object.
-        /// </summary>
-        TCharacteristic NativeCharacteristic { get; }
 
         /// <summary>
         /// Gets a value indicating whether the characteristic supports the Read operation.
@@ -109,5 +103,17 @@ namespace BleCommands.Core.Contracts
         /// Thrown if the characteristic has been disposed.
         /// </exception>
         Task StartReceivingAsync(CancellationToken token = default);
+    }
+
+    /// <summary>
+    /// Represents a generic GATT characteristic on a Bluetooth LE device.
+    /// </summary>
+    /// <typeparam name="TNativeCharacteristic">The platform-specific native characteristic type.</typeparam>
+    public interface ICharacteristic<TNativeCharacteristic> : ICharacteristic
+    {
+        /// <summary>
+        /// Gets the platform-specific native characteristic object.
+        /// </summary>
+        TNativeCharacteristic NativeCharacteristic { get; }
     }
 }

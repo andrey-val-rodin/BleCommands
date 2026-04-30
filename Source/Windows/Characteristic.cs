@@ -12,12 +12,9 @@ using Windows.Storage.Streams;
 namespace BleCommands.Windows
 {
     /// <summary>
-    /// Represents a GATT characteristic on a Bluetooth LE device.
+    /// Windows implementation of <see cref="ICharacteristic{TNativeCharacteristic}"/>
+    /// using the Windows.Devices.Bluetooth.GenericAttributeProfile abstraction layer.
     /// </summary>
-    /// <remarks>
-    /// This class wraps the Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristic
-    /// and provides a higher-level interface for BLE operations.
-    /// </remarks>
     public class Characteristic : ICharacteristic<GattCharacteristic>
     {
         private TokenAggregator? _tokenAggregator;
@@ -25,9 +22,9 @@ namespace BleCommands.Windows
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Characteristic"/> class
-        /// using a native GATT characteristic.
+        /// using a native <see cref="GattCharacteristic"/>.
         /// </summary>
-        /// <param name="characteristic">The native GATT characteristic to wrap.</param>
+        /// <param name="characteristic">The <see cref="GattCharacteristic"/> to wrap.</param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="characteristic"/> is <c>null</c>.
         /// </exception>

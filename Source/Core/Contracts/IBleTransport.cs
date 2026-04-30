@@ -6,10 +6,13 @@ namespace BleCommands.Core.Contracts
     /// <summary>
     /// Provides Bluetooth communication capabilities with a connected device.
     /// </summary>
-    /// <typeparam name="TDevice">Platform-specific device type.</typeparam>
-    /// <typeparam name="TService">Platform-specific service type.</typeparam>
-    /// <typeparam name="TCharacteristic">Platform-specific characteristic type.</typeparam>
+    /// <typeparam name="TDevice">A specific device implementation.</typeparam>
+    /// <typeparam name="TService">A specific service implementation.</typeparam>
+    /// <typeparam name="TCharacteristic">A specific characteristic implementation.</typeparam>
     public interface IBleTransport<TDevice, TService, TCharacteristic> : IDisposable
+        where TDevice : IDevice
+        where TService : IService
+        where TCharacteristic : ICharacteristic
     {
         /// <summary>
         /// Occurs when the device connection is lost
@@ -30,27 +33,27 @@ namespace BleCommands.Core.Contracts
         /// <summary>
         /// Gets the Bluetooth LE device.
         /// </summary>
-        IDevice<TDevice, TService, TCharacteristic> Device { get; }
+        TDevice Device { get; }
 
         /// <summary>
         /// Gets the service.
         /// </summary>
-        IService<TService, TCharacteristic> Service { get; }
+        TService Service { get; }
 
         /// <summary>
         /// Gets the characteristic used for sending commands to the Bluetooth device.
         /// </summary>
-        ICharacteristic<TCharacteristic> CommandCharacteristic { get; }
+        TCharacteristic CommandCharacteristic { get; }
 
         /// <summary>
         /// Gets the characteristic used for receiving responses from the Bluetooth device.
         /// </summary>
-        ICharacteristic<TCharacteristic> ResponseCharacteristic { get; }
+        TCharacteristic ResponseCharacteristic { get; }
 
         /// <summary>
         /// Gets the characteristic used for receiving token streams during listening mode.
         /// </summary>
-        ICharacteristic<TCharacteristic> ListeningCharacteristic { get; }
+        TCharacteristic ListeningCharacteristic { get; }
 
         /// <summary>
         /// Gets a value indicating whether listening is currently in progress.

@@ -4,15 +4,10 @@
     /// Represents a Bluetooth Low Energy scanner that searches for a nearby BLE device.
     /// </summary>
     /// <typeparam name="TDevice">
-    /// Platform-specific device type (e.g., BluetoothLEDevice on Windows, IDevice on MAUI).
+    /// A specific device implementation.
     /// </typeparam>
-    /// <typeparam name="TService">
-    /// Platform-specific service type (e.g., GattDeviceService on Windows, IService on MAUI).
-    /// </typeparam>
-    /// <typeparam name="TCharacteristic">
-    /// Platform-specific characteristic type (e.g., GattCharacteristic on Windows, ICharacteristic on MAUI).
-    /// </typeparam>
-    public interface IBleScanner<TDevice, TService, TCharacteristic> : IDisposable
+    public interface IBleScanner<TDevice> : IDisposable
+        where TDevice : IDevice
     {
         /// <summary>
         /// Searches for a Bluetooth device by name with the default timeout (5 seconds).
@@ -24,7 +19,7 @@
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="deviceName"/> is <c>null</c>, empty, or whitespace.
         /// </exception>
-        Task<IDevice<TDevice, TService, TCharacteristic>?> FindDeviceAsync(string deviceName);
+        Task<TDevice?> FindDeviceAsync(string deviceName);
 
         /// <summary>
         /// Searches for a Bluetooth device by name with a specified timeout.
@@ -40,7 +35,7 @@
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown if the specified timeout is outside the range of 1 to 60 seconds.
         /// </exception>
-        Task<IDevice<TDevice, TService, TCharacteristic>?> FindDeviceAsync(
+        Task<TDevice?> FindDeviceAsync(
             string deviceName, TimeSpan timeout);
     }
 }

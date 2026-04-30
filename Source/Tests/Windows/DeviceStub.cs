@@ -1,10 +1,10 @@
 ﻿using BleCommands.Core.Contracts;
+using BleCommands.Windows;
 using Windows.Devices.Bluetooth;
-using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace BleCommands.Tests.Windows
 {
-    internal class DeviceStub : IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
+    internal class DeviceStub : IDevice<BluetoothLEDevice, Service>
     {
         public string Id => throw new NotImplementedException();
 
@@ -21,12 +21,12 @@ namespace BleCommands.Tests.Windows
             throw new NotImplementedException();
         }
 
-        public Task<IService<GattDeviceService, GattCharacteristic>?> GetServiceAsync(Guid id, CancellationToken token = default)
+        public Task<Service?> GetServiceAsync(Guid id, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<IService<GattDeviceService, GattCharacteristic>>> GetServicesAsync(CancellationToken token = default)
+        public Task<IReadOnlyList<Service>> GetServicesAsync(CancellationToken token = default)
         {
             throw new NotImplementedException();
         }

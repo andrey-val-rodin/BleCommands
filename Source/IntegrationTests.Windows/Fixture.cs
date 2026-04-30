@@ -1,9 +1,8 @@
 ﻿using BleCommands.Core;
-using BleCommands.Core.Contracts;
 using BleCommands.Core.Events;
 using BleCommands.IntegrationTests.Windows;
 using BleCommands.Windows;
-using Windows.Devices.Bluetooth.GenericAttributeProfile;
+using BleTransport = BleCommands.Windows.BleTransport;
 
 [assembly: AssemblyFixture(typeof(Fixture))]
 namespace BleCommands.IntegrationTests.Windows
@@ -26,13 +25,13 @@ namespace BleCommands.IntegrationTests.Windows
 
         public BleTransport BleTransport { get; private set; } = null!;
 
-        public ICharacteristic<GattCharacteristic> CommandCharacteristic { get; private set; } = null!;
+        public Characteristic CommandCharacteristic { get; private set; } = null!;
 
-        public ICharacteristic<GattCharacteristic> ResponseCharacteristic { get; private set; } = null!;
+        public Characteristic ResponseCharacteristic { get; private set; } = null!;
 
-        public ICharacteristic<GattCharacteristic> ListeningCharacteristic { get; private set; } = null!;
+        public Characteristic ListeningCharacteristic { get; private set; } = null!;
 
-        public ICharacteristic<GattCharacteristic> CharacteristicWithAttachedAggregator { get; private set; } = null!;
+        public Characteristic CharacteristicWithAttachedAggregator { get; private set; } = null!;
 
         public async ValueTask InitializeAsync()
         {

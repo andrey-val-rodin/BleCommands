@@ -7,9 +7,10 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 namespace BleCommands.Windows
 {
     /// <summary>
-    /// Windows implementation of a Bluetooth Low Energy device.
+    /// Windows implementation of <see cref="IDevice{TNativeDevice, TService}"/>
+    /// using the Windows.Devices.Bluetooth abstraction layer.
     /// </summary>
-    public class Device : IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
+    public class Device : IDevice<BluetoothLEDevice, Service>
     {
         private readonly ulong _bluetoothAddress;
         private GattSession? _gattSession;
@@ -102,8 +103,7 @@ namespace BleCommands.Windows
         /// Thrown when <see cref="ConnectAsync"/> has not been called
         /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
-        public async Task<IReadOnlyList<IService<GattDeviceService, GattCharacteristic>>> GetServicesAsync(
-            CancellationToken token = default)
+        public async Task<IReadOnlyList<Service>> GetServicesAsync(CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
 
@@ -116,7 +116,7 @@ namespace BleCommands.Windows
             var nativeServices = result.Services;
 
             return nativeServices == null
-                ? new List<IService<GattDeviceService, GattCharacteristic>>()
+                ? new List<Service>()
                 : nativeServices.Select(s => new Service(s)).ToList();
         }
 
@@ -126,8 +126,7 @@ namespace BleCommands.Windows
         /// Thrown when <see cref="ConnectAsync"/> has not been called
         /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
-        public async Task<IService<GattDeviceService, GattCharacteristic>?> GetServiceAsync(
-            Guid id, CancellationToken token = default)
+        public async Task<Service?> GetServiceAsync(Guid id, CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
 

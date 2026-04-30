@@ -4,19 +4,13 @@ using Microsoft.VisualStudio.Threading;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
-using NativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
-using NativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
-using NativeService = Plugin.BLE.Abstractions.Contracts.IService;
 
 namespace BleCommands.Maui
 {
     /// <summary>
     /// Bluetooth Low Energy scanner.
     /// </summary>
-    /// <typeparam name="TDevice">Platform-specific device type.</typeparam>
-    /// <typeparam name="TService">Platform-specific service type.</typeparam>
-    /// <typeparam name="TCharacteristic">Platform-specific characteristic type.</typeparam>
-    public class BleScanner : IBleScanner<NativeDevice, NativeService, NativeCharacteristic>
+    public class BleScanner : IBleScanner<Device>
     {
         private const int DefaultTimeoutSeconds = 5;
         private const int MaxTimeoutSeconds = 60;
@@ -33,8 +27,7 @@ namespace BleCommands.Maui
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="deviceName"/> is <c>null or empty.</exception>
         /// <exception cref="InvalidOperationException">Thrown when Bluetooth scanning is already in progress.</exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
-        public async Task<IDevice<NativeDevice, NativeService, NativeCharacteristic>?> FindDeviceAsync(
-            string deviceName)
+        public async Task<Device?> FindDeviceAsync(string deviceName)
         {
             return await FindDeviceAsync(deviceName, TimeSpan.FromSeconds(DefaultTimeoutSeconds)).ConfigureAwait(false);
         }
@@ -52,8 +45,7 @@ namespace BleCommands.Maui
         /// </exception>
         /// <exception cref="InvalidOperationException">Thrown when Bluetooth scanning is already in progress.</exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
-        public async Task<IDevice<NativeDevice, NativeService, NativeCharacteristic>?> FindDeviceAsync(
-            string deviceName, TimeSpan timeout)
+        public async Task<Device?> FindDeviceAsync(string deviceName, TimeSpan timeout)
         {
             ValidateDeviceName(deviceName);
             ValidateTimeout(timeout);
@@ -70,14 +62,14 @@ namespace BleCommands.Maui
             }
         }
 
-        private async Task<IDevice<NativeDevice, NativeService, NativeCharacteristic>?> FindDeviceInternalAsync(
+        private async Task<Device?> FindDeviceInternalAsync(
             string deviceName,
             CancellationTokenSource tokenSource)
         {
             var releaser = await _scanLock.EnterAsync(tokenSource.Token).ConfigureAwait(false);
             try
             {
-                var tcs = new TaskCompletionSource<IDevice<NativeDevice, NativeService, NativeCharacteristic>?>();
+                var tcs = new TaskCompletionSource<Device?>();
 
                 void Handler(object sender, DeviceEventArgs args)
                 {

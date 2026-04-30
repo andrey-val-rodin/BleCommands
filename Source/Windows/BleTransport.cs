@@ -7,22 +7,31 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 namespace BleCommands.Windows
 {
     /// <inheritdoc />
-    public class BleTransport : BleTransport<BluetoothLEDevice, GattDeviceService, GattCharacteristic>
+    public class BleTransport : BleTransport<
+        IDevice<BluetoothLEDevice, Service>,
+        IService<GattDeviceService, Characteristic>,
+        ICharacteristic<GattCharacteristic>>
     {
         /// <summary>
         /// A constructor.
         /// </summary>
         /// <param name="device">A Bluetooth LE device.</param>
         /// <param name="service"> A service.</param>
-        /// <param name="commandCharacteristic">Characteristic for sending commands to the device (Write or WriteWithoutResponse).</param>
-        /// <param name="responseCharacteristic">Characteristic for receiving command responses from the device (Notify or Indicate).</param>
-        /// <param name="listeningCharacteristic">Characteristic for receiving token stream during listening (Notify or Indicate).</param>
+        /// <param name="commandCharacteristic">
+        /// Characteristic for sending commands to the device (Write or WriteWithoutResponse).
+        /// </param>
+        /// <param name="responseCharacteristic">
+        /// Characteristic for receiving command responses from the device (Notify or Indicate).
+        /// </param>
+        /// <param name="listeningCharacteristic">
+        /// Characteristic for receiving token stream during listening (Notify or Indicate).
+        /// </param>
         /// <param name="tokenDelimiter">Token separator. Typically, character '\n' is used.</param>
         /// <exception cref="ArgumentNullException">Thrown if any characteristic is null.</exception>
         /// <exception cref="ArgumentException">Thrown if any characteristic has invalid properties.</exception>
         public BleTransport(
-            IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic> device,
-            IService<GattDeviceService, GattCharacteristic> service,
+            IDevice<BluetoothLEDevice, Service> device,
+            IService<GattDeviceService, Characteristic> service,
             ICharacteristic<GattCharacteristic> commandCharacteristic,
             ICharacteristic<GattCharacteristic> responseCharacteristic,
             ICharacteristic<GattCharacteristic> listeningCharacteristic,
@@ -64,7 +73,7 @@ namespace BleCommands.Windows
             ListeningCharacteristic = listeningCharacteristic;
             TokenDelimiter = tokenDelimiter;
 
-            if (ResponseCharacteristic == ListeningCharacteristic)
+            if (ReferenceEquals(ResponseCharacteristic, ListeningCharacteristic))
             {
                 ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator());
             }
@@ -76,10 +85,10 @@ namespace BleCommands.Windows
         }
 
         /// <inheritdoc />
-        public override IDevice<BluetoothLEDevice, GattDeviceService, GattCharacteristic> Device { get; }
+        public override IDevice<BluetoothLEDevice, Service> Device { get; }
 
         /// <inheritdoc />
-        public override IService<GattDeviceService, GattCharacteristic> Service { get; }
+        public override IService<GattDeviceService, Characteristic> Service { get; }
 
         /// <inheritdoc />
         public override ICharacteristic<GattCharacteristic> CommandCharacteristic { get; }

@@ -3,19 +3,15 @@ using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
 using Plugin.BLE.Abstractions.Exceptions;
-using IService = BleCommands.Core.Contracts.IService<
-    Plugin.BLE.Abstractions.Contracts.IService,
-    Plugin.BLE.Abstractions.Contracts.ICharacteristic>;
-using NativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 using NativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
-using NativeService = Plugin.BLE.Abstractions.Contracts.IService;
 
 namespace BleCommands.Maui
 {
     /// <summary>
-    /// MAUI implementation of a Bluetooth Low Energy device.
+    /// MAUI implementation of <see cref="IDevice{TNativeDevice, TService}"/>
+    /// using the Plugin.BLE abstraction layer.
     /// </summary>
-    public class Device : IDevice<NativeDevice, NativeService, NativeCharacteristic>
+    public class Device : IDevice<NativeDevice, Service>
     {
         private readonly Guid? _guid;
         private bool _connectionInvoked;
@@ -150,7 +146,7 @@ namespace BleCommands.Maui
         /// Thrown when <see cref="ConnectAsync"/> has not been called
         /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
-        public async Task<IReadOnlyList<IService>> GetServicesAsync(CancellationToken token = default)
+        public async Task<IReadOnlyList<Service>> GetServicesAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
 
@@ -159,8 +155,8 @@ namespace BleCommands.Maui
 
             var nativeServices = await NativeDevice.GetServicesAsync(token);
             return nativeServices == null
-                ? new List<IService>()
-                : nativeServices.Select(s => new Service(s)).ToList<IService>();
+                ? new List<Service>()
+                : nativeServices.Select(s => new Service(s)).ToList();
         }
 
         /// <inheritdoc/>
@@ -169,7 +165,7 @@ namespace BleCommands.Maui
         /// Thrown when <see cref="ConnectAsync"/> has not been called
         /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
-        public async Task<IService?> GetServiceAsync(Guid id, CancellationToken token = default)
+        public async Task<Service?> GetServiceAsync(Guid id, CancellationToken token = default)
         {
             ThrowIfDisposed();
 

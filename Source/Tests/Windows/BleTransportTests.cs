@@ -1,6 +1,6 @@
 ﻿using BleCommands.Core;
 using BleCommands.Core.Enums;
-using BleCommands.Windows;
+using BleTransport = BleCommands.Windows.BleTransport;
 
 namespace BleCommands.Tests.Windows
 {

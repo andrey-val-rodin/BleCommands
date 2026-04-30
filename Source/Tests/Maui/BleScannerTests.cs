@@ -1,4 +1,4 @@
-﻿using BleCommands.Windows;
+﻿using BleCommands.Maui;
 
 namespace BleCommands.Tests.Maui
 {

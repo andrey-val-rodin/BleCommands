@@ -7,9 +7,9 @@ namespace BleCommands.Core
     /// <inheritdoc />
     public abstract class BleTransport<TDevice, TService, TCharacteristic>
         : IBleTransport<TDevice, TService, TCharacteristic>
-        where TDevice : IDevice
-        where TService : IService
-        where TCharacteristic : ICharacteristic
+        where TDevice : class, IDevice
+        where TService : class, IService
+        where TCharacteristic : class, ICharacteristic
     {
         private readonly SemaphoreSlim _semaphore = new(1, 1);
         private readonly object _timerLock = new();

@@ -58,7 +58,7 @@
             }
 
             await device.ConnectAsync(token);
-            return device as Device;
+            return device;
         }
     }
 }

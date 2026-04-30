@@ -36,7 +36,7 @@ namespace BleCommands.IntegrationTests.Windows
         public async ValueTask InitializeAsync()
         {
             var scanner = new BleScanner();
-            Device = await scanner.FindDeviceAsync("Rotating Table") as Device;
+            Device = await scanner.FindDeviceAsync("Rotating Table");
             Assert.True(Device != null, "Turn on Rotating Table!");
             await Device.ConnectAsync();
             var service = (await Device.GetServiceAsync(ServiceUuid))!;

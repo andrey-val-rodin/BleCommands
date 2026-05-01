@@ -56,5 +56,26 @@ namespace BleCommands.IntegrationTests.Windows
             Assert.Contains(services, s => s.Id == new Guid("00001800-0000-1000-8000-00805f9b34fb"));
             Assert.Contains(services, s => s.Id == new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"));
         }
+
+        [Fact]
+        public async Task ConnectToKnownDeviceAsync_Success()
+        {
+            using var device = new Device(Fixture.MacAddress);
+            await device.ConnectAsync(TestContext.Current.CancellationToken);
+            Assert.True(device.IsConnected);
+            /*
+             * TODO: Instead of checking the connection status immediately, you should use the following code:
+            var timeout = TimeSpan.FromSeconds(5);
+            var start = DateTime.UtcNow;
+
+            while (!device.IsConnected && DateTime.UtcNow - start < timeout)
+            {
+                await Task.Delay(50, TestContext.Current.CancellationToken);
+            }
+
+            if (!device.IsConnected)
+                throw new TimeoutException("Device did not connect within timeout");
+            */
+        }
     }
 }

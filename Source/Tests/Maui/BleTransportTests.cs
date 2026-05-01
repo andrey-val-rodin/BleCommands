@@ -4,7 +4,7 @@ using BleTransport = BleCommands.Maui.BleTransport;
 
 namespace BleCommands.Tests.Maui
 {
-    public sealed class BleTransportTests
+    public class BleTransportTests
     {
         public BleTransportTests()
         {

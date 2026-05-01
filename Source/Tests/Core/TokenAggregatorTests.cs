@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BleCommands.Tests.Core
 {
-    public sealed class TokenAggregatorTests
+    public class TokenAggregatorTests
     {
         private const char D = TokenAggregator.DefaultTokenDelimiter;
 

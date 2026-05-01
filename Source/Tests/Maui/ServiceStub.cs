@@ -4,7 +4,7 @@ using NativeService = Plugin.BLE.Abstractions.Contracts.IService;
 
 namespace BleCommands.Tests.Maui
 {
-    public sealed class ServiceStub : IService<NativeService, Characteristic>
+    internal class ServiceStub : IService<NativeService, Characteristic>
     {
         public Guid Id => throw new NotImplementedException();
 

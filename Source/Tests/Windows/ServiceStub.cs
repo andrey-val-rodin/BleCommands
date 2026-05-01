@@ -4,7 +4,7 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace BleCommands.Tests.Windows
 {
-    public sealed class ServiceStub : IService<GattDeviceService, Characteristic>
+    internal class ServiceStub : IService<GattDeviceService, Characteristic>
     {
         public Guid Id => throw new NotImplementedException();
 

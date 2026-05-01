@@ -4,7 +4,7 @@ using BleTransport = BleCommands.Windows.BleTransport;
 
 namespace BleCommands.Tests.Windows
 {
-    public sealed class BleTransportTests
+    public class BleTransportTests
     {
         public BleTransportTests()
         {

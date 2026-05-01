@@ -1,26 +1,31 @@
 ﻿using BleCommands.Core.Events;
-using BleCommands.Windows;
+using BleCommands.Maui;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace BleCommands.IntegrationTests.Windows
+namespace IntegrationTests.Uwp
 {
-    public class TransportTests(Fixture fixture)
+    [TestClass]
+    public class TransportTests
     {
-        private Fixture Fixture { get; } = fixture;
+        public TestContext TestContext { get; set; }
 
         private BleTransport BleTransport => Fixture.BleTransport;
 
-        [Fact]
+        [TestMethod]
         public async Task SendCommandAsync_Status_ValidResponse()
         {
-            Assert.Equal("READY", await BleTransport.SendCommandAsync("STATUS", TestContext.Current.CancellationToken));
+            Assert.AreEqual("READY", await BleTransport.SendCommandAsync("STATUS", TestContext.CancellationToken));
         }
 
-        [Fact]
+        [TestMethod]
         public async Task SendCommandAsync_InsufficientTimeout_Null()
         {
             var oldTimeout = BleTransport.ResponseTimeout;
             var tcs = new TaskCompletionSource<bool>();
-            void Handler(object? sender, TextEventArgs args)
+            void Handler(object sender, TextEventArgs args)
             {
                 tcs.SetResult(true);
             }
@@ -29,7 +34,7 @@ namespace BleCommands.IntegrationTests.Windows
             {
                 BleTransport.ResponseTimeout = TimeSpan.FromMilliseconds(1);
                 BleTransport.ListeningTokenReceived += Handler;
-                Assert.Null(await BleTransport.SendCommandAsync("STATUS", TestContext.Current.CancellationToken));
+                Assert.IsNull(await BleTransport.SendCommandAsync("STATUS", TestContext.CancellationToken));
 
                 // Wait until we receive an actual response
                 await tcs.Task;
@@ -41,13 +46,13 @@ namespace BleCommands.IntegrationTests.Windows
             }
         }
 
-        [Fact]
+        [TestMethod]
         public async Task ListeningIsInProgress_RotateTable_ReceiveTokens()
         {
-            Assert.Equal("OK", await BleTransport.SendCommandAsync("RUN FM", TestContext.Current.CancellationToken));
+            Assert.AreEqual("OK", await BleTransport.SendCommandAsync("RUN FM", TestContext.CancellationToken));
             var tokens = new List<string>();
             var tcs = new TaskCompletionSource<bool>();
-            void Handler(object? sender, TextEventArgs args)
+            void Handler(object sender, TextEventArgs args)
             {
                 tokens.Add(args.Text);
                 if (args.Text == "MOVERR")
@@ -56,7 +61,7 @@ namespace BleCommands.IntegrationTests.Windows
                     tcs.TrySetResult(true);
             }
 
-            void TimeoutHandler(object? sender, System.Timers.ElapsedEventArgs e)
+            void TimeoutHandler(object sender, System.Timers.ElapsedEventArgs e)
             {
                 tcs.TrySetResult(false); // Listening timeout
             }
@@ -66,11 +71,11 @@ namespace BleCommands.IntegrationTests.Windows
                 BleTransport.ListeningTokenReceived += Handler;
                 BleTransport.ListeningTimeoutElapsed += TimeoutHandler;
                 BleTransport.StartListening(TimeSpan.FromSeconds(3));
-                Assert.Equal("OK", await BleTransport.SendCommandAsync("FM 1", TestContext.Current.CancellationToken));
-                Assert.True(await tcs.Task);
+                Assert.AreEqual("OK", await BleTransport.SendCommandAsync("FM 1", TestContext.CancellationToken));
+                Assert.IsTrue(await tcs.Task);
                 await Fixture.StopTableAsync();
-                Assert.Contains(tokens, s => s.StartsWith("POS"));
-                Assert.Equal("READY", await BleTransport.SendCommandAsync("STATUS", TestContext.Current.CancellationToken));
+                Assert.Contains(s => s.StartsWith("POS"), tokens);
+                Assert.AreEqual("READY", await BleTransport.SendCommandAsync("STATUS", TestContext.CancellationToken));
             }
             finally
             {

@@ -28,5 +28,19 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+
+	<!--Description of the Bluetooth request message (required on iOS 10, deprecated)-->
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Мы используем Bluetooth для соединения с фотостолом</string>
+
+	<!--Description of the Bluetooth request message (required on iOS 13)-->
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Мы используем Bluetooth для соединения с фотостолом</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
+	</array>
+
+	<!-- Остальные ключи -->
 </dict>
 </plist>

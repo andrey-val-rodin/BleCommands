@@ -37,11 +37,5 @@ namespace IntegrationTests.Uwp
             Assert.Contains(s => s.Id == new Guid("00001800-0000-1000-8000-00805f9b34fb"), services);
             Assert.Contains(s => s.Id == new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"), services);
         }
-
-        [TestMethod]
-        public async Task ConnectToKnownDeviceAsync_Success()
-        {
-            using var device = new Device(Fixture.Id)
-        }
     }
 }

@@ -17,7 +17,7 @@ try
         return;
     }
 
-    await transport.BeginAsync();
+    await transport.StartAsync();
     PrintAvailableCommands(commands);
 
     while (true)

@@ -1,14 +1,15 @@
 ﻿using BleCommands.Maui;
+using MauiSample.PageModels;
 
-namespace MauiSample
+//xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+namespace MauiSample.Pages
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
-
-        public MainPage()
+        public MainPage(MainPageModel model)
         {
             InitializeComponent();
+            BindingContext = model;
             Loaded += MainPage_Loaded;
         }
 
@@ -16,9 +17,10 @@ namespace MauiSample
         {
             _ = MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                if (!await RequestBluetoothPermissionsAsync())
-                    return;
-
+                await RequestBluetoothPermissionsAsync();
+                if (BindingContext is MainPageModel model)
+                    model.IsPermissionsGranted = true;
+/*
                 var scanner = new BleScanner();
                 using var device = await scanner.FindDeviceAsync("Rotating Table", TimeSpan.FromSeconds(1));
                 if (device == null)
@@ -26,19 +28,8 @@ namespace MauiSample
 
                 await device.ConnectAsync();
                 var ccc = device.IsConnected;
+*/
             });
-        }
-
-        private void OnCounterClicked(object? sender, EventArgs e)
-        {
-            count++;
-
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
-
-            SemanticScreenReader.Announce(CounterBtn.Text);
         }
 
         public static async Task<bool> RequestBluetoothPermissionsAsync()
@@ -68,6 +59,14 @@ namespace MauiSample
             }
 
             return true;
+        }
+
+        private void Entry_Completed(object sender, EventArgs e)
+        {
+            if (BindingContext is MainPageModel viewModel)
+            {
+                viewModel.ConnectCommand.Execute(null);
+            }
         }
     }
 }

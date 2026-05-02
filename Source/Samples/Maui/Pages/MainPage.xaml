@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:pageModels="clr-namespace:MauiSample.PageModels"
+             x:DataType="pageModels:MainPageModel"
+             x:Class="MauiSample.Pages.MainPage">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0"
+               Text="Bluetooth device name"
+               FontSize="Title"
+               Margin="10"
+               VerticalOptions="End"
+               HorizontalOptions="Center"/>
+        <Entry Grid.Row="1"
+               IsEnabled="{Binding IsPermissionsGranted}"
+               Text="{Binding DeviceName}"
+               Completed="Entry_Completed"
+               FontSize="Title">
+        </Entry>
+        <Button x:Name="ConnectButton"
+                Grid.Row="2"
+                FontSize="Title"
+                Margin="0,20"
+                Text="Connect"
+                Command="{Binding ConnectCommand}"/>
+        <Label x:Name="ErrorText"
+               Grid.Row="3"
+               Text="{Binding Error}"
+               FontSize="Title"
+               TextColor="Brown"/>
+    </Grid>
+</ContentPage>

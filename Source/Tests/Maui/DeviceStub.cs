@@ -12,7 +12,7 @@ namespace BleCommands.Tests.Maui
 
         public bool IsConnected => throw new NotImplementedException();
 
-        public NativeDevice? NativeDevice => throw new NotImplementedException();
+        public NativeDevice NativeDevice => null!;
 
         public event EventHandler? Disconnected { add { } remove { } }
 

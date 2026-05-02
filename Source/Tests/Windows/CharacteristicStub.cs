@@ -15,7 +15,7 @@ namespace BleCommands.Tests.Windows
 
         public CharacteristicPropertyFlags Properties { get; } = properties;
 
-        public GattCharacteristic NativeCharacteristic => throw new NotImplementedException();
+        public GattCharacteristic NativeCharacteristic => null!;
 
         public bool CanRead => throw new NotImplementedException();
 

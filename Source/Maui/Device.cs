@@ -77,6 +77,7 @@ namespace BleCommands.Maui
         /// <summary>
         /// Initiates process of connection to the device.
         /// </summary>
+        /// <remarks>The connection will be established shortly.</remarks>
         /// <param name="token">Cancellation token to cancel the operation.</param>
         /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
         /// <exception cref="DeviceConnectionException">Thrown on device connection errors.</exception>

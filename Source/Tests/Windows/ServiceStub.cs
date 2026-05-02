@@ -8,7 +8,7 @@ namespace BleCommands.Tests.Windows
     {
         public Guid Id => throw new NotImplementedException();
 
-        public GattDeviceService NativeService => throw new NotImplementedException();
+        public GattDeviceService NativeService => null!;
 
         public Task<Characteristic?> GetCharacteristicAsync(
             Guid id, CancellationToken token = default)

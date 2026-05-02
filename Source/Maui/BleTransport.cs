@@ -38,11 +38,23 @@ namespace BleCommands.Maui
             ICharacteristic<NativeCharacteristic> listeningCharacteristic,
             char tokenDelimiter = TokenAggregator.DefaultTokenDelimiter)
         {
-            Device = device ?? throw new ArgumentNullException(nameof(device));
-            Service = service ?? throw new ArgumentNullException(nameof(service));
+#pragma warning disable IDE0016
+            if (device == null) throw new ArgumentNullException(nameof(device));
+            if (service == null) throw new ArgumentNullException(nameof(service));
+#pragma warning restore IDE0016
             if (commandCharacteristic == null) throw new ArgumentNullException(nameof(commandCharacteristic));
             if (responseCharacteristic == null) throw new ArgumentNullException(nameof(responseCharacteristic));
             if (listeningCharacteristic == null) throw new ArgumentNullException(nameof(listeningCharacteristic));
+
+            if (!CheckParent(device, commandCharacteristic))
+                throw new ArgumentException($"{nameof(commandCharacteristic)} does not belong to the specified device",
+                    nameof(commandCharacteristic));
+            if (!CheckParent(device, responseCharacteristic))
+                throw new ArgumentException($"{nameof(responseCharacteristic)} does not belong to the specified device",
+                    nameof(responseCharacteristic));
+            if (!CheckParent(device, listeningCharacteristic))
+                throw new ArgumentException($"{nameof(listeningCharacteristic)} does not belong to the specified device",
+                    nameof(listeningCharacteristic));
 
             if (!commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Write) &&
                 !commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse))
@@ -69,6 +81,8 @@ namespace BleCommands.Maui
                     $"{nameof(listeningCharacteristic)} has attached TokenAggregator already.",
                     nameof(listeningCharacteristic));
 
+            Device = device;
+            Service = service;
             CommandCharacteristic = commandCharacteristic;
             ResponseCharacteristic = responseCharacteristic;
             ListeningCharacteristic = listeningCharacteristic;
@@ -99,5 +113,13 @@ namespace BleCommands.Maui
 
         /// <inheritdoc />
         public override ICharacteristic<NativeCharacteristic> ListeningCharacteristic { get; }
+
+        private static bool CheckParent(IDevice<NativeDevice, Service> device,
+            ICharacteristic<NativeCharacteristic> characteristic)
+        {
+            var nativeParent = device?.NativeDevice;
+            var nativeCharacteristic = characteristic?.NativeCharacteristic;
+            return nativeParent == nativeCharacteristic?.Service?.Device;
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace BleCommands.Tests.Maui
     {
         public Guid Id => throw new NotImplementedException();
 
-        public NativeService NativeService => throw new NotImplementedException();
+        public NativeService NativeService => null!;
 
         public Task<Characteristic?> GetCharacteristicAsync(
             Guid id, CancellationToken token = default)

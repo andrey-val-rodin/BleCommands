@@ -51,6 +51,7 @@ namespace BleCommands.Windows
         /// <summary>
         /// Initiates process of connection to the device.
         /// </summary>
+        /// <remarks>The connection will be established shortly.</remarks>
         /// <param name="token">Cancellation token to cancel the operation.</param>
         /// <remarks>
         /// This method must be called from a UI thread.

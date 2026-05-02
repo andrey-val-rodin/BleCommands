@@ -22,7 +22,9 @@ namespace BleCommands.IntegrationTests.Windows
 
         public BleScanner BleScanner { get; } = new BleScanner();
 
-        public Device? Device { get; private set; } = null!;
+        public Device Device { get; private set; } = null!;
+
+        public Service Service { get; private set; } = null!;
 
         public BleTransport BleTransport { get; private set; } = null!;
 
@@ -37,21 +39,34 @@ namespace BleCommands.IntegrationTests.Windows
         public async ValueTask InitializeAsync()
         {
             var scanner = new BleScanner();
-            Device = await scanner.FindDeviceAsync("Rotating Table");
-            Assert.True(Device != null, "Turn on Rotating Table!");
+            var device = await scanner.FindDeviceAsync("Rotating Table");
+            Assert.True(device != null, "Turn on Rotating Table!");
+            Device = device;
             await Device.ConnectAsync();
-            var service = (await Device.GetServiceAsync(ServiceUuid))!;
-            Assert.NotNull(service);
-            CommandCharacteristic = (await service.GetCharacteristicAsync(WriteCharacteristicUuid))!;
+            // Verify connection
+            var timeout = TimeSpan.FromSeconds(5);
+            var start = DateTime.UtcNow;
+
+            while (!device.IsConnected && DateTime.UtcNow - start < timeout)
+            {
+                await Task.Delay(50, TestContext.Current.CancellationToken);
+            }
+
+            if (!device.IsConnected)
+                throw new TimeoutException("Device did not connect within timeout");
+
+            Service = (await Device.GetServiceAsync(ServiceUuid))!;
+            Assert.NotNull(Service);
+            CommandCharacteristic = (await Service.GetCharacteristicAsync(WriteCharacteristicUuid))!;
             Assert.NotNull(CommandCharacteristic);
-            ListeningCharacteristic = ResponseCharacteristic = (await service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
+            ListeningCharacteristic = ResponseCharacteristic = (await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
             Assert.NotNull(ResponseCharacteristic);
             Assert.NotNull(ListeningCharacteristic);
-            CharacteristicWithAttachedAggregator = (await service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
+            CharacteristicWithAttachedAggregator = (await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
             CharacteristicWithAttachedAggregator.AttachTokenAggregator(new TokenAggregator());
             BleTransport = new BleTransport(
                 Device,
-                service,
+                Service,
                 CommandCharacteristic,
                 ResponseCharacteristic,
                 ListeningCharacteristic,
@@ -91,7 +106,6 @@ namespace BleCommands.IntegrationTests.Windows
             ListeningCharacteristic?.Dispose();
             CharacteristicWithAttachedAggregator?.Dispose();
             BleTransport?.Dispose();
-            GC.SuppressFinalize(this);
             return ValueTask.CompletedTask;
         }
     }

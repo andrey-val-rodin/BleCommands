@@ -4,7 +4,8 @@ using System.Timers;
 namespace BleCommands.Core.Contracts
 {
     /// <summary>
-    /// Provides Bluetooth communication capabilities with a connected device.
+    /// Provides Bluetooth communication capabilities with a connected device
+    /// and properly releases all system resources after use.
     /// </summary>
     /// <typeparam name="TDevice">A specific device implementation.</typeparam>
     /// <typeparam name="TService">A specific service implementation.</typeparam>

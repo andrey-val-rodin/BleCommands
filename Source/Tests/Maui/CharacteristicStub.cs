@@ -15,7 +15,7 @@ namespace BleCommands.Tests.Maui
 
         public CharacteristicPropertyFlags Properties { get; } = properties;
 
-        public NativeCharacteristic NativeCharacteristic => throw new NotImplementedException();
+        public NativeCharacteristic NativeCharacteristic => null!;
 
         public bool CanRead => throw new NotImplementedException();
 

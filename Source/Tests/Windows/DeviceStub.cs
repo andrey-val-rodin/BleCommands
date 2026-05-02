@@ -12,7 +12,7 @@ namespace BleCommands.Tests.Windows
 
         public bool IsConnected => throw new NotImplementedException();
 
-        public BluetoothLEDevice? NativeDevice => throw new NotImplementedException();
+        public BluetoothLEDevice? NativeDevice => null!;
 
         public event EventHandler? Disconnected { add { } remove { } }
 

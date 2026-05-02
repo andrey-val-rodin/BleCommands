@@ -67,7 +67,7 @@ namespace BleCommands.Core
         public char TokenDelimiter { get; set; }
 
         /// <inheritdoc />
-        public TimeSpan ResponseTimeout { get; set; } = TimeSpan.FromMilliseconds(500);
+        public TimeSpan ResponseTimeout { get; set; } = TimeSpan.FromMilliseconds(1000);
 
         public bool IsStarted { get; protected set; }
 

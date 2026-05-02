@@ -37,11 +37,21 @@ namespace BleCommands.Windows
             ICharacteristic<GattCharacteristic> listeningCharacteristic,
             char tokenDelimiter = TokenAggregator.DefaultTokenDelimiter)
         {
-            Device = device ?? throw new ArgumentNullException(nameof(device));
-            Service = service ?? throw new ArgumentNullException(nameof(service));
+            ArgumentNullException.ThrowIfNull(device);
+            ArgumentNullException.ThrowIfNull(service);
             ArgumentNullException.ThrowIfNull(commandCharacteristic);
             ArgumentNullException.ThrowIfNull(responseCharacteristic);
             ArgumentNullException.ThrowIfNull(listeningCharacteristic);
+
+            if (!CheckParent(device, commandCharacteristic))
+                throw new ArgumentException($"{nameof(commandCharacteristic)} does not belong to the specified device",
+                    nameof(commandCharacteristic));
+            if (!CheckParent(device, responseCharacteristic))
+                throw new ArgumentException($"{nameof(responseCharacteristic)} does not belong to the specified device",
+                    nameof(responseCharacteristic));
+            if (!CheckParent(device, listeningCharacteristic))
+                throw new ArgumentException($"{nameof(listeningCharacteristic)} does not belong to the specified device",
+                    nameof(listeningCharacteristic));
 
             if (!commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Write) &&
                 !commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse))
@@ -68,6 +78,8 @@ namespace BleCommands.Windows
                     $"{nameof(listeningCharacteristic)} has attached TokenAggregator already.",
                     nameof(listeningCharacteristic));
 
+            Device = device;
+            Service = service;
             CommandCharacteristic = commandCharacteristic;
             ResponseCharacteristic = responseCharacteristic;
             ListeningCharacteristic = listeningCharacteristic;
@@ -98,5 +110,13 @@ namespace BleCommands.Windows
 
         /// <inheritdoc />
         public override ICharacteristic<GattCharacteristic> ListeningCharacteristic { get; }
+
+        private static bool CheckParent(IDevice<BluetoothLEDevice, Service> device,
+            ICharacteristic<GattCharacteristic> characteristic)
+        {
+            var nativeParent = device?.NativeDevice;
+            var nativeCharacteristic = characteristic?.NativeCharacteristic;
+            return nativeParent == nativeCharacteristic?.Service?.Device;
+        }
     }
 }

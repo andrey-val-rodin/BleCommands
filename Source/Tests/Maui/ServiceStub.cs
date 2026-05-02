@@ -7,7 +7,7 @@ namespace BleCommands.Tests.Maui
     internal class ServiceStub : IService<NativeService, Characteristic>
     {
         public bool Disposed { get; private set; }
-        
+
         public Guid Id => throw new NotImplementedException();
 
         public NativeService NativeService => null!;
@@ -20,6 +20,11 @@ namespace BleCommands.Tests.Maui
 
         public Task<IReadOnlyList<Characteristic>> GetCharacteristicsAsync(
             CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RegisterChild(IDisposable child)
         {
             throw new NotImplementedException();
         }

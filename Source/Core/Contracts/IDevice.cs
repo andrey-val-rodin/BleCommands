@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents a Bluetooth Low Energy device.
     /// </summary>
-    public interface IDevice : IDisposable
+    public interface IDevice : IDisposable, IChildDisposer
     {
         /// <summary>
         /// Occurs when the device is disconnected.

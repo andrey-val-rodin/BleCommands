@@ -18,6 +18,7 @@ namespace BleCommands.Maui
         private readonly SemaphoreSlim _semaphore = new(1, 1);
         private bool _disconnected;
         private readonly object _lock = new();
+        private readonly List<IDisposable> _children = new();
         private bool _disposed = false;
 
         /// <inheritdoc/>
@@ -155,9 +156,16 @@ namespace BleCommands.Maui
                 throw new InvalidOperationException("Device not connected.");
 
             var nativeServices = await NativeDevice.GetServicesAsync(token);
-            return nativeServices == null
+            var result = nativeServices == null
                 ? new List<Service>()
                 : nativeServices.Select(s => new Service(s)).ToList();
+
+            foreach (var service in result)
+            {
+                ((IChildDisposer)this).RegisterChild(service);
+            }
+
+            return result;
         }
 
         /// <inheritdoc/>
@@ -174,7 +182,13 @@ namespace BleCommands.Maui
                 throw new InvalidOperationException("Device not connected.");
 
             var nativeService = await NativeDevice.GetServiceAsync(id, token);
-            return nativeService == null ? null : new Service(nativeService);
+            if (nativeService == null)
+                return null;
+
+            var result = new Service(nativeService);
+            ((IChildDisposer)this).RegisterChild(result);
+
+            return result;
         }
 
         private void ThrowIfDisposed()
@@ -192,10 +206,24 @@ namespace BleCommands.Maui
                     Adapter.DeviceDisconnected -= Adapter_DeviceDisconnected;
                     Adapter.DeviceConnectionLost -= Adapter_DeviceDisconnected;
                     NativeDevice?.Dispose();
+
+                    foreach (var child in _children)
+                    {
+                        child?.Dispose();
+                    }
                 }
 
                 _disposed = true;
             }
+        }
+
+        /// <summary>
+        /// Explicit interface implementation. Registers a child element for future disposing.
+        /// </summary>
+        /// <param name="child">A child.</param>
+        void IChildDisposer.RegisterChild(IDisposable child)
+        {
+            _children.Add(child);
         }
 
         /// <summary>

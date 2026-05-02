@@ -9,6 +9,7 @@ namespace BleCommands.Maui
     /// </summary>
     public class Service : IService<NativeService, Characteristic>
     {
+        private readonly List<IDisposable> _children = new();
         private bool _disposed = false;
 
         /// <summary>
@@ -56,7 +57,13 @@ namespace BleCommands.Maui
             ThrowIfDisposed();
 
             var nativeCharacteristic = await NativeService.GetCharacteristicAsync(id, token);
-            return nativeCharacteristic == null ? null : new Characteristic(nativeCharacteristic);
+            if (nativeCharacteristic == null)
+                return null;
+
+            var result = new Characteristic(nativeCharacteristic);
+            ((IChildDisposer)this).RegisterChild(result);
+
+            return result;
         }
 
         /// <inheritdoc/>
@@ -70,9 +77,16 @@ namespace BleCommands.Maui
             ThrowIfDisposed();
 
             var nativeCharacteristics = await NativeService.GetCharacteristicsAsync(token);
-            return nativeCharacteristics == null
+            var result = nativeCharacteristics == null
                 ? new List<Characteristic>()
                 : nativeCharacteristics.Select(static c => new Characteristic(c)).ToList();
+
+            foreach (var characteristic in result)
+            {
+                ((IChildDisposer)this).RegisterChild(characteristic);
+            }
+
+            return result;
         }
 
         private void ThrowIfDisposed()
@@ -88,10 +102,24 @@ namespace BleCommands.Maui
                 if (disposing)
                 {
                     NativeService?.Dispose();
+
+                    foreach (var child in _children)
+                    {
+                        child?.Dispose();
+                    }
                 }
 
                 _disposed = true;
             }
+        }
+
+        /// <summary>
+        /// Explicit interface implementation. Registers a child element for future disposing.
+        /// </summary>
+        /// <param name="child">A child.</param>
+        void IChildDisposer.RegisterChild(IDisposable child)
+        {
+            _children.Add(child);
         }
 
         /// <inheritdoc/>

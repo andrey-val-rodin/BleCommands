@@ -24,6 +24,11 @@ namespace BleCommands.Tests.Windows
             throw new NotImplementedException();
         }
 
+        public void RegisterChild(IDisposable child)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Dispose()
         {
             Disposed = true;

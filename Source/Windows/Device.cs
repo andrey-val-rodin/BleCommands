@@ -15,6 +15,7 @@ namespace BleCommands.Windows
         private readonly ulong _bluetoothAddress;
         private GattSession? _gattSession;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
+        private readonly List<IDisposable> _children = new();
         private bool _disposed = false;
 
         /// <inheritdoc/>
@@ -111,14 +112,21 @@ namespace BleCommands.Windows
             if (NativeDevice == null)
                 throw new InvalidOperationException("Device is not connected.");
 
-            var result = await NativeDevice.GetGattServicesAsync(BluetoothCacheMode.Cached)
+            var gattResult = await NativeDevice.GetGattServicesAsync(BluetoothCacheMode.Cached)
                 .AsTask(token);
-            result.ThrowIfError();
-            var nativeServices = result.Services;
+            gattResult.ThrowIfError();
+            var nativeServices = gattResult.Services;
 
-            return nativeServices == null
+            var result = nativeServices == null
                 ? new List<Service>()
                 : nativeServices.Select(s => new Service(s)).ToList();
+
+            foreach (var service in result)
+            {
+                ((IChildDisposer)this).RegisterChild(service);
+            }
+
+            return result;
         }
 
         /// <inheritdoc/>
@@ -134,12 +142,18 @@ namespace BleCommands.Windows
             if (NativeDevice == null)
                 throw new InvalidOperationException("Device is not connected.");
 
-            var result = await NativeDevice.GetGattServicesForUuidAsync(id, BluetoothCacheMode.Cached)
+            var gattResult = await NativeDevice.GetGattServicesForUuidAsync(id, BluetoothCacheMode.Cached)
                 .AsTask(token);
-            result.ThrowIfError();
-            var nativeService = result.Services?.Count > 0 ? result.Services[0] : null;
+            gattResult.ThrowIfError();
 
-            return nativeService == null ? null : new Service(nativeService);
+            var nativeService = gattResult.Services?.Count > 0 ? gattResult.Services[0] : null;
+            if (nativeService == null)
+                return null;
+
+            var result = new Service(nativeService);
+            ((IChildDisposer)this).RegisterChild(result);
+
+            return result;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -153,6 +167,11 @@ namespace BleCommands.Windows
                         NativeDevice.ConnectionStatusChanged -= NativeDevice_ConnectionStatusChanged;
                         NativeDevice.Dispose();
                         NativeDevice = null;
+
+                        foreach (var child in _children)
+                        {
+                            child?.Dispose();
+                        }
                     }
 
                     _gattSession?.Dispose();
@@ -161,6 +180,15 @@ namespace BleCommands.Windows
 
                 _disposed = true;
             }
+        }
+
+        /// <summary>
+        /// Explicit interface implementation. Registers a child element for future disposing.
+        /// </summary>
+        /// <param name="child">A child.</param>
+        void IChildDisposer.RegisterChild(IDisposable child)
+        {
+            _children.Add(child);
         }
 
         /// <inheritdoc/>

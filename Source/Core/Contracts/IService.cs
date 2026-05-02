@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents a Bluetooth GATT service.
     /// </summary>
-    public interface IService : IDisposable
+    public interface IService : IDisposable, IChildDisposer
     {
         /// <summary>
         /// Gets the unique identifier (UUID) of the service.

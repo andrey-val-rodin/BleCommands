@@ -11,6 +11,7 @@ namespace BleCommands.Windows
     /// </summary>
     public class Service : IService<GattDeviceService, Characteristic>
     {
+        private readonly List<IDisposable> _children = new();
         private bool _disposed = false;
 
         /// <summary>
@@ -56,12 +57,18 @@ namespace BleCommands.Windows
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
 
-            var result = await NativeService.GetCharacteristicsForUuidAsync(id)
+            var gattResultresult = await NativeService.GetCharacteristicsForUuidAsync(id)
                 .AsTask(token);
-            result.ThrowIfError();
-            var nativeCharacteristic = result.Characteristics.Count > 0 ? result.Characteristics[0] : null;
+            gattResultresult.ThrowIfError();
 
-            return nativeCharacteristic == null ? null : new Characteristic(nativeCharacteristic);
+            var nativeCharacteristic = gattResultresult.Characteristics.Count > 0 ? gattResultresult.Characteristics[0] : null;
+            if (nativeCharacteristic == null)
+                return null;
+
+            var result = new Characteristic(nativeCharacteristic);
+            ((IChildDisposer)this).RegisterChild(result);
+
+            return result;
         }
 
         /// <inheritdoc/>
@@ -75,14 +82,21 @@ namespace BleCommands.Windows
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
 
-            var result = await NativeService.GetCharacteristicsAsync()
+            var gattResult = await NativeService.GetCharacteristicsAsync()
                 .AsTask(token);
-            result.ThrowIfError();
-            var nativeCharacteristics = result.Characteristics;
+            gattResult.ThrowIfError();
+            var nativeCharacteristics = gattResult.Characteristics;
 
-            return nativeCharacteristics == null
+            var result = nativeCharacteristics == null
                 ? new List<Characteristic>()
                 : nativeCharacteristics.Select(static c => new Characteristic(c)).ToList();
+
+            foreach (var characteristic in result)
+            {
+                ((IChildDisposer)this).RegisterChild(characteristic);
+            }
+
+            return result;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -92,10 +106,24 @@ namespace BleCommands.Windows
                 if (disposing)
                 {
                     NativeService?.Dispose();
+
+                    foreach (var child in _children)
+                    {
+                        child?.Dispose();
+                    }
                 }
 
                 _disposed = true;
             }
+        }
+
+        /// <summary>
+        /// Explicit interface implementation. Registers a child element for future disposing.
+        /// </summary>
+        /// <param name="child">A child.</param>
+        void IChildDisposer.RegisterChild(IDisposable child)
+        {
+            _children.Add(child);
         }
 
         /// <inheritdoc/>

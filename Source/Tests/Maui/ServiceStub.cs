@@ -6,6 +6,8 @@ namespace BleCommands.Tests.Maui
 {
     internal class ServiceStub : IService<NativeService, Characteristic>
     {
+        public bool Disposed { get; private set; }
+        
         public Guid Id => throw new NotImplementedException();
 
         public NativeService NativeService => null!;
@@ -24,6 +26,7 @@ namespace BleCommands.Tests.Maui
 
         public void Dispose()
         {
+            Disposed = true;
         }
     }
 }

@@ -11,6 +11,8 @@ namespace BleCommands.Tests.Windows
     {
         public event EventHandler<ByteArrayEventArgs>? ValueReceived { add { } remove { } }
 
+        public bool Disposed { get; private set; }
+
         public Guid Id { get; set; }
 
         public CharacteristicPropertyFlags Properties { get; } = properties;
@@ -57,6 +59,7 @@ namespace BleCommands.Tests.Windows
 
         public void Dispose()
         {
+            Disposed = true;
         }
     }
 }

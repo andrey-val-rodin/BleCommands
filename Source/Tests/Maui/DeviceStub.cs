@@ -6,6 +6,8 @@ namespace BleCommands.Tests.Maui
 {
     internal class DeviceStub : IDevice<NativeDevice, Service>
     {
+        public bool Disposed { get; private set; }
+        
         public string Id => throw new NotImplementedException();
 
         public string Name => throw new NotImplementedException();
@@ -33,6 +35,7 @@ namespace BleCommands.Tests.Maui
 
         public void Dispose()
         {
+            Disposed = true;
         }
     }
 }

@@ -246,5 +246,28 @@ namespace BleCommands.Tests.Maui
                 transport.StartListening(TimeSpan.FromSeconds(1));
             });
         }
+
+        [Fact]
+        public void Instance_Dispose_EverythingIsDisposed()
+        {
+            var device = new DeviceStub();
+            var service = new ServiceStub();
+            var commandCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Write);
+            var responseCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Notify);
+            var listeningCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Notify);
+            var transport = new BleTransport(
+                device,
+                service,
+                commandCharacteristic,
+                responseCharacteristic,
+                listeningCharacteristic);
+            transport.Dispose();
+
+            Assert.True(device.Disposed);
+            Assert.True(service.Disposed);
+            Assert.True(commandCharacteristic.Disposed);
+            Assert.True(responseCharacteristic.Disposed);
+            Assert.True(listeningCharacteristic.Disposed);
+        }
     }
 }

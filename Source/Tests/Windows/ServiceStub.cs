@@ -6,6 +6,8 @@ namespace BleCommands.Tests.Windows
 {
     internal class ServiceStub : IService<GattDeviceService, Characteristic>
     {
+        public bool Disposed { get; private set; }
+
         public Guid Id => throw new NotImplementedException();
 
         public GattDeviceService NativeService => null!;
@@ -24,6 +26,7 @@ namespace BleCommands.Tests.Windows
 
         public void Dispose()
         {
+            Disposed = true;
         }
     }
 }

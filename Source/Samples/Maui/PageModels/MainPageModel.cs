@@ -5,9 +5,9 @@ using MauiSample.Models;
 
 namespace MauiSample.PageModels
 {
-    public partial class MainPageModel(DeviceHolder device) : ObservableObject
+    public partial class MainPageModel(DeviceHolder deviceHolder) : ObservableObject
     {
-        DeviceHolder DeviceHolder { get; set; } = device;
+        DeviceHolder DeviceHolder { get; set; } = deviceHolder;
 
         [ObservableProperty]
         bool _isBusy;
@@ -16,7 +16,8 @@ namespace MauiSample.PageModels
         bool _isPermissionsGranted;
 
         [ObservableProperty]
-        string _deviceName = string.Empty;
+        //TODO: remove "Rotating Table"
+        string _deviceName = "Rotating Table";//string.Empty;
 
         [ObservableProperty]
         string _error = string.Empty;
@@ -34,7 +35,7 @@ namespace MauiSample.PageModels
             try
             {
                 var scanner = new BleScanner();
-                using var device = await scanner.FindDeviceAsync(DeviceName, TimeSpan.FromSeconds(3));
+                var device = await scanner.FindDeviceAsync(DeviceName);
                 if (device == null)
                 {
                     Error = $"Failed to connect to '{DeviceName}'";
@@ -42,10 +43,7 @@ namespace MauiSample.PageModels
                 }
 
                 await device.ConnectAsync();
-                var services = await device.GetServicesAsync();
-                
                 DeviceHolder.Device = device;
-                DeviceHolder.AddServices(services);
 
                 await Shell.Current.GoToAsync("services", true);
             }

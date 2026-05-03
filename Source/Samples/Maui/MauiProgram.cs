@@ -34,6 +34,7 @@ namespace MauiSample
             builder.Services.AddSingleton<ServicesPageModel>();
             
             builder.Services.AddTransientWithShellRoute<ServicesPage, ServicesPageModel>("services");
+            builder.Services.AddTransientWithShellRoute<CharacteristicsPage, CharacteristicsPageModel>("characteristics");
 
             return builder.Build();
         }

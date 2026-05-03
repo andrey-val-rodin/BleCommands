@@ -6,7 +6,6 @@ namespace MauiSample.Models
     public class DeviceHolder
     {
         private Device? _device;
-        private readonly List<MyService> _services = [];
 
         public Device? Device
         {
@@ -18,14 +17,16 @@ namespace MauiSample.Models
             }
         }
 
-        public IReadOnlyList<MyService> Services => _services;
+        public MyService[] Services { get; private set; } = [];
 
-        public void AddServices(IReadOnlyList<Service> services)
+        public MyService? SelectedService { get; set; }
+
+        public void SetServices(IReadOnlyList<Service> services)
         {
-            foreach (var service in services)
+            Services = new MyService[services.Count];
+            for (int i = 0; i < services.Count; i++)
             {
-                var myService = new MyService(service.NativeService);
-                _services.Add(myService);
+                Services[i] = new MyService(services[i].NativeService);
             }
         }
 
@@ -33,7 +34,6 @@ namespace MauiSample.Models
         {
             // Will initiate a cascading disposing of all underlying objects
             _device?.Dispose();
-            _services.Clear();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using BleCommands.Maui;
+﻿using MauiSample.Models;
 using MauiSample.PageModels;
 
 //xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
@@ -6,11 +6,22 @@ namespace MauiSample.Pages
 {
     public partial class MainPage : ContentPage
     {
-        public MainPage(MainPageModel model)
+        public MainPage(MainPageModel model, DeviceHolder deviceHolder)
         {
             InitializeComponent();
             BindingContext = model;
+            DeviceHolder = deviceHolder;
             Loaded += MainPage_Loaded;
+        }
+
+        DeviceHolder DeviceHolder { get; set; }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            DeviceHolder.Device = null;
+            //TODO: Check in Android quick reconnection
+            //DeviceName.Text = string.Empty;
         }
 
         private void MainPage_Loaded(object? sender, EventArgs e)
@@ -20,15 +31,6 @@ namespace MauiSample.Pages
                 await RequestBluetoothPermissionsAsync();
                 if (BindingContext is MainPageModel model)
                     model.IsPermissionsGranted = true;
-/*
-                var scanner = new BleScanner();
-                using var device = await scanner.FindDeviceAsync("Rotating Table", TimeSpan.FromSeconds(1));
-                if (device == null)
-                    return;
-
-                await device.ConnectAsync();
-                var ccc = device.IsConnected;
-*/
             });
         }
 

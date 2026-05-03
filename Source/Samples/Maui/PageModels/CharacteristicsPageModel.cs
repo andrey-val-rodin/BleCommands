@@ -5,14 +5,14 @@ using System.Collections.ObjectModel;
 
 namespace MauiSample.PageModels
 {
-    public partial class ServicesPageModel(DeviceHolder deviceHolder) : ObservableObject
+    public partial class CharacteristicsPageModel(DeviceHolder deviceHolder) : ObservableObject
     {
         DeviceHolder DeviceHolder { get; set; } = deviceHolder;
 
         [ObservableProperty]
         bool _isBusy;
 
-        public ObservableCollection<MyService> Services { get; private set; } = [];
+        public ObservableCollection<MyCharacteristic> Characteristics { get; private set; } = [];
 
         [ObservableProperty]
         string _error = string.Empty;
@@ -21,21 +21,19 @@ namespace MauiSample.PageModels
         MyService? _item;
 
         [RelayCommand]
-        async Task GetServicesAsync()
+        async Task GetCharacteristicsAsync()
         {
             IsBusy = true;
             try
             {
-                var device = DeviceHolder.Device;
-                if (device == null)
+                var service = DeviceHolder.SelectedService;
+                if (service == null)
                     return;
 
-                var services = await device.GetServicesAsync();
-                DeviceHolder.SetServices(services);
-                Services.Clear();
-                foreach (var service in DeviceHolder.Services)
+                var characteristics = await service.GetCharacteristicsAsync();
+                foreach (var characteristic in characteristics)
                 {
-                    Services.Add(service);
+                    Characteristics.Add(new MyCharacteristic(characteristic.NativeCharacteristic));
                 }
             }
             catch (Exception ex)
@@ -49,13 +47,10 @@ namespace MauiSample.PageModels
         }
 
         [RelayCommand]
-        async Task ExploreServiceAsync()
+        void ExploreService()
         {
             if (Item == null)
                 return;
-
-            DeviceHolder.SelectedService = Item;
-            await Shell.Current.GoToAsync("characteristics", true);
         }
     }
 }

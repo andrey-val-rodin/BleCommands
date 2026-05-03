@@ -3,9 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:MauiSample.Models"
              xmlns:pageModels="clr-namespace:MauiSample.PageModels"
-             x:DataType="pageModels:ServicesPageModel"
-             x:Class="MauiSample.Pages.ServicesPage"
-             Title="Services">
+             x:DataType="pageModels:CharacteristicsPageModel"
+             x:Class="MauiSample.Pages.CharacteristicsPage"
+             Title="Characteristics">
 
     <Grid Padding="10" Margin="5,2">
         <Grid.RowDefinitions>
@@ -18,17 +18,12 @@
         </Grid.RowDefinitions>
 
         <CollectionView Grid.Row="0"
-                        ItemsSource="{Binding Services}"
+                        ItemsSource="{Binding Characteristics}"
                         SelectionMode="Single"
                         SelectedItem="{Binding Item, Mode=TwoWay}">
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:MyService">
+                <DataTemplate x:DataType="models:MyCharacteristic">
                     <VerticalStackLayout>
-                        <VerticalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ExploreServiceCommand,
-                                Source={RelativeSource AncestorType={x:Type pageModels:ServicesPageModel}},
-                                x:DataType=pageModels:ServicesPageModel}" CommandParameter="{Binding .}"/>
-                        </VerticalStackLayout.GestureRecognizers>
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup Name="CommonStates">
                                 <VisualState Name="Normal"></VisualState>
@@ -40,12 +35,14 @@
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
                         <VerticalStackLayout Margin="8,8">
-                            <Label Text="{Binding Name}" 
-                               FontSize="16"
-                               FontAttributes="Bold"/>
-                            <Label Text="{Binding Id}" 
-                               FontSize="14" 
-                               TextColor="DarkGray"/>
+                            <Label Text="{Binding Name}"
+                                   FontSize="16"
+                                   FontAttributes="Bold"/>
+                            <Label Text="{Binding Id}"
+                                   FontSize="14"
+                                   TextColor="DarkGray"/>
+                            <Label Text="{Binding PropertiesString}"
+                                   FontSize="14"/>
                         </VerticalStackLayout>
                     </VerticalStackLayout>
                 </DataTemplate>

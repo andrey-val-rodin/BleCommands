@@ -19,20 +19,23 @@
                Margin="10"
                VerticalOptions="End"
                HorizontalOptions="Center"/>
-        <Entry Grid.Row="1"
+        <Entry x:Name="DeviceName"
+               Grid.Row="1"
                IsEnabled="{Binding IsPermissionsGranted}"
                Text="{Binding DeviceName}"
                Completed="Entry_Completed"
                FontSize="Title">
         </Entry>
+        <ActivityIndicator Grid.Row="1"
+                           IsVisible="{Binding IsBusy}"
+                           IsRunning="{Binding IsBusy}"/>
         <Button x:Name="ConnectButton"
                 Grid.Row="2"
                 FontSize="Title"
                 Margin="0,20"
                 Text="Connect"
                 Command="{Binding ConnectCommand}"/>
-        <Label x:Name="ErrorText"
-               Grid.Row="3"
+        <Label Grid.Row="3"
                Text="{Binding Error}"
                FontSize="Title"
                TextColor="Brown"/>

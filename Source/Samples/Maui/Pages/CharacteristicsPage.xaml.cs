@@ -2,9 +2,9 @@
 
 namespace MauiSample.Pages
 {
-    public partial class ServicesPage : ContentPage
+    public partial class CharacteristicsPage : ContentPage
     {
-        public ServicesPage(ServicesPageModel model)
+        public CharacteristicsPage(CharacteristicsPageModel model)
         {
             InitializeComponent();
             BindingContext = model;
@@ -16,8 +16,8 @@ namespace MauiSample.Pages
 
             _ = MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                if (BindingContext is ServicesPageModel model)
-                    await model.GetServicesCommand.ExecuteAsync(null);
+                if (BindingContext is CharacteristicsPageModel model)
+                    await model.GetCharacteristicsCommand.ExecuteAsync(null);
             });
         }
     }

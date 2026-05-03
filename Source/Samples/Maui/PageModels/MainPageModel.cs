@@ -42,7 +42,9 @@ namespace MauiSample.PageModels
 
                 await device.ConnectAsync();
                 var services = await device.GetServicesAsync();
+                
                 DeviceHolder.Device = device;
+                DeviceHolder.AddServices(services);
 
                 await Shell.Current.GoToAsync("services", true);
             }

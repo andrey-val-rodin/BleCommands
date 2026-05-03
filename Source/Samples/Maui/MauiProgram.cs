@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui;
+using MauiSample.Models;
 using MauiSample.PageModels;
 using MauiSample.Pages;
 using Microsoft.Extensions.Logging;
@@ -28,6 +29,7 @@ namespace MauiSample
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
+            builder.Services.AddSingleton<DeviceHolder>();
             builder.Services.AddSingleton<MainPageModel>();
             builder.Services.AddSingleton<ServicesPageModel>();
             

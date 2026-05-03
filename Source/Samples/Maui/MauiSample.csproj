@@ -67,7 +67,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Core\Core.csproj" />
 	  <ProjectReference Include="..\..\Maui\Maui.csproj" />
 	</ItemGroup>
 

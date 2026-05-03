@@ -1,12 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Plugin.BLE.Abstractions;
+using MauiSample.Models;
 
 namespace MauiSample.PageModels
 {
-    public partial class ServicesPageModel : ObservableObject, IQueryAttributable
+    public partial class ServicesPageModel(DeviceHolder device) : ObservableObject
     {
-        public void ApplyQueryAttributes(IDictionary<string, object> query)
-        {
-        }
+        public DeviceHolder DeviceHolder { get; set; } = device;
+
+        [ObservableProperty]
+        bool _isBusy;
     }
 }

@@ -1,11 +1,14 @@
 using BleCommands.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MauiSample.Models;
 
 namespace MauiSample.PageModels
 {
-    public partial class MainPageModel : ObservableObject
+    public partial class MainPageModel(DeviceHolder device) : ObservableObject
     {
+        public DeviceHolder DeviceHolder { get; set; } = device;
+
         [ObservableProperty]
         bool _isBusy;
 
@@ -39,12 +42,9 @@ namespace MauiSample.PageModels
 
                 await device.ConnectAsync();
                 var services = await device.GetServicesAsync();
-                var parameters = new Dictionary<string, object>
-                {
-                    { "device", device }
-                };
+                DeviceHolder.Device = device;
 
-                await Shell.Current.GoToAsync("services", true, parameters);
+                await Shell.Current.GoToAsync("services", true);
             }
             catch (Exception ex)
             {

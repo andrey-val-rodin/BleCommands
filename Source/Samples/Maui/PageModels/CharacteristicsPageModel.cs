@@ -18,7 +18,7 @@ namespace MauiSample.PageModels
         string _error = string.Empty;
 
         [ObservableProperty]
-        MyService? _item;
+        MyCharacteristic? _item;
 
         [RelayCommand]
         async Task GetCharacteristicsAsync()

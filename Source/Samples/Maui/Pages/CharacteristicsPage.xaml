@@ -13,11 +13,20 @@
             <!-- CollectionView -->
             <RowDefinition Height="Auto" />
             <!-- ActivityIndicator -->
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
             <!-- Error Label -->
         </Grid.RowDefinitions>
 
-        <CollectionView Grid.Row="0"
+        <ActivityIndicator Grid.Row="0"
+                           IsVisible="{Binding IsBusy}"
+                           IsRunning="{Binding IsBusy}"/>
+        
+        <Label Grid.Row="1"
+               Text="{Binding Error}"
+               FontSize="Title"
+               TextColor="Brown"/>
+
+        <CollectionView Grid.Row="2"
                         ItemsSource="{Binding Characteristics}"
                         SelectionMode="Single"
                         SelectedItem="{Binding Item, Mode=TwoWay}">
@@ -48,12 +57,5 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-        <ActivityIndicator Grid.Row="1"
-                           IsVisible="{Binding IsBusy}"
-                           IsRunning="{Binding IsBusy}"/>
-        <Label Grid.Row="2"
-               Text="{Binding Error}"
-               FontSize="Title"
-               TextColor="Brown"/>
     </Grid>
 </ContentPage>

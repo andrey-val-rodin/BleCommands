@@ -6,7 +6,27 @@
              x:Class="MauiSample.Pages.ServicesPage"
              Title="Services">
 
-    <Grid>
-        
-    </Grid>
+    <CollectionView ItemsSource="{Binding Services}"
+                    SelectionMode="None">
+        <CollectionView.ItemTemplate>
+            <DataTemplate>
+                <Grid Padding="10"
+                      BackgroundColor="LightGray"
+                      Margin="5,2">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ExploreServiceCommand}" />
+                    </Grid.GestureRecognizers>
+
+                    <VerticalStackLayout>
+                        <Label Text="{Binding Name}"
+                               FontSize="16"
+                               FontAttributes="Bold"/>
+                        <Label Text="{Binding Id}"
+                               FontSize="14"
+                               TextColor="DarkGray"/>
+                    </VerticalStackLayout>
+                </Grid>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
 </ContentPage>

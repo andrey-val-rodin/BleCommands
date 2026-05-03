@@ -7,7 +7,7 @@ namespace MauiSample.PageModels
 {
     public partial class MainPageModel(DeviceHolder device) : ObservableObject
     {
-        public DeviceHolder DeviceHolder { get; set; } = device;
+        DeviceHolder DeviceHolder { get; set; } = device;
 
         [ObservableProperty]
         bool _isBusy;
@@ -29,6 +29,7 @@ namespace MauiSample.PageModels
         [RelayCommand]
         async Task ConnectAsync()
         {
+            Error = string.Empty;
             IsBusy = true;
             try
             {

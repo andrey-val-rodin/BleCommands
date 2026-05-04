@@ -96,7 +96,7 @@ namespace WpfSample
 
         public async Task<bool> BeginAsync(string deviceName)
         {
-            BleTransport = await BleCommandsClient.CreateTransportAsync(deviceName);
+            BleTransport = await ArduinoClient.CreateTransportAsync(deviceName);
             if (BleTransport == null)
             {
                 return false;

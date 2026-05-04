@@ -1,6 +1,6 @@
-﻿namespace BleCommands.Windows
+﻿namespace BleCommands.Maui
 {
-    public static class BleCommandsClient
+    public static class ArduinoClient
     {
         public static readonly Guid ServiceUuid                 = new("DB341FB3-8977-4C2D-AC6C-74540BD8B901");
         public static readonly Guid CommandCharacteristicUuid   = new("DB341FB3-8977-4C2D-AC6C-74540BD8B902");

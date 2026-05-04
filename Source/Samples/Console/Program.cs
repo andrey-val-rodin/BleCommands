@@ -9,7 +9,7 @@ try
     string[] validResponses = ["OK", "ON", "OFF"];
     WriteLine("Connecting...");
 
-    using var transport = await BleCommandsClient.CreateTransportAsync(deviceName);
+    using var transport = await ArduinoClient.CreateTransportAsync(deviceName);
     if (transport == null)
     {
         // Failed to create transport

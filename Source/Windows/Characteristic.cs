@@ -153,7 +153,7 @@ namespace BleCommands.Windows
         /// <returns>
         /// The converted string, or an empty string if the conversion fails.
         /// </returns>
-        protected static string ConvertToString(byte[] value)
+        public static string ConvertToString(byte[] value)
         {
             try
             {

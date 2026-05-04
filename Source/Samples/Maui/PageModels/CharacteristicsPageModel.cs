@@ -7,6 +7,8 @@ namespace MauiSample.PageModels
 {
     public partial class CharacteristicsPageModel(DeviceHolder deviceHolder) : ObservableObject
     {
+        public event Func<MyCharacteristic, Task<string>>? RequestUserInput;
+
         DeviceHolder DeviceHolder { get; set; } = deviceHolder;
 
         [ObservableProperty]
@@ -31,9 +33,11 @@ namespace MauiSample.PageModels
                     return;
 
                 var characteristics = await service.GetCharacteristicsAsync();
-                foreach (var characteristic in characteristics)
+                DeviceHolder.SetCharacteristics(characteristics);
+                foreach (var characteristic in DeviceHolder.Characteristics)
                 {
-                    Characteristics.Add(new MyCharacteristic(characteristic.NativeCharacteristic));
+                    await characteristic.InitializeAsync();
+                    Characteristics.Add(characteristic);
                 }
             }
             catch (Exception ex)
@@ -47,10 +51,56 @@ namespace MauiSample.PageModels
         }
 
         [RelayCommand]
-        void ExploreService()
+        async Task WriteAsync(MyCharacteristic characteristic)
         {
-            if (Item == null)
+            if (characteristic == null)
                 return;
+
+            Item = characteristic;
+
+            if (RequestUserInput != null)
+            {
+                var input = await RequestUserInput.Invoke(characteristic);
+                if (input != null)
+                {
+                    try
+                    {
+                        await characteristic.WriteAsync(input + '\n');
+                    }
+                    catch (Exception ex)
+                    {
+                        Error = ex.Message;
+                    }
+                }
+            }
+        }
+
+        [RelayCommand]
+        async Task ReadAsync(MyCharacteristic characteristic)
+        {
+            if (characteristic == null)
+                return;
+
+            Item = characteristic;
+
+            try
+            {
+                characteristic.ReadValue = await characteristic.ReadAsync();
+            }
+            catch (Exception ex)
+            {
+                Error = ex.Message;
+            }
+        }
+
+        [RelayCommand]
+        void ToggleNotifying(MyCharacteristic characteristic)
+        {
+            if (characteristic == null)
+                return;
+
+            Item = characteristic;
+            characteristic.IsNotifying = !characteristic.IsNotifying;
         }
     }
 }

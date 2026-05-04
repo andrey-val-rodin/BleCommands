@@ -48,14 +48,14 @@
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                        <VerticalStackLayout Margin="8,8">
-                            <Label Text="{Binding Name}" 
+                        <Label Text="{Binding Name}"
+                               Margin="10,12,0,0"
                                FontSize="16"
                                FontAttributes="Bold"/>
-                            <Label Text="{Binding Id}" 
-                               FontSize="14" 
+                        <Label Text="{Binding Id}"
+                               Margin="10,4,0,12"
+                               FontSize="14"
                                TextColor="DarkGray"/>
-                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

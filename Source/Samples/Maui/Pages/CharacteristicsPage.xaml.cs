@@ -8,6 +8,17 @@ namespace MauiSample.Pages
         {
             InitializeComponent();
             BindingContext = model;
+            model.RequestUserInput += Model_RequestUserInputAsync;
+        }
+
+        private async Task<string> Model_RequestUserInputAsync(Models.MyCharacteristic arg)
+        {
+            return await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                return await DisplayPromptAsync("Write Value",
+                    $"Enter value to write:",
+                    "OK", "Cancel");
+            });
         }
 
         protected override void OnNavigatedTo(NavigatedToEventArgs args)

@@ -49,12 +49,13 @@ namespace MauiSample.PageModels
         }
 
         [RelayCommand]
-        async Task ExploreServiceAsync()
+        async Task ExploreServiceAsync(MyService? service)
         {
-            if (Item == null)
+            if (service == null)
                 return;
 
-            DeviceHolder.SelectedService = Item;
+            Item = service;
+            DeviceHolder.SelectedService = service;
             await Shell.Current.GoToAsync("characteristics", true);
         }
     }

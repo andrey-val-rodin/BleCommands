@@ -16,8 +16,7 @@ namespace MauiSample.PageModels
         bool _isPermissionsGranted;
 
         [ObservableProperty]
-        //TODO: remove "Rotating Table"
-        string _deviceName = "Rotating Table";//string.Empty;
+        string _deviceName = string.Empty;
 
         [ObservableProperty]
         string _error = string.Empty;

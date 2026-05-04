@@ -20,7 +20,6 @@ namespace MauiSample.Pages
         {
             base.OnAppearing();
             DeviceHolder.Device = null;
-            //TODO: Check in Android quick reconnection
             //DeviceName.Text = string.Empty;
         }
 

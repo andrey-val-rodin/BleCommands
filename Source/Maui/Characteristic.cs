@@ -97,7 +97,7 @@ namespace BleCommands.Maui
                 throw new InvalidOperationException("The characteristic is not Read.");
 
             await NativeCharacteristic.ReadAsync(token).ConfigureAwait(false);
-            return NativeCharacteristic.StringValue;
+            return ConvertToString(NativeCharacteristic.Value);
         }
 
         /// <summary>
@@ -130,6 +130,25 @@ namespace BleCommands.Maui
 
             var bytes = Encoding.UTF8.GetBytes(text);
             await NativeCharacteristic.WriteAsync(bytes, token);
+        }
+
+        /// <summary>
+        /// Converts a byte array to a UTF-8 string.
+        /// </summary>
+        /// <param name="value">The byte array to convert.</param>
+        /// <returns>
+        /// The converted string, or an empty string if the conversion fails.
+        /// </returns>
+        public static string ConvertToString(byte[] value)
+        {
+            try
+            {
+                return Encoding.UTF8.GetString(value);
+            }
+            catch (Exception ex) when (ex is DecoderFallbackException or ArgumentException or ArgumentNullException)
+            {
+                return string.Empty;
+            }
         }
 
         /// <summary>

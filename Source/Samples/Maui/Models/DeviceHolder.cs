@@ -21,6 +21,8 @@ namespace MauiSample.Models
 
         public MyService? SelectedService { get; set; }
 
+        public MyCharacteristic[] Characteristics { get; private set; } = [];
+
         public void SetServices(IReadOnlyList<Service> services)
         {
             Services = new MyService[services.Count];
@@ -30,10 +32,29 @@ namespace MauiSample.Models
             }
         }
 
+        public void SetCharacteristics(IReadOnlyList<Characteristic> characteristics)
+        {
+            Characteristics = new MyCharacteristic[characteristics.Count];
+            for (int i = 0; i < characteristics.Count; i++)
+            {
+                Characteristics[i] = new MyCharacteristic(characteristics[i].NativeCharacteristic);
+            }
+        }
+
         private void Clean()
         {
             // Will initiate a cascading disposing of all underlying objects
             _device?.Dispose();
+
+            // Unsubscribe event handler in all characteristics
+            foreach (var characteristic in Characteristics)
+            {
+                characteristic.IsNotifying = false;
+            }
+
+            Services = [];
+            SelectedService = null;
+            Characteristics = [];
         }
     }
 }

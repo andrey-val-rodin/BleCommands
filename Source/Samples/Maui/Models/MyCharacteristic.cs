@@ -1,11 +1,16 @@
 ﻿using BleCommands.Core.Enums;
 using BleCommands.Maui;
+using CommunityToolkit.Mvvm.ComponentModel;
 using NativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 
 namespace MauiSample.Models
 {
-    public partial class MyCharacteristic(NativeCharacteristic nativeCharacteristic) : Characteristic(nativeCharacteristic)
+    [INotifyPropertyChanged]
+    public partial class MyCharacteristic(NativeCharacteristic nativeCharacteristic)
+        : Characteristic(nativeCharacteristic)
     {
+        private bool _isNotifying = false;
+
         public string Name
         {
             get
@@ -18,6 +23,41 @@ namespace MauiSample.Models
         }
 
         public string PropertiesString => GetPropertiesString(Properties);
+
+        [ObservableProperty]
+        string _notifyValue = string.Empty;
+
+        [ObservableProperty]
+        string _readValue = string.Empty;
+
+        public bool IsNotifying
+        {
+            get { return _isNotifying; }
+            set
+            {
+                if (SetProperty(ref _isNotifying, value))
+                {
+                    if (_isNotifying)
+                        ValueReceived += MyCharacteristic_ValueReceived;
+                    else
+                        ValueReceived -= MyCharacteristic_ValueReceived;
+                }
+            }
+        }
+
+        private void MyCharacteristic_ValueReceived(object? sender, BleCommands.Core.Events.ByteArrayEventArgs e)
+        {
+            NotifyValue = ConvertToString(e.Value);
+        }
+
+        public async Task InitializeAsync()
+        {
+            if (CanUpdate)
+            {
+                await StartReceivingAsync();
+                IsNotifying = true;
+            }
+        }
 
         public static string GetPropertiesString(CharacteristicPropertyFlags properties)
         {

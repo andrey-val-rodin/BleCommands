@@ -31,8 +31,8 @@ jobs:
       
     - name: Build Samples.Maui for Android only
       run: |
-        dotnet restore Samples/Maui/MauiSample.csproj
-        dotnet build Samples/Maui/MauiSample.csproj -f net9.0-android --configuration Release --no-restore
+        dotnet restore Source/Samples/Maui/MauiSample.csproj
+        dotnet build Source/Samples/Maui/MauiSample.csproj -f net9.0-android --configuration Release --no-restore
 
   build-windows:
     name: Build Windows-specific projects
@@ -55,9 +55,9 @@ jobs:
         dotnet restore Source/Maui/Maui.csproj
         dotnet restore Source/Windows/Windows.csproj
         dotnet restore Source/Tests/Tests.csproj
-        dotnet restore Samples/Console/ConsoleSample.csproj
-        dotnet restore Samples/WPF/WPFSample.csproj
-        dotnet restore Samples/Maui/MauiSample.csproj
+        dotnet restore Source/Samples/Console/ConsoleSample.csproj
+        dotnet restore Source/Samples/WPF/WPFSample.csproj
+        dotnet restore Source/Samples/Maui/MauiSample.csproj
       
     - name: Build all projects
       run: |
@@ -65,13 +65,13 @@ jobs:
         dotnet build Source/Maui/Maui.csproj --configuration Release --no-restore
         dotnet build Source/Windows/Windows.csproj --configuration Release --no-restore
         dotnet build Source/Tests/Tests.csproj --configuration Release --no-restore
-        dotnet build Samples/Console/ConsoleSample.csproj --configuration Release --no-restore
-        dotnet build Samples/WPF/WPFSample.csproj --configuration Release --no-restore
+        dotnet build Source/Samples/Console/ConsoleSample.csproj --configuration Release --no-restore
+        dotnet build Source/Samples/WPF/WPFSample.csproj --configuration Release --no-restore
       
     - name: Build Samples.Maui for iOS and MacCatalyst
       run: |
-        dotnet build Samples/Maui/Samples/MauiSample.csproj -f net9.0-ios --configuration Release --no-restore
-        dotnet build Samples/Maui/Samples/MauiSample.csproj -f net9.0-maccatalyst --configuration Release --no-restore
+        dotnet build Source/Samples/Maui/Samples/MauiSample.csproj -f net9.0-ios --configuration Release --no-restore
+        dotnet build Source/Samples/Maui/Samples/MauiSample.csproj -f net9.0-maccatalyst --configuration Release --no-restore
       
     - name: Run Unit Tests
       run: dotnet test Source/Tests/Tests.csproj --configuration Release --no-build --verbosity normal

@@ -16,6 +16,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>ble;bluetooth;bluetooth-le;arduino;device;service;characteristic;command;protocol;cross-platform;netstandard;maui;windows;iot;android;ios;mobile;xamarin</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/andrey-val-rodin/BleCommands</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

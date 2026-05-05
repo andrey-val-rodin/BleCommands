@@ -6,11 +6,13 @@
 	<Nullable>enable</Nullable>
 	<LangVersion>10.0</LangVersion>
 	<RootNamespace>BleCommands.Maui</RootNamespace>
+    <PackageIcon>Logo.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.14.15" />
     <PackageReference Include="Plugin.BLE" Version="3.2.0" />
+    <None Include="..\Images\Logo.png" Pack="true" PackagePath="\" Visible="false"/>
   </ItemGroup>
 
   <ItemGroup>

@@ -28,14 +28,9 @@ jobs:
       run: |
         dotnet build Source/Core/Core.csproj --configuration Release --no-restore
         dotnet build Source/Maui/Maui.csproj --configuration Release --no-restore
-      
-    - name: Build Samples.Maui for Android only
-      run: |
-        dotnet restore Source/Samples/Maui/MauiSample.csproj
-        dotnet build Source/Samples/Maui/MauiSample.csproj -f net9.0-android --configuration Release --no-restore
 
   build-windows:
-    name: Build Windows-specific projects
+    name: Build on Windows
     runs-on: windows-latest
     
     steps:
@@ -68,10 +63,11 @@ jobs:
         dotnet build Source/Samples/Console/ConsoleSample.csproj --configuration Release --no-restore
         dotnet build Source/Samples/WPF/WPFSample.csproj --configuration Release --no-restore
       
-    - name: Build Samples.Maui for iOS and MacCatalyst
+    - name: Build Samples.Maui for Android, iOS and MacCatalyst
       run: |
-        dotnet build Source/Samples/Maui/Samples/MauiSample.csproj -f net9.0-ios --configuration Release --no-restore
-        dotnet build Source/Samples/Maui/Samples/MauiSample.csproj -f net9.0-maccatalyst --configuration Release --no-restore
+        dotnet build Source/Samples/Maui/MauiSample.csproj -f net9.0-android --configuration Release --no-restore
+        dotnet build Source/Samples/Maui/MauiSample.csproj -f net9.0-ios --configuration Release --no-restore
+        dotnet build Source/Samples/Maui/MauiSample.csproj -f net9.0-maccatalyst --configuration Release --no-restore
       
     - name: Run Unit Tests
       run: dotnet test Source/Tests/Tests.csproj --configuration Release --no-build --verbosity normal

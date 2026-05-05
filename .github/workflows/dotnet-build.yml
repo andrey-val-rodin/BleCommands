@@ -7,9 +7,10 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  build-crossplatform:
+    name: Build cross-platform projects
     runs-on: ubuntu-latest
-
+    
     steps:
     - uses: actions/checkout@v4
     
@@ -18,11 +19,62 @@ jobs:
       with:
         dotnet-version: '9.0.x'
     
-    - name: Restore dependencies
-      run: dotnet restore Source
+    - name: Install .NET MAUI workloads
+      run: dotnet workload install maui
       
-    - name: Build
-      run: dotnet build Source --configuration Release --no-restore
+    - name: Restore cross-platform projects
+      run: |
+        dotnet restore Source/Core/Core.csproj
+        dotnet restore Source/Maui/Maui.csproj
+      
+    - name: Build cross-platform projects
+      run: |
+        dotnet build Source/Core/Core.csproj --configuration Release --no-restore
+        dotnet build Source/Maui/Maui.csproj --configuration Release --no-restore
+      
+    - name: Build Samples.Maui for Android only
+      run: |
+        dotnet restore Samples/Maui/Samples.Maui.csproj
+        dotnet build Samples/Maui/Samples.Maui.csproj -f net9.0-android --configuration Release --no-restore
+
+  build-windows:
+    name: Build Windows-specific projects
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Install .NET MAUI workloads
+      run: dotnet workload install maui
+      
+    - name: Restore all projects
+      run: |
+        dotnet restore Source/Core/Core.csproj
+        dotnet restore Source/Maui/Maui.csproj
+        dotnet restore Source/Windows/Windows.csproj
+        dotnet restore Source/Tests/Tests.csproj
+        dotnet restore Samples/Console/Console.csproj
+        dotnet restore Samples/WPF/WPF.csproj
+        dotnet restore Samples/Maui/Samples.Maui.csproj
+      
+    - name: Build all projects
+      run: |
+        dotnet build Source/Core/Core.csproj --configuration Release --no-restore
+        dotnet build Source/Maui/Maui.csproj --configuration Release --no-restore
+        dotnet build Source/Windows/Windows.csproj --configuration Release --no-restore
+        dotnet build Source/Tests/Tests.csproj --configuration Release --no-restore
+        dotnet build Samples/Console/Console.csproj --configuration Release --no-restore
+        dotnet build Samples/WPF/WPF.csproj --configuration Release --no-restore
+      
+    - name: Build Samples.Maui for iOS and MacCatalyst
+      run: |
+        dotnet build Samples/Maui/Samples.Maui.csproj -f net9.0-ios --configuration Release --no-restore
+        dotnet build Samples/Maui/Samples.Maui.csproj -f net9.0-maccatalyst --configuration Release --no-restore
       
     - name: Run Unit Tests
       run: dotnet test Source/Tests/Tests.csproj --configuration Release --no-build --verbosity normal

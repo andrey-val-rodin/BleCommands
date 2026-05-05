@@ -150,7 +150,7 @@ namespace BleCommands.Tests.Maui
         }
 
         [Fact]
-        public void Constructor_ListeningeCharacteristicWithAttachedAggregator_ArgumentException()
+        public void Constructor_ListeningCharacteristicWithAttachedAggregator_ArgumentException()
         {
             var exception = Assert.Throws<ArgumentException>(() =>
             {

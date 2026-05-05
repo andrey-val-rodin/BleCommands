@@ -20,7 +20,7 @@ namespace IntegrationTests.Uwp
         public async Task FindDeviceWithTimeout_Timeout_ReturnsNull()
         {
             // Timeout 100 milliseconds
-            var device = await BleScanner.FindDeviceAsync("Unexistent Device", TimeSpan.FromMilliseconds(100));
+            var device = await BleScanner.FindDeviceAsync("Non-existent Device", TimeSpan.FromMilliseconds(100));
             Assert.IsNull(device);
         }
 

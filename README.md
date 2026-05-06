@@ -17,12 +17,12 @@
 
 Add one of the following NuGet packages to your project:
 
-```bash
+```powershell
 # For MAUI applications (Android, iOS)
-dotnet add package BleCommands.Maui
+Install-Package BleCommands.Maui
 
 # For Windows applications (WPF, WinForms, Console)
-dotnet add package BleCommands.Windows
+Install-Package BleCommands.Windows
 ```
 
 ## Quick Start

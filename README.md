@@ -1,4 +1,4 @@
-# <img src="Source\Images\logo.png" width="71" height="71"/> BleCommands
+# BleCommands
 
 [![.NET Build & Test](https://github.com/andrey-val-rodin/BleCommands/actions/workflows/dotnet-build.yml/badge.svg)](https://github.com/andrey-val-rodin/BleCommands/actions/workflows/dotnet-build.yml)
 

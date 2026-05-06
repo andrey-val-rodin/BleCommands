@@ -56,7 +56,8 @@ namespace BleCommands.Maui
         {
             ThrowIfDisposed();
 
-            var nativeCharacteristic = await NativeService.GetCharacteristicAsync(id, token);
+            var nativeCharacteristic = await NativeService.GetCharacteristicAsync(id, token)
+                .ConfigureAwait(false);
             if (nativeCharacteristic == null)
                 return null;
 
@@ -76,7 +77,8 @@ namespace BleCommands.Maui
         {
             ThrowIfDisposed();
 
-            var nativeCharacteristics = await NativeService.GetCharacteristicsAsync(token);
+            var nativeCharacteristics = await NativeService.GetCharacteristicsAsync(token)
+                .ConfigureAwait(false);
             var result = nativeCharacteristics == null
                 ? new List<Characteristic>()
                 : nativeCharacteristics.Select(static c => new Characteristic(c)).ToList();

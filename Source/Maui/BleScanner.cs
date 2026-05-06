@@ -12,24 +12,29 @@ namespace BleCommands.Maui
     /// </summary>
     public class BleScanner : IBleScanner<Device>
     {
-        private const int DefaultTimeoutSeconds = 5;
-        private const int MaxTimeoutSeconds = 60;
+        public const int DefaultTimeoutSeconds = 5;
+        public const int MaxTimeoutSeconds = 60;
 
         private readonly AsyncSemaphore _scanLock = new(1);
 
-        private static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
+        protected static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
 
         /// <summary>
         /// Searches for a Bluetooth device by name with default timeout (5 seconds).
         /// </summary>
         /// <param name="deviceName">Name to search for.</param>
         /// <returns>Found device or null if timeout expired.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="deviceName"/> is <c>null</c> or empty.</exception>
-        /// <exception cref="InvalidOperationException">Thrown when Bluetooth scanning is already in progress.</exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if <paramref name="deviceName"/> is <c>null</c> or empty.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when Bluetooth scanning is already in progress.
+        /// </exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
         public async Task<Device?> FindDeviceAsync(string deviceName)
         {
-            return await FindDeviceAsync(deviceName, TimeSpan.FromSeconds(DefaultTimeoutSeconds)).ConfigureAwait(false);
+            return await FindDeviceAsync(deviceName,
+                TimeSpan.FromSeconds(DefaultTimeoutSeconds)).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -38,12 +43,16 @@ namespace BleCommands.Maui
         /// <param name="deviceName">Name to search for.</param>
         /// <param name="timeout">Timeout.</param>
         /// <returns>Found device or null if timeout expired.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="deviceName"/> is <c>null</c> or empty.</exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if <paramref name="deviceName"/> is <c>null</c> or empty.
+        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown if the specified timeout is less than or equal to zero,
         /// or greater than 60 seconds.
         /// </exception>
-        /// <exception cref="InvalidOperationException">Thrown when Bluetooth scanning is already in progress.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when Bluetooth scanning is already in progress.
+        /// </exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
         public async Task<Device?> FindDeviceAsync(string deviceName, TimeSpan timeout)
         {
@@ -62,7 +71,7 @@ namespace BleCommands.Maui
             }
         }
 
-        private async Task<Device?> FindDeviceInternalAsync(
+        protected async Task<Device?> FindDeviceInternalAsync(
             string deviceName,
             CancellationTokenSource tokenSource)
         {
@@ -112,19 +121,21 @@ namespace BleCommands.Maui
             }
         }
 
-        private static void ValidateDeviceName(string deviceName)
+        protected static void ValidateDeviceName(string deviceName)
         {
             if (string.IsNullOrWhiteSpace(deviceName))
                 throw new ArgumentNullException(nameof(deviceName));
         }
 
-        private static void ValidateTimeout(TimeSpan timeout)
+        protected static void ValidateTimeout(TimeSpan timeout)
         {
             if (timeout <= TimeSpan.Zero)
-                throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout is less than or equal to zero.");
+                throw new ArgumentOutOfRangeException(nameof(timeout),
+                    "Timeout is less than or equal to zero.");
 
             if (timeout > TimeSpan.FromSeconds(MaxTimeoutSeconds))
-                throw new ArgumentOutOfRangeException(nameof(timeout), $"Timeout too long. Maximum is {MaxTimeoutSeconds} seconds.");
+                throw new ArgumentOutOfRangeException(nameof(timeout),
+                    $"Timeout too long. Maximum is {MaxTimeoutSeconds} seconds.");
         }
 
         public void Dispose()

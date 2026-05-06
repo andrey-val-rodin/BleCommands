@@ -10,8 +10,8 @@ namespace BleCommands.Windows
     /// </summary>
     public class BleScanner : IBleScanner<Device>
     {
-        private const int DefaultTimeoutSeconds = 5;
-        private const int MaxTimeoutSeconds = 60;
+        public const int DefaultTimeoutSeconds = 5;
+        public const int MaxTimeoutSeconds = 60;
 
         private readonly AsyncSemaphore _scanLock = new(1);
 
@@ -20,11 +20,14 @@ namespace BleCommands.Windows
         /// </summary>
         /// <param name="deviceName">Name to search for.</param>
         /// <returns>Found device or null if timeout expired.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="deviceName"/> is <c>null</c> or empty.</exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if <paramref name="deviceName"/> is <c>null</c> or empty.
+        /// </exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
         public async Task<Device?> FindDeviceAsync(string deviceName)
         {
-            return await FindDeviceAsync(deviceName, TimeSpan.FromSeconds(DefaultTimeoutSeconds)).ConfigureAwait(false);
+            return await FindDeviceAsync(deviceName,
+                TimeSpan.FromSeconds(DefaultTimeoutSeconds)).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -33,7 +36,9 @@ namespace BleCommands.Windows
         /// <param name="deviceName">Name to search for.</param>
         /// <param name="timeout">Timeout.</param>
         /// <returns>Found device or null if timeout expired.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="deviceName"/> is <c>null</c> or empty.</exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if <paramref name="deviceName"/> is <c>null</c> or empty.
+        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown if the specified timeout is less than or equal to zero,
         /// or greater than 60 seconds.
@@ -109,19 +114,21 @@ namespace BleCommands.Windows
             }
         }
 
-        private static void ValidateDeviceName(string deviceName)
+        protected static void ValidateDeviceName(string deviceName)
         {
             if (string.IsNullOrWhiteSpace(deviceName))
                 throw new ArgumentNullException(nameof(deviceName));
         }
 
-        private static void ValidateTimeout(TimeSpan timeout)
+        protected static void ValidateTimeout(TimeSpan timeout)
         {
             if (timeout <= TimeSpan.Zero)
-                throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout is less than or equal to zero.");
+                throw new ArgumentOutOfRangeException(nameof(timeout),
+                    "Timeout is less than or equal to zero.");
 
             if (timeout > TimeSpan.FromSeconds(MaxTimeoutSeconds))
-                throw new ArgumentOutOfRangeException(nameof(timeout), $"Timeout too long. Maximum is {MaxTimeoutSeconds} seconds.");
+                throw new ArgumentOutOfRangeException(nameof(timeout),
+                    $"Timeout too long. Maximum is {MaxTimeoutSeconds} seconds.");
         }
 
         public void Dispose()

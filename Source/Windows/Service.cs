@@ -58,10 +58,13 @@ namespace BleCommands.Windows
             ObjectDisposedException.ThrowIf(_disposed, this);
 
             var gattResult = await NativeService.GetCharacteristicsForUuidAsync(id)
-                .AsTask(token);
+                .AsTask(token)
+                .ConfigureAwait(false);
             gattResult.ThrowIfError();
 
-            var nativeCharacteristic = gattResult.Characteristics.Count > 0 ? gattResult.Characteristics[0] : null;
+            var nativeCharacteristic = gattResult.Characteristics.Count > 0
+                ? gattResult.Characteristics[0]
+                : null;
             if (nativeCharacteristic == null)
                 return null;
 
@@ -83,7 +86,8 @@ namespace BleCommands.Windows
             ObjectDisposedException.ThrowIf(_disposed, this);
 
             var gattResult = await NativeService.GetCharacteristicsAsync()
-                .AsTask(token);
+                .AsTask(token)
+                .ConfigureAwait(false);
             gattResult.ThrowIfError();
             var nativeCharacteristics = gattResult.Characteristics;
 

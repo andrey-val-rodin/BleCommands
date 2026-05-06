@@ -59,7 +59,7 @@ namespace BleCommands.Windows
         public Guid Id { get; private init; }
 
         /// <inheritdoc/>
-        public CharacteristicPropertyFlags Properties { get; private set; }
+        public CharacteristicPropertyFlags Properties { get; private init; }
 
         /// <inheritdoc/>
         public bool CanRead => Properties.HasFlag(CharacteristicPropertyFlags.Read);

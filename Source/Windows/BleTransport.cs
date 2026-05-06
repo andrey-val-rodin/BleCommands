@@ -111,7 +111,7 @@ namespace BleCommands.Windows
         /// <inheritdoc />
         public override ICharacteristic<GattCharacteristic> ListeningCharacteristic { get; }
 
-        private static bool CheckParent(IDevice<BluetoothLEDevice, Service> device,
+        protected static bool CheckParent(IDevice<BluetoothLEDevice, Service> device,
             ICharacteristic<GattCharacteristic> characteristic)
         {
             var nativeParent = device?.NativeDevice;

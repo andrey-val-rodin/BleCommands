@@ -114,7 +114,7 @@ namespace BleCommands.Maui
         /// <inheritdoc />
         public override ICharacteristic<NativeCharacteristic> ListeningCharacteristic { get; }
 
-        private static bool CheckParent(IDevice<NativeDevice, Service> device,
+        protected static bool CheckParent(IDevice<NativeDevice, Service> device,
             ICharacteristic<NativeCharacteristic> characteristic)
         {
             var nativeParent = device?.NativeDevice;

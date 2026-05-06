@@ -12,7 +12,10 @@ namespace BleCommands.Windows
         {
             try
             {
-                var adapter = await BluetoothAdapter.GetDefaultAsync();
+                var adapter = await BluetoothAdapter.GetDefaultAsync()
+                    .AsTask()
+                    .ConfigureAwait(false);
+
                 return adapter != null;
             }
             catch (Exception ex)
@@ -29,11 +32,17 @@ namespace BleCommands.Windows
         {
             try
             {
-                var adapter = await BluetoothAdapter.GetDefaultAsync();
+                var adapter = await BluetoothAdapter.GetDefaultAsync()
+                    .AsTask()
+                    .ConfigureAwait(false);
+
                 if (adapter == null)
                     return false;
 
-                var radio = await adapter.GetRadioAsync();
+                var radio = await adapter.GetRadioAsync()
+                    .AsTask()
+                    .ConfigureAwait(false);
+
                 return radio != null && radio.State == RadioState.On;
             }
             catch (Exception ex)

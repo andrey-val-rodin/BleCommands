@@ -80,14 +80,18 @@ namespace BleCommands.Maui
         /// </summary>
         /// <remarks>The connection will be established shortly.</remarks>
         /// <param name="token">Cancellation token to cancel the operation.</param>
-        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
-        /// <exception cref="DeviceConnectionException">Thrown on device connection errors.</exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown when the device has been disposed.
+        /// </exception>
+        /// <exception cref="DeviceConnectionException">
+        /// Thrown on device connection errors.
+        /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task ConnectAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
 
-            await _semaphore.WaitAsync(token);
+            await _semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
                 if (_connectionInvoked)
@@ -129,33 +133,39 @@ namespace BleCommands.Maui
             }
         }
 
-        private async Task ConnectAsync(
+        protected async Task ConnectAsync(
             NativeDevice nativeDevice, CancellationToken token = default)
         {
             var parameters = new ConnectParameters(false, forceBleTransport: true);
-            await Adapter.ConnectToDeviceAsync(nativeDevice, parameters, token);
+            await Adapter.ConnectToDeviceAsync(nativeDevice, parameters, token)
+                .ConfigureAwait(false);
         }
 
-        private async Task ConnectAsync(Guid guid, CancellationToken token = default)
+        protected async Task ConnectAsync(Guid guid, CancellationToken token = default)
         {
             NativeDevice = await Adapter.ConnectToKnownDeviceAsync(guid,
-                new ConnectParameters(false, forceBleTransport: true), token);
+                new ConnectParameters(false, forceBleTransport: true), token)
+                .ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
-        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown when the device has been disposed.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="ConnectAsync"/> has not been called
         /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
-        public async Task<IReadOnlyList<Service>> GetServicesAsync(CancellationToken token = default)
+        public async Task<IReadOnlyList<Service>> GetServicesAsync(
+            CancellationToken token = default)
         {
             ThrowIfDisposed();
 
             if (NativeDevice == null)
                 throw new InvalidOperationException("Device not connected.");
 
-            var nativeServices = await NativeDevice.GetServicesAsync(token);
+            var nativeServices = await NativeDevice.GetServicesAsync(token)
+                .ConfigureAwait(false);
             var result = nativeServices == null
                 ? new List<Service>()
                 : nativeServices.Select(s => new Service(s)).ToList();
@@ -169,7 +179,9 @@ namespace BleCommands.Maui
         }
 
         /// <inheritdoc/>
-        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown when the device has been disposed.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="ConnectAsync"/> has not been called
         /// </exception>
@@ -181,7 +193,8 @@ namespace BleCommands.Maui
             if (NativeDevice == null)
                 throw new InvalidOperationException("Device not connected.");
 
-            var nativeService = await NativeDevice.GetServiceAsync(id, token);
+            var nativeService = await NativeDevice.GetServiceAsync(id, token)
+                .ConfigureAwait(false);
             if (nativeService == null)
                 return null;
 

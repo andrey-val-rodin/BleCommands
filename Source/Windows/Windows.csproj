@@ -14,7 +14,7 @@
     <Description>Simple text-based command/response protocol over BLE — Windows library.</Description>
     <RepositoryUrl>https://github.com/andrey-val-rodin/BleCommands</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>ble;bluetooth;bluetooth-le;arduino;device;service;characteristic;command;protocol;cross-platform;netstandard;maui;windows;iot;wpf;winforms;desktop;winui</PackageTags>
+    <PackageTags>ble;bluetooth;bluetooth-le;arduino;device;service;characteristic;command;gatt</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/andrey-val-rodin/BleCommands</PackageProjectUrl>
   </PropertyGroup>

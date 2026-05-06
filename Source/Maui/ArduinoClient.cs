@@ -9,8 +9,8 @@
 
         public static async Task<BleTransport?> CreateTransportAsync(string deviceName, CancellationToken token = default)
         {
-            if (!await BluetoothHelper.IsBluetoothAvailableAsync() ||
-                !await BluetoothHelper.IsBluetoothOnAsync())
+            if (!await BluetoothHelper.IsBluetoothAvailableAsync().ConfigureAwait(false) ||
+                !await BluetoothHelper.IsBluetoothOnAsync().ConfigureAwait(false))
                 return null;
 
             var device = await CreateDeviceAsync(deviceName, token).ConfigureAwait(false);
@@ -50,14 +50,14 @@
         private static async Task<Device?> CreateDeviceAsync(string deviceName, CancellationToken token)
         {
             using var scanner = new BleScanner();
-            var device = await scanner.FindDeviceAsync(deviceName);
+            var device = await scanner.FindDeviceAsync(deviceName).ConfigureAwait(false);
             if (device == null)
             {
                 // Device not found
                 return null;
             }
 
-            await device.ConnectAsync(token);
+            await device.ConnectAsync(token).ConfigureAwait(false);
             return device;
         }
     }

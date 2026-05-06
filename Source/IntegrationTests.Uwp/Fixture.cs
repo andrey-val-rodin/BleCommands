@@ -48,7 +48,8 @@ namespace IntegrationTests.Uwp
             await Device.ConnectAsync(context.CancellationToken);
             Assert.IsTrue(Device.IsConnected);
             /*
-             * TODO: Instead of checking the connection status immediately, you should use the following code:
+             * If Assert.IsTrue fails, then instead of checking the connection status immediately,
+             * you should use the following code:
             var timeout = TimeSpan.FromSeconds(5);
             var start = DateTime.UtcNow;
 

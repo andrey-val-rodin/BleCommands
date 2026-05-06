@@ -33,7 +33,8 @@ namespace BleCommands.IntegrationTests.Windows
             await device.ConnectAsync(TestContext.Current.CancellationToken);
             Assert.True(device.IsConnected);
             /*
-             * TODO: Instead of checking the connection status immediately, you should use the following code:
+             * If Assert.IsTrue fails, then instead of checking the connection status immediately,
+             * you should use the following code:
             var timeout = TimeSpan.FromSeconds(5);
             var start = DateTime.UtcNow;
 
@@ -94,7 +95,8 @@ namespace BleCommands.IntegrationTests.Windows
             await device.ConnectAsync(TestContext.Current.CancellationToken);
             Assert.True(device.IsConnected);
             /*
-             * TODO: Instead of checking the connection status immediately, you should use the following code:
+             * If Assert.IsTrue fails, then instead of checking the connection status immediately,
+             * you should use the following code:
             var timeout = TimeSpan.FromSeconds(5);
             var start = DateTime.UtcNow;
 

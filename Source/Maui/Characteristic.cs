@@ -123,13 +123,14 @@ namespace BleCommands.Maui
             ThrowIfDisposed();
 
             if (!CanWrite)
-                throw new InvalidOperationException("The characteristic is neither Write nor WriteWithoutResponse.");
+                throw new InvalidOperationException(
+                    "The characteristic is neither Write nor WriteWithoutResponse.");
 
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
 
             var bytes = Encoding.UTF8.GetBytes(text);
-            await NativeCharacteristic.WriteAsync(bytes, token);
+            await NativeCharacteristic.WriteAsync(bytes, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -145,7 +146,9 @@ namespace BleCommands.Maui
             {
                 return Encoding.UTF8.GetString(value);
             }
-            catch (Exception ex) when (ex is DecoderFallbackException or ArgumentException or ArgumentNullException)
+            catch (Exception ex) when (ex is DecoderFallbackException or
+                                             ArgumentException or
+                                             ArgumentNullException)
             {
                 return string.Empty;
             }
@@ -170,14 +173,16 @@ namespace BleCommands.Maui
             ThrowIfDisposed();
 
             if (!CanUpdate)
-                throw new InvalidOperationException("The characteristic is neither Notify nor Indicate.");
+                throw new InvalidOperationException(
+                    "The characteristic is neither Notify nor Indicate.");
 
             if (tokenAggregator == null)
                 throw new ArgumentNullException(nameof(tokenAggregator));
 
             var original = Interlocked.CompareExchange(ref _tokenAggregator, tokenAggregator, null);
             if (original != null)
-                throw new InvalidOperationException("TokenAggregator is already attached. Call DetachTokenAggregator first.");
+                throw new InvalidOperationException(
+                    "TokenAggregator is already attached. Call DetachTokenAggregator first.");
         }
 
         /// <inheritdoc/>
@@ -205,9 +210,10 @@ namespace BleCommands.Maui
             ThrowIfDisposed();
 
             if (!CanUpdate)
-                throw new InvalidOperationException("The characteristic is neither Notify nor Indicate.");
+                throw new InvalidOperationException(
+                    "The characteristic is neither Notify nor Indicate.");
 
-            await NativeCharacteristic.StartUpdatesAsync(token);
+            await NativeCharacteristic.StartUpdatesAsync(token).ConfigureAwait(false);
             NativeCharacteristic.ValueUpdated += NativeCharacteristic_ValueUpdated;
         }
 
@@ -229,7 +235,7 @@ namespace BleCommands.Maui
             tokenAggregator?.Append(text);
         }
 
-        private void ThrowIfDisposed()
+        protected void ThrowIfDisposed()
         {
             if (_disposed)
                 throw new ObjectDisposedException(typeof(Characteristic).FullName);

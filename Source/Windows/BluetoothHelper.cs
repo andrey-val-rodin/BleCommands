@@ -6,7 +6,7 @@ namespace BleCommands.Windows
     public class BluetoothHelper
     {
         /// <summary>
-        /// Returns true if Bluetooth is available on this computer
+        /// Returns true if Bluetooth is available
         /// </summary>
         public static async Task<bool> IsBluetoothAvailableAsync()
         {

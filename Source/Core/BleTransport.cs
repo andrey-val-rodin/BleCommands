@@ -207,10 +207,14 @@ namespace BleCommands.Core
 
                     ListeningTokenReceived -= ListeningHandler;
 
+                    // The device will dispose all its services and characteristics.
+                    // However, BleTransport owns all objects passed to the constructor,
+                    // so we need to dispose them all.
                     CommandCharacteristic?.Dispose();
                     ResponseCharacteristic?.Dispose();
                     ListeningCharacteristic?.Dispose();
                     Service?.Dispose();
+
                     Device?.Dispose();
 
                     _listeningTimer?.Stop();

@@ -4,7 +4,7 @@ using BleTransport = BleCommands.Maui.BleTransport;
 
 namespace BleCommands.Tests.Maui
 {
-    public class BleTransportTests
+    public class BleTransportTests : IDisposable
     {
         public BleTransportTests()
         {
@@ -268,6 +268,12 @@ namespace BleCommands.Tests.Maui
             Assert.True(commandCharacteristic.Disposed);
             Assert.True(responseCharacteristic.Disposed);
             Assert.True(listeningCharacteristic.Disposed);
+        }
+
+        public void Dispose()
+        {
+            CharacteristicWithAttachedAggregator.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace BleCommands.Maui
     public class BluetoothHelper
     {
         /// <summary>
-        /// Returns true if Bluetooth is available on this computer
+        /// Returns true if Bluetooth is available
         /// </summary>
         public static Task<bool> IsBluetoothAvailableAsync()
         {

@@ -58,9 +58,10 @@ namespace MauiSample.PageModels
 
             Item = characteristic;
 
-            if (RequestUserInput != null)
+            var handler = RequestUserInput;
+            if (handler != null)
             {
-                var input = await RequestUserInput.Invoke(characteristic);
+                var input = await handler.Invoke(characteristic);
                 if (input != null)
                 {
                     try

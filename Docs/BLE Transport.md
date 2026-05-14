@@ -18,10 +18,7 @@ Both client and server use predefined UUIDs for the service and characteristics:
 > The Listening characteristic can be used by the server to send any information, such as current position or temperature. The client can start the listening procedure and receive all messages via events.  
 > Introduce a final token in your protocol (e.g., `'END'`) so the client knows when to stop listening.
 
-# Limitations
+# Interaction
+![](img/Interaction.png)
 
-The server and client interact via short messages separated by a delimiter symbol (by default, '\n').  
-
-The maximum amount of data that can be transmitted over BLE is 512 bytes. In practice, the size may be up to two times smaller on different devices. Therefore, avoid using very long commands, responses, or listening messages.  
-
-If you need to send a large amount of text from Arduino (e.g., JSON), you can write the data to the characteristic in chunks and terminate sequence with trailing delimiter.
+The length of incoming messages and responses to commands is not limited; texts are encoded as UTF-8 strings.

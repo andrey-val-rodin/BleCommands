@@ -11,7 +11,7 @@ namespace BleCommands.IntegrationTests.Windows
     /// The test fixture uses real device called Rotating Table:
     /// <see href="https://table-360.ru/">https://table-360.ru/</see>
     /// </summary>
-    public class Fixture : IAsyncLifetime
+    public sealed class Fixture : IAsyncLifetime
     {
         public const string Id = "BluetoothLE#BluetoothLE90:e8:68:ad:f0:54-f8:b3:b7:22:09:3e";
         public const ulong MacAddress = 0xf8b3b722093e;

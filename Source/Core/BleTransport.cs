@@ -114,9 +114,8 @@ namespace BleCommands.Core
             {
                 ResponseAggregator.TokenReceived += Handler;
 
-                // Append terminator and send command
-                await CommandCharacteristic.WriteAsync(command + TokenDelimiter, token)
-                    .ConfigureAwait(false);
+                // Send command
+                await CommandCharacteristic.WriteAsync(command, token).ConfigureAwait(false);
 
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
                 cts.CancelAfter(ResponseTimeout);

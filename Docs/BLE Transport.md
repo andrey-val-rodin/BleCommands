@@ -21,4 +21,4 @@ Both client and server use predefined UUIDs for the service and characteristics:
 # Interaction
 ![](img/Interaction.png)
 
-The length of incoming messages and responses to commands is not limited; texts are encoded as UTF-8 strings.
+Maximum size of command with arguments is 512 bytes. The length of responses to commands and outgoing messages is limited only by available memory; texts are encoded as UTF-8 strings.

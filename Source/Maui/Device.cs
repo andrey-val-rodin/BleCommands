@@ -80,12 +80,8 @@ namespace BleCommands.Maui
         /// </summary>
         /// <remarks>The connection will be established shortly.</remarks>
         /// <param name="token">Cancellation token to cancel the operation.</param>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown when the device has been disposed.
-        /// </exception>
-        /// <exception cref="DeviceConnectionException">
-        /// Thrown on device connection errors.
-        /// </exception>
+        /// <exception cref="ObjectDisposedException">Thrown if the device has been disposed.</exception>
+        /// <exception cref="DeviceConnectionException">Thrown on device connection errors.</exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task ConnectAsync(CancellationToken token = default)
         {
@@ -234,8 +230,13 @@ namespace BleCommands.Maui
         /// Explicit interface implementation. Registers a child element for future disposing.
         /// </summary>
         /// <param name="child">A child.</param>
+        /// <exception cref="ObjectDisposedException">Thrown if the device has been disposed.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if any characteristic is null.</exception>
         void IChildDisposer.RegisterChild(IDisposable child)
         {
+            ThrowIfDisposed();
+            if (child == null) throw new ArgumentNullException(nameof(child));
+
             _children.Add(child);
         }
 

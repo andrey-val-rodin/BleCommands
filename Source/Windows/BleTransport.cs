@@ -27,7 +27,7 @@ namespace BleCommands.Windows
         /// Characteristic for receiving token stream during listening (Notify or Indicate).
         /// </param>
         /// <param name="tokenDelimiter">Token separator. Typically, character '\n' is used.</param>
-        /// <exception cref="ArgumentNullException">Thrown if any characteristic is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if any parameter is null.</exception>
         /// <exception cref="ArgumentException">Thrown if any characteristic has invalid properties.</exception>
         public BleTransport(
             IDevice<BluetoothLEDevice, Service> device,

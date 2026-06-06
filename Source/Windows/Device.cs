@@ -54,7 +54,7 @@ namespace BleCommands.Windows
         /// </summary>
         /// <remarks>The connection will be established shortly.</remarks>
         /// <param name="token">Cancellation token to cancel the operation.</param>
-        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
+        /// <exception cref="ObjectDisposedException">Thrown if the device has been disposed.</exception>
         /// <exception cref="DeviceException">Thrown on GATT-protocol errors.</exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task ConnectAsync(CancellationToken token = default)
@@ -187,8 +187,13 @@ namespace BleCommands.Windows
         /// Explicit interface implementation. Registers a child element for future disposing.
         /// </summary>
         /// <param name="child">A child.</param>
+        /// <exception cref="ObjectDisposedException">Thrown if the device has been disposed.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if any characteristic is null.</exception>
         void IChildDisposer.RegisterChild(IDisposable child)
         {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            ArgumentNullException.ThrowIfNull(child);
+
             _children.Add(child);
         }
 

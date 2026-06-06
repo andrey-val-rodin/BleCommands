@@ -73,12 +73,12 @@ void loop() {
         }
     }
 
-    public class LargeTextTests : IClassFixture<Fixture>
+    public class LongTextTests : IClassFixture<Fixture>
     {
         public BleTransport BleTransport { get; set; }
         public string TestString { get; set; }
         
-        public LargeTextTests(Fixture fixture)
+        public LongTextTests(Fixture fixture)
         {
             BleTransport = fixture.BleTransport;
             Assert.NotNull(BleTransport);

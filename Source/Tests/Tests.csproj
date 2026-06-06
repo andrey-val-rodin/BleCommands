@@ -10,11 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Core\LargeTextTests.cs" />
+    <Compile Remove="Core\LongTextTests.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Core\LargeTextTests.cs" />
+    <None Include="Core\LongTextTests.cs" />
   </ItemGroup>
 
   <ItemGroup>

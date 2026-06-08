@@ -13,43 +13,44 @@ namespace BleCommands.Core
     public class TokenAggregator
     {
         public const char DefaultTokenDelimiter = '\n';
+
         private readonly StringBuilder _buffer = new();
+        private readonly List<string> _tokensToRaise = new();
 
         public TokenAggregator(char delimiter = DefaultTokenDelimiter)
         {
             TokenDelimiter = delimiter;
         }
 
-        public char TokenDelimiter { get; }
-
         public event EventHandler<TextEventArgs>? TokenReceived;
+
+        public char TokenDelimiter { get; }
 
         public void Append(string text)
         {
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
 
-            List<string> tokensToRaise = new();
-
             lock (_buffer)
             {
-                Parse(text, tokensToRaise);
+                Parse(text);
             }
 
-            foreach (var token in tokensToRaise)
+            foreach (var token in _tokensToRaise)
             {
                 System.Diagnostics.Debug.WriteLine("Token: " + token);
                 TokenReceived?.Invoke(this, new TextEventArgs(token));
             }
+            _tokensToRaise.Clear();
         }
 
-        protected void Parse(string text, List<string> tokensToRaise)
+        protected void Parse(string text)
         {
             foreach (char c in text)
             {
                 if (c == TokenDelimiter)
                 {
-                    tokensToRaise.Add(_buffer.ToString());
+                    _tokensToRaise.Add(_buffer.ToString());
                     _buffer.Clear();
                 }
                 else

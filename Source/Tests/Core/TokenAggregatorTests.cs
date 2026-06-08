@@ -178,6 +178,26 @@ namespace BleCommands.Tests.Core
         }
 
         [Fact]
+        public void Append_MultipleTokens_ValidTokens()
+        {
+            var chain = $"Token 1{D}Token 2{D}Token 3{D}";
+            Aggregator.TokenReceived += Aggregator_TokenReceived;
+            try
+            {
+                Aggregator.Append(chain);
+
+                Assert.Equal(3, Tokens.Count);
+                Assert.Equal("Token 1", Tokens[0]);
+                Assert.Equal("Token 2", Tokens[1]);
+                Assert.Equal("Token 3", Tokens[2]);
+            }
+            finally
+            {
+                Aggregator.TokenReceived -= Aggregator_TokenReceived;
+            }
+        }
+
+        [Fact]
         public void Append_LongDisruptedChain_ValidTokens()
         {
             var builder = new StringBuilder();

@@ -4,7 +4,7 @@ using System.Text;
 namespace BleCommands.Core
 {
     /// <summary>
-    /// Aggregates text fragments into complete tokens delimited by the specified character.
+    /// Combines fragments of text into complete tokens delimited by the specified character.
     /// </summary>
     /// <remarks>
     /// Thread-safe. Call <see cref="Append"/> with incoming data. When delimiter is encountered,

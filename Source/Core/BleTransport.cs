@@ -38,23 +38,23 @@ namespace BleCommands.Core
         }
 
         /// <inheritdoc />
-        abstract public TDevice Device { get; }
+        public abstract TDevice Device { get; }
 
         /// <inheritdoc />
-        abstract public TService Service { get; }
+        public abstract TService Service { get; }
 
         /// <inheritdoc />
-        abstract public TCharacteristic CommandCharacteristic { get; }
+        public abstract TCharacteristic CommandCharacteristic { get; }
 
         /// <inheritdoc />
-        abstract public TCharacteristic ResponseCharacteristic { get; }
+        public abstract TCharacteristic ResponseCharacteristic { get; }
 
         protected TokenAggregator ResponseAggregator =>
             ResponseCharacteristic.TokenAggregator ??
             throw new InvalidOperationException("TokenAggregator not attached to ResponseCharacteristic");
 
         /// <inheritdoc />
-        abstract public TCharacteristic ListeningCharacteristic { get; }
+        public abstract TCharacteristic ListeningCharacteristic { get; }
 
         protected TokenAggregator ListeningAggregator =>
             ListeningCharacteristic.TokenAggregator ??

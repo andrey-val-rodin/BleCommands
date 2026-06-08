@@ -110,7 +110,7 @@ namespace BleCommands.IntegrationTests.Windows
             */
         }
 
-        void RegisterDisposableObject(object obj)
+        private void RegisterDisposableObject(object obj)
         {
             ArgumentNullException.ThrowIfNull(obj, nameof(obj));
             _disposableObjects.Add(obj);

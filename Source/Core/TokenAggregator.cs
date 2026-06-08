@@ -13,44 +13,43 @@ namespace BleCommands.Core
     public class TokenAggregator
     {
         public const char DefaultTokenDelimiter = '\n';
-
         private readonly StringBuilder _buffer = new();
-        private readonly List<string> _tokensToRaise = new();
 
         public TokenAggregator(char delimiter = DefaultTokenDelimiter)
         {
             TokenDelimiter = delimiter;
         }
 
-        public event EventHandler<TextEventArgs>? TokenReceived;
-
         public char TokenDelimiter { get; }
+
+        public event EventHandler<TextEventArgs>? TokenReceived;
 
         public void Append(string text)
         {
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
 
+            IEnumerable<string> tokensToRaise;
             lock (_buffer)
             {
-                Parse(text);
+                tokensToRaise = Parse(text);
             }
 
-            foreach (var token in _tokensToRaise)
+            foreach (var token in tokensToRaise)
             {
                 System.Diagnostics.Debug.WriteLine("Token: " + token);
                 TokenReceived?.Invoke(this, new TextEventArgs(token));
             }
-            _tokensToRaise.Clear();
         }
 
-        protected void Parse(string text)
+        protected IEnumerable<string> Parse(string text)
         {
+            List<string> result = new();
             foreach (char c in text)
             {
                 if (c == TokenDelimiter)
                 {
-                    _tokensToRaise.Add(_buffer.ToString());
+                    result.Add(_buffer.ToString());
                     _buffer.Clear();
                 }
                 else
@@ -58,6 +57,8 @@ namespace BleCommands.Core
                     _buffer.Append(c);
                 }
             }
+
+            return result;
         }
     }
 }

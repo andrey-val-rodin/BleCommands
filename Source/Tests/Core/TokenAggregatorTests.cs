@@ -227,6 +227,53 @@ namespace BleCommands.Tests.Core
             }
         }
 
+        [Fact]
+        public async Task Append_MultipleThreads_ValidTokens()
+        {
+            var completionSource = new TaskCompletionSource<bool>();
+            var receivedCount = 0;
+            var expectedCount = 5;
+            var lockObject = new object();
+
+            void Handler(object? sender, TextEventArgs args)
+            {
+                lock (lockObject)
+                {
+                    Tokens.Add(args.Text);
+                    receivedCount++;
+                    if (receivedCount == expectedCount)
+                    {
+                        completionSource.TrySetResult(true);
+                    }
+                }
+            }
+
+            Aggregator.TokenReceived += Handler;
+            try
+            {
+                var tasks = new[]
+                {
+                    Task.Run(() => Aggregator.Append($"Token 1{D}"), TestContext.Current.CancellationToken),
+                    Task.Run(() => Aggregator.Append($"Token 2{D}"), TestContext.Current.CancellationToken),
+                    Task.Run(() => Aggregator.Append($"Token 3{D}"), TestContext.Current.CancellationToken),
+                    Task.Run(() => Aggregator.Append($"Token 4{D}"), TestContext.Current.CancellationToken),
+                    Task.Run(() => Aggregator.Append($"Token 5{D}"), TestContext.Current.CancellationToken)
+                };
+
+                await completionSource.Task;
+
+                Assert.Contains($"Token 1", Tokens);
+                Assert.Contains($"Token 2", Tokens);
+                Assert.Contains($"Token 3", Tokens);
+                Assert.Contains($"Token 4", Tokens);
+                Assert.Contains($"Token 5", Tokens);
+            }
+            finally
+            {
+                Aggregator.TokenReceived -= Handler;
+            }
+        }
+
         private void Aggregator_TokenReceived(object? sender, TextEventArgs args)
         {
             Tokens.Add(args.Text);

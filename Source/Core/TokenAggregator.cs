@@ -7,7 +7,7 @@ namespace BleCommands.Core
     /// Combines fragments of text into complete tokens delimited by the specified character.
     /// </summary>
     /// <remarks>
-    /// Thread-safe. Call <see cref="Append"/> with incoming data. When delimiter is encountered,
+    /// Thread-safe. When delimiter is encountered,
     /// the accumulated token is raised via <see cref="TokenReceived"/> event.
     /// </remarks>
     public class TokenAggregator
@@ -24,41 +24,39 @@ namespace BleCommands.Core
 
         public event EventHandler<TextEventArgs>? TokenReceived;
 
+        /// <summary>
+        /// Appends a chunk of text to the internal buffer and raises <see cref="TokenReceived"/>
+        /// events for each complete token found.
+        /// </summary>
+        /// <param name="text">Text fragment to append. Cannot be null.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="text"/> is null.</exception>
+        /// <remarks>
+        /// This method is thread-safe and guarantees that tokens from concurrent calls
+        /// are raised in the order they are received.
+        /// </remarks>
         public void Append(string text)
         {
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
 
-            IEnumerable<string> tokensToRaise;
             lock (_buffer)
             {
-                tokensToRaise = Parse(text);
-            }
-
-            foreach (var token in tokensToRaise)
-            {
-                System.Diagnostics.Debug.WriteLine("Token: " + token);
-                TokenReceived?.Invoke(this, new TextEventArgs(token));
-            }
-        }
-
-        protected IEnumerable<string> Parse(string text)
-        {
-            List<string> result = new();
-            foreach (char c in text)
-            {
-                if (c == TokenDelimiter)
+                foreach (char c in text)
                 {
-                    result.Add(_buffer.ToString());
-                    _buffer.Clear();
-                }
-                else
-                {
-                    _buffer.Append(c);
+                    if (c == TokenDelimiter)
+                    {
+                        string token = _buffer.ToString();
+                        _buffer.Clear();
+
+                        System.Diagnostics.Debug.WriteLine($"Token: {token}");
+                        TokenReceived?.Invoke(this, new TextEventArgs(token));
+                    }
+                    else
+                    {
+                        _buffer.Append(c);
+                    }
                 }
             }
-
-            return result;
         }
     }
 }

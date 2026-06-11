@@ -49,12 +49,12 @@ namespace BleCommands.Core
         /// <inheritdoc />
         public abstract TCharacteristic ResponseCharacteristic { get; }
 
+        /// <inheritdoc />
+        public abstract TCharacteristic ListeningCharacteristic { get; }
+
         protected TokenAggregator ResponseAggregator =>
             ResponseCharacteristic.TokenAggregator ??
             throw new InvalidOperationException("TokenAggregator not attached to ResponseCharacteristic");
-
-        /// <inheritdoc />
-        public abstract TCharacteristic ListeningCharacteristic { get; }
 
         protected TokenAggregator ListeningAggregator =>
             ListeningCharacteristic.TokenAggregator ??

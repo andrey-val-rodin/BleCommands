@@ -45,7 +45,7 @@ namespace BleCommands.Windows
         public bool IsConnected => NativeDevice?.ConnectionStatus == BluetoothConnectionStatus.Connected;
 
         /// <summary>
-        /// Gets the platform-specific Windows Bluetooth LE device.
+        /// Gets the platform-specific device
         /// </summary>
         public BluetoothLEDevice? NativeDevice { get; protected set; }
 

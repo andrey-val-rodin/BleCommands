@@ -69,7 +69,7 @@ namespace BleCommands.Maui
         public bool IsConnected => NativeDevice?.State == DeviceState.Connected;
 
         /// <summary>
-        /// Gets platform-specific device
+        /// Gets the platform-specific device
         /// </summary>
         public NativeDevice? NativeDevice { get; private set; }
 
@@ -145,15 +145,12 @@ namespace BleCommands.Maui
         }
 
         /// <inheritdoc/>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown when the device has been disposed.
-        /// </exception>
+        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="ConnectAsync"/> has not been called
         /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
-        public async Task<IReadOnlyList<Service>> GetServicesAsync(
-            CancellationToken token = default)
+        public async Task<IReadOnlyList<Service>> GetServicesAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
 
@@ -175,9 +172,7 @@ namespace BleCommands.Maui
         }
 
         /// <inheritdoc/>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown when the device has been disposed.
-        /// </exception>
+        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="ConnectAsync"/> has not been called
         /// </exception>

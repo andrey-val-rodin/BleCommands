@@ -159,7 +159,9 @@ namespace BleCommands.Windows
             {
                 return Encoding.UTF8.GetString(value);
             }
-            catch (Exception ex) when (ex is DecoderFallbackException or ArgumentException or ArgumentNullException)
+            catch (Exception ex) when (ex is DecoderFallbackException or
+                                             ArgumentException or
+                                             ArgumentNullException)
             {
                 return string.Empty;
             }

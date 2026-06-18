@@ -9,7 +9,7 @@
     <PackageIcon>Logo.png</PackageIcon>
     <PackageId>BleCommands.Maui</PackageId>
     <Title>BleCommands.Maui</Title>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
     <Authors>Andrey Rodin</Authors>
     <Description>Simple text-based command/response protocol over BLE — MAUI library.</Description>
     <RepositoryUrl>https://github.com/andrey-val-rodin/BleCommands</RepositoryUrl>
@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.14.15" />
-    <PackageReference Include="Plugin.BLE" Version="3.2.0" />
+    <PackageReference Include="Plugin.BLE" Version="3.2.1" />
     <ProjectReference Include="..\Core\Core.csproj" />
     <None Include="..\..\README.md">
       <Pack>True</Pack>

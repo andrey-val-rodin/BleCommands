@@ -3,7 +3,7 @@ using System.Text;
 
 namespace BleCommands.Tests.Core
 {
-    // These tests work with this sketch:
+    // These tests work with the following sketch:
     /*
 #include <BLECommands.h>
 

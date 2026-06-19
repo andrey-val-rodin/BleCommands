@@ -48,12 +48,7 @@
                 responseCharacteristic == null ||
                 listeningCharacteristic == null)
             {
-                // Unable to get characteristics
-                commandCharacteristic?.Dispose();
-                responseCharacteristic?.Dispose();
-                listeningCharacteristic?.Dispose();
                 device.Dispose();
-                service.Dispose();
                 return null;
             }
 

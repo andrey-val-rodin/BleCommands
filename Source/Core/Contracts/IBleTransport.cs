@@ -86,12 +86,6 @@ namespace BleCommands.Core.Contracts
         /// or null if the device does not respond within <see cref="ResponseTimeout">.
         /// </returns>
         /// <param name="token">A token to cancel the operation.</param>
-        /// <exception cref="CharacteristicException">
-        /// Thrown when Bluetooth errors occur
-        /// </exception>
-        /// <exception cref="TimeoutException">
-        /// Thrown when the device doesn't respond within the expected timeframe.
-        /// </exception>
         Task<string?> SendCommandAsync(string command, CancellationToken token = default);
 
         /// <summary>
@@ -107,9 +101,6 @@ namespace BleCommands.Core.Contracts
         /// Subscribe to <see cref="ListeningTokenReceived"/> before calling this method.
         /// Listening continues until <see cref="StopListening"/> is called.
         /// </remarks>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when characteristics are not set.
-        /// </exception>
         void StartListening(TimeSpan timeout);
 
         /// <summary>

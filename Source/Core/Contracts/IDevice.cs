@@ -59,7 +59,7 @@
         /// </summary>
         /// <param name="id">The UUID of the service to retrieve.</param>
         /// <param name="token">Cancellation token to cancel the operation.</param>
-        /// <returns>The requested service, or null if not found.</returns>
+        /// <returns>The requested service, or <c>null</c> if not found.</returns>
         Task<TService?> GetServiceAsync(Guid id, CancellationToken token = default);
     }
 }

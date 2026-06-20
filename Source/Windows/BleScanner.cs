@@ -19,9 +19,9 @@ namespace BleCommands.Windows
         /// Searches for a Bluetooth device by name with default timeout (5 seconds).
         /// </summary>
         /// <param name="deviceName">Name to search for.</param>
-        /// <returns>Found device or null if timeout expired.</returns>
+        /// <returns>Found device or <c>null</c> if timeout expired.</returns>
         /// <exception cref="ArgumentNullException">
-        /// Thrown if <paramref name="deviceName"/> is <c>null</c> or empty.
+        /// Thrown if <paramref name="deviceName"/> is <c>null</c>, empty, or whitespace.
         /// </exception>
         /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
         public async Task<Device?> FindDeviceAsync(string deviceName)
@@ -33,11 +33,11 @@ namespace BleCommands.Windows
         /// <summary>
         /// Searches for a Bluetooth device by name with the specified timeout.
         /// </summary>
-        /// <param name="deviceName">Name to search for.</param>
-        /// <param name="timeout">Timeout.</param>
-        /// <returns>Found device or null if timeout expired.</returns>
+        /// <param name="deviceName">The name of the device to search for.</param>
+        /// <param name="timeout">Maximum wait time for device discovery.</param>
+        /// <returns>Found device or <c>null</c> if timeout expired.</returns>
         /// <exception cref="ArgumentNullException">
-        /// Thrown if <paramref name="deviceName"/> is <c>null</c> or empty.
+        /// Thrown if <paramref name="deviceName"/> is <c>null</c>, empty, or whitespace.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown if the specified timeout is less than or equal to zero,

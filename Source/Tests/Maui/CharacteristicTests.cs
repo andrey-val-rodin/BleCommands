@@ -155,7 +155,7 @@ namespace BleCommands.Tests.Maui
             // Arrange
             var characteristic = new Characteristic(CharacteristicPropertyFlags.Notify);
 
-            // Act & Assert - при попытке работать с null NativeCharacteristic
+            // Act & Assert
             await Assert.ThrowsAsync<NullReferenceException>(async () =>
             {
                 await characteristic.StartReceivingAsync(TestContext.Current.CancellationToken);

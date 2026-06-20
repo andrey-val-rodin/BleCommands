@@ -10,30 +10,27 @@
         where TDevice : IDevice
     {
         /// <summary>
-        /// Searches for a Bluetooth device by name with the default timeout (5 seconds).
+        /// Searches for a Bluetooth device by name with default timeout (5 seconds).
         /// </summary>
-        /// <param name="deviceName">The name of the device to search for.</param>
-        /// <returns>
-        /// The found device, or <c>null</c> if the timeout expires.
-        /// </returns>
+        /// <param name="deviceName">Name to search for.</param>
+        /// <returns>Found device or <c>null</c> if timeout expired.</returns>
         /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="deviceName"/> is <c>null</c>, empty, or whitespace.
+        /// Thrown if <paramref name="deviceName"/> is <c>null</c>, empty, or whitespace.
         /// </exception>
         Task<TDevice?> FindDeviceAsync(string deviceName);
 
         /// <summary>
-        /// Searches for a Bluetooth device by name with a specified timeout.
+        /// Searches for a Bluetooth device by name with the specified timeout.
         /// </summary>
         /// <param name="deviceName">The name of the device to search for.</param>
         /// <param name="timeout">Maximum wait time for device discovery.</param>
-        /// <returns>
-        /// The found device, or <c>null</c> if the timeout expires before the device is discovered.
-        /// </returns>
+        /// <returns>Found device or <c>null</c> if timeout expired.</returns>
         /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="deviceName"/> is <c>null</c>, empty, or whitespace.
+        /// Thrown if <paramref name="deviceName"/> is <c>null</c>, empty, or whitespace.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown if the specified timeout is outside the range of 1 to 60 seconds.
+        /// Thrown if the specified timeout is less than or equal to zero,
+        /// or greater than 60 seconds.
         /// </exception>
         Task<TDevice?> FindDeviceAsync(
             string deviceName, TimeSpan timeout);

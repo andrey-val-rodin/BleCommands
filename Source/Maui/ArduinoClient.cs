@@ -15,7 +15,7 @@
         /// </summary>
         /// <param name="deviceName">A device name.</param>
         /// <param name="token">Cancellation token to cancel the operation.</param>
-        /// <returns>A BleTransport object, or null if something went wrong.</returns>
+        /// <returns>A BleTransport object, or <c>null</c> if something went wrong.</returns>
         /// <remarks>
         /// Be sure to call the Dispose method or use the using statement on the transport object
         /// to release all system resources.

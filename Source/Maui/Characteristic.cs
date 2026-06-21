@@ -73,7 +73,7 @@ namespace BleCommands.Maui
         public TokenAggregator? TokenAggregator => _tokenAggregator;
 
         /// <summary>
-        /// Reads the characteristic value from the device.
+        /// Reads the characteristic value.
         /// </summary>
         /// <param name="token">A cancellation token to cancel the read operation.</param>
         /// <returns>
@@ -103,7 +103,7 @@ namespace BleCommands.Maui
         /// <summary>
         /// Writes a string value to the characteristic.
         /// </summary>
-        /// <param name="text">The string value to write. The string is encoded as UTF-8.</param>
+        /// <param name="data">The string value to write.</param>
         /// <param name="token">A cancellation token to cancel the write operation.</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
         /// <exception cref="InvalidOperationException">
@@ -173,8 +173,7 @@ namespace BleCommands.Maui
             ThrowIfDisposed();
 
             if (!CanUpdate)
-                throw new InvalidOperationException(
-                    "The characteristic is neither Notify nor Indicate.");
+                throw new InvalidOperationException("The characteristic is neither Notify nor Indicate.");
 
             if (tokenAggregator == null)
                 throw new ArgumentNullException(nameof(tokenAggregator));
@@ -210,8 +209,7 @@ namespace BleCommands.Maui
             ThrowIfDisposed();
 
             if (!CanUpdate)
-                throw new InvalidOperationException(
-                    "The characteristic is neither Notify nor Indicate.");
+                throw new InvalidOperationException("The characteristic is neither Notify nor Indicate.");
 
             await NativeCharacteristic.StartUpdatesAsync(token).ConfigureAwait(false);
             NativeCharacteristic.ValueUpdated += NativeCharacteristic_ValueUpdated;

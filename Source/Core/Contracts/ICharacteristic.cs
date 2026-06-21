@@ -44,10 +44,13 @@ namespace BleCommands.Core.Contracts
         TokenAggregator? TokenAggregator { get; }
 
         /// <summary>
-        /// Reads the characteristic value as a UTF-8 string.
+        /// Reads the characteristic value.
         /// </summary>
         /// <param name="token">Cancellation token for the operation.</param>
-        /// <returns>The characteristic value as a UTF-8 string.</returns>
+        /// <returns>
+        /// A task that represents the asynchronous read operation.
+        /// The task result contains the characteristic value as a UTF-8 string.
+        /// </returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="CanRead"/> is <c>false</c>.
         /// </exception>
@@ -57,7 +60,7 @@ namespace BleCommands.Core.Contracts
         Task<string> ReadAsync(CancellationToken token = default);
 
         /// <summary>
-        /// Writes a UTF-8 string to the characteristic.
+        /// Writes a string value to the characteristic.
         /// </summary>
         /// <param name="data">The string value to write.</param>
         /// <param name="token">Cancellation token for the operation.</param>
@@ -65,22 +68,22 @@ namespace BleCommands.Core.Contracts
         /// Thrown when <see cref="CanWrite"/> is <c>false</c>.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="data"/> is <c>null</c>.
+        /// Thrown if <paramref name="text"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
         /// </exception>
-        Task WriteAsync(string data, CancellationToken token = default);
+        Task WriteAsync(string text, CancellationToken token = default);
 
         /// <summary>
         /// Attaches a token aggregator to collect notification/indication values.
         /// </summary>
         /// <param name="tokenAggregator">The token aggregator to attach.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="CanUpdate"/> is <c>false</c> or an aggregator is already attached.
+        /// Thrown if <see cref="CanUpdate"/> is <c>false</c> or an aggregator is already attached.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="tokenAggregator"/> is <c>null</c>.
+        /// Thrown if <paramref name="tokenAggregator"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
@@ -93,7 +96,7 @@ namespace BleCommands.Core.Contracts
         void DetachTokenAggregator();
 
         /// <summary>
-        /// Starts receiving notifications from the characteristic.
+        /// Starts receiving notifications or indications from the characteristic.
         /// </summary>
         /// <param name="token">Cancellation token for the operation.</param>
         /// <exception cref="InvalidOperationException">

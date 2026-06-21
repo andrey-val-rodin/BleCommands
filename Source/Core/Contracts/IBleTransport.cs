@@ -19,6 +19,7 @@ namespace BleCommands.Core.Contracts
         /// Occurs when the device connection is lost
         /// </summary>
         event EventHandler? Disconnected;
+
         /// <summary>
         /// Occurs when the listening timeout is exceeded
         /// (no token received within the specified interval).

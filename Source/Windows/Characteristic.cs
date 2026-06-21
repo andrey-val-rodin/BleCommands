@@ -76,7 +76,7 @@ namespace BleCommands.Windows
         public TokenAggregator? TokenAggregator => _tokenAggregator;
 
         /// <summary>
-        /// Reads the characteristic value from the device.
+        /// Reads the characteristic value.
         /// </summary>
         /// <param name="token">A cancellation token to cancel the read operation.</param>
         /// <returns>
@@ -110,7 +110,7 @@ namespace BleCommands.Windows
         /// <summary>
         /// Writes a string value to the characteristic.
         /// </summary>
-        /// <param name="text">The string value to write. The string is encoded as UTF-8.</param>
+        /// <param name="data">The string value to write.</param>
         /// <param name="token">A cancellation token to cancel the write operation.</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
         /// <exception cref="InvalidOperationException">
@@ -192,7 +192,8 @@ namespace BleCommands.Windows
 
             var original = Interlocked.CompareExchange(ref _tokenAggregator, tokenAggregator, null);
             if (original != null)
-                throw new InvalidOperationException("TokenAggregator is already attached. Call DetachTokenAggregator first.");
+                throw new InvalidOperationException(
+                    "TokenAggregator is already attached. Call DetachTokenAggregator first.");
         }
 
         /// <inheritdoc/>
@@ -237,7 +238,7 @@ namespace BleCommands.Windows
         }
 
         /// <summary>
-        /// Handles the ValueChanged event from the native GATT characteristic.
+        /// Handles the ValueChanged event from the native characteristic.
         /// </summary>
         /// <remarks>
         /// This method converts the received bytes to a UTF-8 string, raises the

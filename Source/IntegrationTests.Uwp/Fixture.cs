@@ -112,10 +112,6 @@ namespace IntegrationTests.Uwp
         public static void Cleanup()
         {
             BleScanner.Dispose();
-            CommandCharacteristic?.Dispose();
-            ResponseCharacteristic?.Dispose();
-            ListeningCharacteristic?.Dispose();
-            CharacteristicWithAttachedAggregator?.Dispose();
             BleTransport?.Dispose();
         }
     }

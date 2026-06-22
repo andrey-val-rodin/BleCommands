@@ -171,7 +171,7 @@ namespace BleCommands.Windows
 
                         foreach (var child in _children)
                         {
-                            child?.Dispose();
+                            child.Dispose();
                         }
                     }
 

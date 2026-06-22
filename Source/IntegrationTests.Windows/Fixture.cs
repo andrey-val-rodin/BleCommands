@@ -101,10 +101,6 @@ namespace BleCommands.IntegrationTests.Windows
         public ValueTask DisposeAsync()
         {
             BleScanner.Dispose();
-            CommandCharacteristic?.Dispose();
-            ResponseCharacteristic?.Dispose();
-            ListeningCharacteristic?.Dispose();
-            CharacteristicWithAttachedAggregator?.Dispose();
             BleTransport?.Dispose();
             return ValueTask.CompletedTask;
         }

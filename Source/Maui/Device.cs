@@ -213,7 +213,7 @@ namespace BleCommands.Maui
 
                     foreach (var child in _children)
                     {
-                        child?.Dispose();
+                        child.Dispose();
                     }
                 }
 

@@ -28,7 +28,6 @@ namespace IntegrationTests.Uwp
         public async Task GetServices_Success()
         {
             var device = Fixture.Device;
-            Assert.IsNotNull(device);
             var services = await device.GetServicesAsync(TestContext.CancellationToken);
 
             Assert.IsNotNull(services);
@@ -36,6 +35,20 @@ namespace IntegrationTests.Uwp
             Assert.Contains(s => s.Id == new Guid("00001801-0000-1000-8000-00805f9b34fb"), services);
             Assert.Contains(s => s.Id == new Guid("00001800-0000-1000-8000-00805f9b34fb"), services);
             Assert.Contains(s => s.Id == new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"), services);
+        }
+
+        [TestMethod]
+        public async Task GetCharacteristics_Success()
+        {
+            var device = Fixture.Device;
+            var service = await device.GetServiceAsync(
+                new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"), TestContext.CancellationToken);
+            var characteristics = await service.GetCharacteristicsAsync(TestContext.CancellationToken);
+
+            Assert.IsNotNull(characteristics);
+            Assert.HasCount(2, characteristics);
+            Assert.Contains(c => c.Id == new Guid("0000ffe1-0000-1000-8000-00805f9b34fb"), characteristics);
+            Assert.Contains(c => c.Id == new Guid("0000ffe2-0000-1000-8000-00805f9b34fb"), characteristics);
         }
     }
 }

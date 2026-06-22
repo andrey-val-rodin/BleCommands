@@ -107,7 +107,7 @@ namespace BleCommands.Maui
 
                     foreach (var child in _children)
                     {
-                        child?.Dispose();
+                        child.Dispose();
                     }
                 }
 
@@ -119,8 +119,13 @@ namespace BleCommands.Maui
         /// Explicit interface implementation. Registers a child element for future disposing.
         /// </summary>
         /// <param name="child">A child.</param>
+        /// <exception cref="ObjectDisposedException">Thrown if the device has been disposed.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if any characteristic is null.</exception>
         void IChildDisposer.RegisterChild(IDisposable child)
         {
+            ThrowIfDisposed();
+            if (child == null) throw new ArgumentNullException(nameof(child));
+
             _children.Add(child);
         }
 

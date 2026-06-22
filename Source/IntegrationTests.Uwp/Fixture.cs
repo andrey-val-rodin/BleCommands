@@ -3,6 +3,8 @@ using BleCommands.Core.Events;
 using BleCommands.Maui;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using BleTransport = BleCommands.Maui.BleTransport;
 
@@ -22,6 +24,7 @@ namespace IntegrationTests.Uwp
         public static readonly Guid ServiceUuid                 = new("0000ffe0-0000-1000-8000-00805f9b34fb");
         public static readonly Guid UpdatesCharacteristicUuid   = new("0000ffe1-0000-1000-8000-00805f9b34fb");
         public static readonly Guid WriteCharacteristicUuid     = new("0000ffe2-0000-1000-8000-00805f9b34fb");
+        private static List<IDisposable> _disposableObjects = new();
 
         public static BleScanner BleScanner { get; } = new BleScanner();
 
@@ -61,19 +64,27 @@ namespace IntegrationTests.Uwp
             if (!device.IsConnected)
                 throw new TimeoutException("Device did not connect within timeout");
             */
+            RegisterDisposableObject(Device);
+            await RetrieveObjectsToCheckCorrectDisposingAsync();
 
             Service = await Device.GetServiceAsync(ServiceUuid, context.CancellationToken);
             Assert.IsNotNull(Service);
+            RegisterDisposableObject(Service);
+
             CommandCharacteristic = await Service.GetCharacteristicAsync
                 (WriteCharacteristicUuid, context.CancellationToken);
             Assert.IsNotNull(CommandCharacteristic);
+            RegisterDisposableObject(CommandCharacteristic);
             ListeningCharacteristic = ResponseCharacteristic =
                 await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid, context.CancellationToken);
             Assert.IsNotNull(ResponseCharacteristic);
             Assert.IsNotNull(ListeningCharacteristic);
+            RegisterDisposableObject(ResponseCharacteristic);
+            RegisterDisposableObject(ListeningCharacteristic);
             CharacteristicWithAttachedAggregator =
                 await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid, context.CancellationToken);
             CharacteristicWithAttachedAggregator.AttachTokenAggregator(new TokenAggregator());
+            RegisterDisposableObject(CharacteristicWithAttachedAggregator);
             BleTransport = new BleTransport(
                 Device,
                 Service,
@@ -108,11 +119,60 @@ namespace IntegrationTests.Uwp
             BleTransport.ListeningTokenReceived -= Handler;
         }
 
+        private static async Task RetrieveObjectsToCheckCorrectDisposingAsync()
+        {
+            var services = await Device.GetServicesAsync();
+            foreach (var service in services)
+            {
+                _disposableObjects.Add(service);
+                var characteristics = await service.GetCharacteristicsAsync();
+                foreach (var characteristic in characteristics)
+                {
+                    _disposableObjects.Add(characteristic);
+                }
+            }
+        }
+
+        private static void RegisterDisposableObject(IDisposable obj)
+        {
+            Assert.IsNotNull(obj);
+            _disposableObjects.Add(obj);
+        }
+
+        private static void VerifyDisposeWasCalled(object obj)
+        {
+            var type = obj.GetType();
+
+            var disposedField = type.GetField("_disposed",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var value = disposedField?.GetValue(obj);
+            if (value != null)
+            {
+                var isDisposed = (bool)value;
+                Assert.IsTrue(isDisposed, $"The {type.Name} object was not disposed");
+            }
+            else
+            {
+                if (obj is IDisposable)
+                {
+                    Assert.Fail($"The {type.Name} object implements IDisposable, " +
+                        "but the _disposed field was not found.");
+                }
+            }
+        }
+
         [AssemblyCleanup]
         public static void Cleanup()
         {
             BleScanner.Dispose();
             BleTransport?.Dispose();
+
+            // Check whether all objects were disposed
+            foreach (var obj in _disposableObjects)
+            {
+                VerifyDisposeWasCalled(obj);
+            }
         }
     }
 }

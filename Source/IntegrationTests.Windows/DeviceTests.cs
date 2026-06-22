@@ -9,7 +9,7 @@ namespace BleCommands.IntegrationTests.Windows
     /// </summary>
     public class DeviceTests(Fixture fixture) : IDisposable
     {
-        private readonly List<object> _disposableObjects = [];
+        private readonly List<IDisposable> _disposableObjects = [];
 
         private Fixture Fixture { get; } = fixture;
 
@@ -124,7 +124,7 @@ namespace BleCommands.IntegrationTests.Windows
             */
         }
 
-        private void RegisterDisposableObject(object obj)
+        private void RegisterDisposableObject(IDisposable obj)
         {
             ArgumentNullException.ThrowIfNull(obj, nameof(obj));
             _disposableObjects.Add(obj);

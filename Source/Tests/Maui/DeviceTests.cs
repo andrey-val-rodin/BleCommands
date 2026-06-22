@@ -15,6 +15,16 @@ namespace BleCommands.Tests.Maui
         }
 
         [Fact]
+        public void Constructor_NullAdapter_ArgumentNullException()
+        {
+            var exception = Assert.Throws<ArgumentNullException>(() =>
+            {
+                new Device(Guid.Empty, null!);
+            });
+            Assert.Equal("adapter", exception.ParamName);
+        }
+
+        [Fact]
         public async Task ConnectAsync_Disposed_ObjectDisposedException()
         {
             await Assert.ThrowsAsync<ObjectDisposedException>(async () =>

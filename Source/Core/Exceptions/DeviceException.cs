@@ -6,7 +6,8 @@
         {
         }
 
-        public DeviceException(string message, Exception innerException) : base(message, innerException)
+        public DeviceException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
     }

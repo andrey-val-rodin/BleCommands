@@ -36,9 +36,7 @@
     /// Represents a generic Bluetooth Low Energy device with platform-specific types.
     /// </summary>
     /// <typeparam name="TNativeDevice">The platform-specific device type.</typeparam>
-    /// <typeparam name="TService">
-    /// A specific service implementation.
-    /// </typeparam>
+    /// <typeparam name="TService">A specific service implementation.</typeparam>
     public interface IDevice<TNativeDevice, TService> : IDevice
         where TService : IService
     {

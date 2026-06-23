@@ -28,9 +28,9 @@ Install-Package BleCommands.Windows
 ## Quick Start
 If your Arduino sketch uses the [Arduino companion library](https://github.com/andrey-val-rodin/BleCommands.Arduino), then the work will be quite simple:
 ```c#
-using var transport = await ArduinoClient.CreateTransportAsync("My device");
+using var transport = await ArduinoClient.CreateTransportAsync("My BLE device");
 await transport.StartAsync();
-var response = await transport.SendCommandAsync("Status");
+var response = await transport.SendCommandAsync("STATUS");
 ```
 You can subscribe to regular messages from the device, as well as to timeout and connection loss events:
 ```c#
@@ -41,7 +41,7 @@ transport.StartListening(TimeSpan.FromSeconds(1));
 ```
 You can work directly with Device, Service, and Characteristic objects. To release all system resources after work, simply dispose the Device object:
 ```c#
-using var device = await new BleScanner().FindDeviceAsync("My device");
+using var device = await new BleScanner().FindDeviceAsync("My BLE device");
 var services = await device.GetServicesAsync();
 var characteristics = await services.FirstOrDefault()?.GetCharacteristicsAsync();
 ```

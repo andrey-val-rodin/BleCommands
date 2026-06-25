@@ -84,7 +84,7 @@ namespace BleCommands.Core.Contracts
         /// <param name="command">The command string to send.</param>
         /// <returns>
         /// The response string received from the Bluetooth device,
-        /// or null if the device does not respond within <see cref="ResponseTimeout">.
+        /// or <c>null</c> if the device does not respond within <see cref="ResponseTimeout"/>.
         /// </returns>
         /// <param name="token">A token to cancel the operation.</param>
         Task<string?> SendCommandAsync(string command, CancellationToken token = default);

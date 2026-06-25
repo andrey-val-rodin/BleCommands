@@ -52,10 +52,16 @@ namespace BleCommands.Core
         /// <inheritdoc />
         public abstract TCharacteristic ListeningCharacteristic { get; }
 
+        /// <summary>
+        /// The <see cref="TokenAggregator"/> instance used by <see cref="ResponseCharacteristic"/>.
+        /// </summary>
         protected TokenAggregator ResponseAggregator =>
             ResponseCharacteristic.TokenAggregator ??
             throw new InvalidOperationException("TokenAggregator not attached to ResponseCharacteristic");
 
+        /// <summary>
+        /// The <see cref="TokenAggregator"/> instance used by <see cref="ListeningCharacteristic"/>.
+        /// </summary>
         protected TokenAggregator ListeningAggregator =>
             ListeningCharacteristic.TokenAggregator ??
             throw new InvalidOperationException("TokenAggregator not attached to ListeningCharacteristic");
@@ -69,6 +75,9 @@ namespace BleCommands.Core
         /// <inheritdoc />
         public TimeSpan ResponseTimeout { get; set; } = TimeSpan.FromMilliseconds(1000);
 
+        /// <summary>
+        /// Returns <c>true</c> if the <see cref="StartAsync(CancellationToken)"/> method was called.
+        /// </summary>
         public bool IsStarted { get; protected set; }
 
         /// <inheritdoc />
@@ -162,7 +171,7 @@ namespace BleCommands.Core
             }
         }
 
-        protected void ListeningHandler(object? sender, TextEventArgs args)
+        private void ListeningHandler(object? sender, TextEventArgs args)
         {
             if (_disposed)
                 return;
@@ -189,13 +198,20 @@ namespace BleCommands.Core
             }
         }
 
-        protected void ThrowIfDisposed()
+        private void ThrowIfDisposed()
         {
             if (_disposed)
                 throw new ObjectDisposedException(
                     typeof(BleTransport<TDevice, TService, TCharacteristic>).FullName);
         }
 
+        /// <summary>
+        /// Releases managed and unmanaged resources.
+        /// </summary>
+        /// <param name="disposing">
+        /// <c>true</c> to release both managed and unmanaged resources;
+        /// <c>false</c> to release only unmanaged resources.
+        /// </param>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -224,6 +240,7 @@ namespace BleCommands.Core
             }
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(disposing: true);

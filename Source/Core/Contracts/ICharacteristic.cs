@@ -62,7 +62,7 @@ namespace BleCommands.Core.Contracts
         /// <summary>
         /// Writes a string value to the characteristic.
         /// </summary>
-        /// <param name="data">The string value to write.</param>
+        /// <param name="text">The string value to write.</param>
         /// <param name="token">Cancellation token for the operation.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="CanWrite"/> is <c>false</c>.

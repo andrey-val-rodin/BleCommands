@@ -97,6 +97,13 @@ namespace BleCommands.Maui
                 throw new ObjectDisposedException(typeof(Service).FullName);
         }
 
+        /// <summary>
+        /// Releases managed and unmanaged resources.
+        /// </summary>
+        /// <param name="disposing">
+        /// <c>true</c> to release both managed and unmanaged resources;
+        /// <c>false</c> to release only unmanaged resources.
+        /// </param>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)

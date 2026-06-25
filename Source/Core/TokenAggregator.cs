@@ -12,16 +12,34 @@ namespace BleCommands.Core
     /// </remarks>
     public class TokenAggregator
     {
+        /// <summary>
+        /// The default token delimiter character (newline).
+        /// </summary>
         public const char DefaultTokenDelimiter = '\n';
+
         private readonly StringBuilder _buffer = new();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TokenAggregator"/> class
+        /// with the specified delimiter character.
+        /// </summary>
+        /// <param name="delimiter">
+        /// The character that marks the end of a token.
+        /// Defaults to <see cref="DefaultTokenDelimiter"/>.
+        /// </param>
         public TokenAggregator(char delimiter = DefaultTokenDelimiter)
         {
             TokenDelimiter = delimiter;
         }
 
+        /// <summary>
+        /// Gets the character that marks the end of a token.
+        /// </summary>
         public char TokenDelimiter { get; }
 
+        /// <summary>
+        /// Occurs when a complete token has been accumulated.
+        /// </summary>
         public event EventHandler<TextEventArgs>? TokenReceived;
 
         /// <summary>

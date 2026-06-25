@@ -12,11 +12,20 @@ namespace BleCommands.Maui
     /// </summary>
     public class BleScanner : IBleScanner<Device>
     {
+        /// <summary>
+        /// Default timeout for device search.
+        /// </summary>
         public const int DefaultTimeoutSeconds = 5;
+        /// <summary>
+        /// Maximum timeout for device search.
+        /// </summary>
         public const int MaxTimeoutSeconds = 60;
 
         private readonly AsyncSemaphore _scanLock = new(1);
 
+        /// <summary>
+        /// Gets reference to <see cref="IAdapter"/>.
+        /// </summary>
         protected static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
 
         /// <summary>
@@ -71,7 +80,7 @@ namespace BleCommands.Maui
             }
         }
 
-        protected async Task<Device?> FindDeviceInternalAsync(
+        private async Task<Device?> FindDeviceInternalAsync(
             string deviceName,
             CancellationTokenSource tokenSource)
         {
@@ -121,13 +130,13 @@ namespace BleCommands.Maui
             }
         }
 
-        protected static void ValidateDeviceName(string deviceName)
+        private static void ValidateDeviceName(string deviceName)
         {
             if (string.IsNullOrWhiteSpace(deviceName))
                 throw new ArgumentNullException(nameof(deviceName));
         }
 
-        protected static void ValidateTimeout(TimeSpan timeout)
+        private static void ValidateTimeout(TimeSpan timeout)
         {
             if (timeout <= TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException(nameof(timeout),
@@ -138,6 +147,7 @@ namespace BleCommands.Maui
                     $"Timeout too long. Maximum is {MaxTimeoutSeconds} seconds.");
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             _scanLock.Dispose();

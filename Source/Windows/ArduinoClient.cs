@@ -5,9 +5,21 @@
     /// </summary>
     public static class ArduinoClient
     {
+        /// <summary>
+        /// The service UUID.
+        /// </summary>
         public static readonly Guid ServiceUuid                 = new("DB341FB3-8977-4C2D-AC6C-74540BD8B901");
+        /// <summary>
+        /// The command characteristic UUID.
+        /// </summary>
         public static readonly Guid CommandCharacteristicUuid   = new("DB341FB3-8977-4C2D-AC6C-74540BD8B902");
+        /// <summary>
+        /// The response characteristic UUID.
+        /// </summary>
         public static readonly Guid ResponseCharacteristicUuid  = new("DB341FB3-8977-4C2D-AC6C-74540BD8B903");
+        /// <summary>
+        /// The listening characteristic UUID.
+        /// </summary>
         public static readonly Guid ListeningCharacteristicUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B904");
 
         /// <summary>
@@ -15,7 +27,7 @@
         /// </summary>
         /// <param name="deviceName">A device name.</param>
         /// <param name="token">Cancellation token to cancel the operation.</param>
-        /// <returns>A BleTransport object, or null if something went wrong.</returns>
+        /// <returns>A BleTransport object, or <c>null</c> if something went wrong.</returns>
         /// <remarks>
         /// Be sure to call the Dispose method or use the using statement on the transport object
         /// to release all system resources.

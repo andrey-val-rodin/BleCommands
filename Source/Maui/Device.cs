@@ -29,7 +29,7 @@ namespace BleCommands.Maui
         /// </summary>
         /// <param name="guid">A device Guid</param>
         /// <remarks>
-        /// The <see cref="ConnectAsync"/> method will use
+        /// The <see cref="ConnectAsync(CancellationToken)"/> method will use
         /// <see cref="IAdapter.ConnectToKnownDeviceAsync"/>
         /// The recommended way for obtaining a device is using <see cref="BleScanner"/>.
         /// </remarks>
@@ -129,6 +129,11 @@ namespace BleCommands.Maui
             }
         }
 
+        /// <summary>
+        /// Initiates the connection process to the specified native device.
+        /// </summary>
+        /// <param name="nativeDevice">The native device to connect to.</param>
+        /// <param name="token">Cancellation token to cancel the operation.</param>
         protected async Task ConnectAsync(
             NativeDevice nativeDevice, CancellationToken token = default)
         {
@@ -137,6 +142,11 @@ namespace BleCommands.Maui
                 .ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Initiates the connection process to the known device with the specified UUID.
+        /// </summary>
+        /// <param name="guid">The device UUID.</param>
+        /// <param name="token">Cancellation token to cancel the operation.</param>
         protected async Task ConnectAsync(Guid guid, CancellationToken token = default)
         {
             NativeDevice = await Adapter.ConnectToKnownDeviceAsync(guid,
@@ -147,7 +157,7 @@ namespace BleCommands.Maui
         /// <inheritdoc/>
         /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="ConnectAsync"/> has not been called
+        /// Thrown when <see cref="ConnectAsync(CancellationToken)"/> has not been called.
         /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task<IReadOnlyList<Service>> GetServicesAsync(CancellationToken token = default)
@@ -174,7 +184,7 @@ namespace BleCommands.Maui
         /// <inheritdoc/>
         /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="ConnectAsync"/> has not been called
+        /// Thrown when <see cref="ConnectAsync(CancellationToken)"/> has not been called.
         /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task<Service?> GetServiceAsync(Guid id, CancellationToken token = default)
@@ -201,6 +211,13 @@ namespace BleCommands.Maui
                 throw new ObjectDisposedException(typeof(Device).FullName);
         }
 
+        /// <summary>
+        /// Releases managed and unmanaged resources.
+        /// </summary>
+        /// <param name="disposing">
+        /// <c>true</c> to release both managed and unmanaged resources;
+        /// <c>false</c> to release only unmanaged resources.
+        /// </param>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)

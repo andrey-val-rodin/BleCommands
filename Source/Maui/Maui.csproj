@@ -9,7 +9,7 @@
     <PackageIcon>Logo.png</PackageIcon>
     <PackageId>BleCommands.Maui</PackageId>
     <Title>BleCommands.Maui</Title>
-    <Version>1.0.7</Version>
+    <Version>1.1.0</Version>
     <Authors>Andrey Rodin</Authors>
     <Description>Simple text-based command/response protocol over BLE — MAUI library.</Description>
     <RepositoryUrl>https://github.com/andrey-val-rodin/BleCommands</RepositoryUrl>
@@ -17,6 +17,10 @@
     <PackageTags>ble;bluetooth;bluetooth-le;arduino;device;service;characteristic;command;gatt</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/andrey-val-rodin/BleCommands</PackageProjectUrl>
+    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedAllSources>true</EmbedAllSources>
   </PropertyGroup>
 
   <ItemGroup>

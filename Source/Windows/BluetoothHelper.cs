@@ -3,11 +3,17 @@ using Windows.Devices.Radios;
 
 namespace BleCommands.Windows
 {
+    /// <summary>
+    /// Provides helper methods for checking Bluetooth state.
+    /// </summary>
     public class BluetoothHelper
     {
         /// <summary>
-        /// Returns true if Bluetooth is available
+        /// Returns a value indicating whether Bluetooth hardware is available on the device.
         /// </summary>
+        /// <returns>
+        /// <c>true</c> if Bluetooth hardware is available; <c>false</c> otherwise.
+        /// </returns>
         public static async Task<bool> IsBluetoothAvailableAsync()
         {
             try
@@ -26,8 +32,11 @@ namespace BleCommands.Windows
         }
 
         /// <summary>
-        /// Returns true if Bluetooth is on
+        /// Returns a value indicating whether Bluetooth is currently powered on.
         /// </summary>
+        /// <returns>
+        /// <c>true</c> if Bluetooth is turned on; <c>false</c> otherwise.
+        /// </returns>
         public static async Task<bool> IsBluetoothOnAsync()
         {
             try

@@ -110,7 +110,7 @@ namespace BleCommands.Windows
         /// <summary>
         /// Writes a string value to the characteristic.
         /// </summary>
-        /// <param name="data">The string value to write.</param>
+        /// <param name="text">The string value to write.</param>
         /// <param name="token">A cancellation token to cancel the write operation.</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
         /// <exception cref="InvalidOperationException">
@@ -255,6 +255,13 @@ namespace BleCommands.Windows
             tokenAggregator?.Append(text);
         }
 
+        /// <summary>
+        /// Releases managed and unmanaged resources.
+        /// </summary>
+        /// <param name="disposing">
+        /// <c>true</c> to release both managed and unmanaged resources;
+        /// <c>false</c> to release only unmanaged resources.
+        /// </param>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -271,9 +278,7 @@ namespace BleCommands.Windows
             }
         }
 
-        /// <summary>
-        /// Releases all resources used by this object.
-        /// </summary>
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(disposing: true);

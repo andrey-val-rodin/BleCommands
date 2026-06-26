@@ -7,7 +7,7 @@
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DeviceException"/> class
-        /// with a specified error message.
+        /// with the specified error message.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         public DeviceException(string message) : base(message)
@@ -16,7 +16,7 @@
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DeviceException"/> class
-        /// with a specified error message and a reference to the inner exception
+        /// with the specified error message and a reference to the inner exception
         /// that is the cause of this exception.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>

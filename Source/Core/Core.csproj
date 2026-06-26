@@ -9,7 +9,7 @@
     <PackageIcon>Logo.png</PackageIcon>
     <PackageId>BleCommands.Core</PackageId>
     <Title>BleCommands.Core</Title>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <Authors>Andrey Rodin</Authors>
     <Description>Simple text-based command/response protocol over BLE — Core library.</Description>
     <RepositoryUrl>https://github.com/andrey-val-rodin/BleCommands</RepositoryUrl>
@@ -20,7 +20,7 @@
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <EmbedAllSources>true</EmbedAllSources>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

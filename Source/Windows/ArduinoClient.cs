@@ -30,7 +30,7 @@
         /// <returns>A BleTransport object, or <c>null</c> if something went wrong.</returns>
         /// <remarks>
         /// Be sure to call the Dispose method or use the using statement on the transport object
-        /// to release all system resources.
+        /// to release all system resources after use.
         /// </remarks>
         public static async Task<BleTransport?> CreateTransportAsync(string deviceName, CancellationToken token = default)
         {

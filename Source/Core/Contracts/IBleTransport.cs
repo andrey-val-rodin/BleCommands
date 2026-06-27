@@ -82,11 +82,17 @@ namespace BleCommands.Core.Contracts
         /// Sends a command to the Bluetooth device and waits for the response.
         /// </summary>
         /// <param name="command">The command string to send.</param>
+        /// <param name="token">A token to cancel the operation.</param>
         /// <returns>
         /// The response string received from the Bluetooth device,
         /// or <c>null</c> if the device does not respond within <see cref="ResponseTimeout"/>.
         /// </returns>
-        /// <param name="token">A token to cancel the operation.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the transport has not been started.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the transport has been disposed.
+        /// </exception>
         Task<string?> SendCommandAsync(string command, CancellationToken token = default);
 
         /// <summary>
@@ -98,6 +104,12 @@ namespace BleCommands.Core.Contracts
         /// If the interval exceeds this value,
         /// the <see cref="ListeningTimeoutElapsed"/> event is raised.
         /// </param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the transport has not been started or listening is already in progress.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the transport has been disposed.
+        /// </exception>
         /// <remarks>
         /// Subscribe to <see cref="ListeningTokenReceived"/> before calling this method.
         /// Listening continues until <see cref="StopListening"/> is called.

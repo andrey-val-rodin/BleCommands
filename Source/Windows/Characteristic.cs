@@ -18,6 +18,7 @@ namespace BleCommands.Windows
     public class Characteristic : ICharacteristic<GattCharacteristic>
     {
         private TokenAggregator? _tokenAggregator;
+        private readonly object _lock = new();
         private bool _disposed;
 
         /// <summary>
@@ -73,7 +74,16 @@ namespace BleCommands.Windows
                                 Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse);
 
         /// <inheritdoc/>
-        public TokenAggregator? TokenAggregator => _tokenAggregator;
+        public TokenAggregator? TokenAggregator
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _tokenAggregator;
+                }
+            }
+        }
 
         /// <summary>
         /// Reads the characteristic value.
@@ -190,16 +200,22 @@ namespace BleCommands.Windows
 
             ArgumentNullException.ThrowIfNull(tokenAggregator);
 
-            var original = Interlocked.CompareExchange(ref _tokenAggregator, tokenAggregator, null);
-            if (original != null)
-                throw new InvalidOperationException(
-                    "TokenAggregator is already attached. Call DetachTokenAggregator first.");
+            lock (_lock)
+            {
+                if (_tokenAggregator != null)
+                    throw new InvalidOperationException("TokenAggregator is already attached. Call DetachTokenAggregator first.");
+
+                _tokenAggregator = tokenAggregator;
+            }
         }
 
         /// <inheritdoc/>
         public void DetachTokenAggregator()
         {
-            Interlocked.Exchange(ref _tokenAggregator, null);
+            lock (_lock)
+            {
+                _tokenAggregator = null;
+            }
         }
 
         /// <summary>
@@ -251,7 +267,11 @@ namespace BleCommands.Windows
             ValueReceived?.Invoke(this, new ByteArrayEventArgs(bytes));
             var text = ConvertToString(bytes);
 
-            var tokenAggregator = Interlocked.CompareExchange(ref _tokenAggregator, null, null);
+            TokenAggregator? tokenAggregator;
+            lock (_lock)
+            {
+                tokenAggregator = _tokenAggregator;
+            }
             tokenAggregator?.Append(text);
         }
 

@@ -53,15 +53,49 @@ namespace BleCommands.Core
         public abstract TCharacteristic ListeningCharacteristic { get; }
 
         /// <summary>
-        /// The <see cref="TokenAggregator"/> instance used by <see cref="ResponseCharacteristic"/>.
+        /// Gets the <see cref="TokenAggregator"/> instance used by <see cref="ResponseCharacteristic"/>.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This property is expected to be initialized by derived classes in their constructor.
+        /// The <see cref="TokenAggregator"/> should be attached to the <see cref="ResponseCharacteristic"/>
+        /// during initialization of the specific BLE implementation.
+        /// </para>
+        /// <para>
+        /// The property throws <see cref="InvalidOperationException"/> if the aggregator is not attached.
+        /// This is by design — it serves as a safeguard to ensure proper initialization of the transport
+        /// before any operations are performed. Derived implementations must guarantee that
+        /// <see cref="ICharacteristic.TokenAggregator"/> is set before this property is accessed.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="ICharacteristic.TokenAggregator"/> is <c>null</c>.
+        /// This indicates that the derived class failed to properly initialize the transport.
+        /// </exception>
         protected TokenAggregator ResponseAggregator =>
             ResponseCharacteristic.TokenAggregator ??
             throw new InvalidOperationException("TokenAggregator not attached to ResponseCharacteristic");
 
         /// <summary>
-        /// The <see cref="TokenAggregator"/> instance used by <see cref="ListeningCharacteristic"/>.
+        /// Gets the <see cref="TokenAggregator"/> instance used by <see cref="ListeningCharacteristic"/>.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This property is expected to be initialized by derived classes in their constructor.
+        /// The <see cref="TokenAggregator"/> should be attached to the <see cref="ListeningCharacteristic"/>
+        /// during initialization of the specific BLE implementation.
+        /// </para>
+        /// <para>
+        /// The property throws <see cref="InvalidOperationException"/> if the aggregator is not attached.
+        /// This is by design — it serves as a safeguard to ensure proper initialization of the transport
+        /// before any operations are performed. Derived implementations must guarantee that
+        /// <see cref="ICharacteristic.TokenAggregator"/> is set before this property is accessed.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="ICharacteristic.TokenAggregator"/> is <c>null</c>.
+        /// This indicates that the derived class failed to properly initialize the transport.
+        /// </exception>
         protected TokenAggregator ListeningAggregator =>
             ListeningCharacteristic.TokenAggregator ??
             throw new InvalidOperationException("TokenAggregator not attached to ListeningCharacteristic");

@@ -7,8 +7,7 @@
 // https://github.com/CommunityToolkit/WindowsCommunityToolkit/blob/main/Microsoft.Toolkit.Uwp.Connectivity/BluetoothLEHelper/GattProtocolErrorParser.cs
 // Date: 2024-04-14 with these changes applied:
 // 1. These comments are added
-// 2. namespace Microsoft.Toolkit.Uwp.Connectivity -> Windows.Utils
-// 3. public static class GattProtocolErrorParser -> internal static class GattProtocolErrorParser
+// 2. namespace Microsoft.Toolkit.Uwp.Connectivity -> BleCommands.Windows.Extensions
 
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 

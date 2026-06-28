@@ -7,7 +7,7 @@
 // https://github.com/dotnet-bluetooth-le/dotnet-bluetooth-le/blob/main/Source/Plugin.BLE/Windows/Extensions/GattResultExtensions.cs
 // Date: 2024-04-14 with these changes applied:
 // 1. These comments are added
-// 2. namespace Plugin.BLE.Extensions -> Windows.Extensions
+// 2. namespace Plugin.BLE.Extensions -> BleCommands.Windows.Extensions
 // 3. Nullable types
 // 4. Minor changes in GetErrorMessage()
 // 5. new byte[0] -> Array.Empty<byte>()

@@ -5,14 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IntegrationTests.Uwp
+namespace IntegrationTests.Maui
 {
     [TestClass]
     public class TransportTests
     {
         public TestContext TestContext { get; set; }
 
-        private BleTransport BleTransport => Fixture.BleTransport;
+        private static BleTransport BleTransport => Fixture.BleTransport ?? throw new InvalidOperationException();
 
         [TestMethod]
         public async Task SendCommandAsync_Status_ValidResponse()
@@ -25,7 +25,7 @@ namespace IntegrationTests.Uwp
         {
             var oldTimeout = BleTransport.ResponseTimeout;
             var tcs = new TaskCompletionSource<bool>();
-            void Handler(object sender, TextEventArgs args)
+            void Handler(object? sender, TextEventArgs args)
             {
                 tcs.SetResult(true);
             }
@@ -52,7 +52,7 @@ namespace IntegrationTests.Uwp
             Assert.AreEqual("OK", await BleTransport.SendCommandAsync("RUN FM", TestContext.CancellationToken));
             var tokens = new List<string>();
             var tcs = new TaskCompletionSource<bool>();
-            void Handler(object sender, TextEventArgs args)
+            void Handler(object? sender, TextEventArgs args)
             {
                 tokens.Add(args.Text);
                 if (args.Text == "MOVERR")
@@ -61,7 +61,7 @@ namespace IntegrationTests.Uwp
                     tcs.TrySetResult(true);
             }
 
-            void TimeoutHandler(object sender, System.Timers.ElapsedEventArgs e)
+            void TimeoutHandler(object? sender, System.Timers.ElapsedEventArgs e)
             {
                 tcs.TrySetResult(false); // Listening timeout
             }

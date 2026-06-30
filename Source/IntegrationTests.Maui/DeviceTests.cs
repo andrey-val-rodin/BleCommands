@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;
 
-namespace IntegrationTests.Uwp
+namespace IntegrationTests.Maui
 {
     /// <summary>
     /// These tests use real device called Rotating Table:
@@ -14,7 +14,7 @@ namespace IntegrationTests.Uwp
     {
         public TestContext TestContext { get; set; }
 
-        private BleScanner BleScanner => Fixture.BleScanner;
+        private static BleScanner BleScanner => Fixture.BleScanner;
 
         [TestMethod]
         public async Task FindDeviceWithTimeout_Timeout_ReturnsNull()
@@ -28,6 +28,7 @@ namespace IntegrationTests.Uwp
         public async Task GetServices_Success()
         {
             var device = Fixture.Device;
+            Assert.IsNotNull(device);
             var services = await device.GetServicesAsync(TestContext.CancellationToken);
 
             Assert.IsNotNull(services);
@@ -41,8 +42,10 @@ namespace IntegrationTests.Uwp
         public async Task GetCharacteristics_Success()
         {
             var device = Fixture.Device;
+            Assert.IsNotNull(device);
             var service = await device.GetServiceAsync(
                 new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"), TestContext.CancellationToken);
+            Assert.IsNotNull(service);
             var characteristics = await service.GetCharacteristicsAsync(TestContext.CancellationToken);
 
             Assert.IsNotNull(characteristics);

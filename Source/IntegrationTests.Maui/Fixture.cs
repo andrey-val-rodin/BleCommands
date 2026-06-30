@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using BleTransport = BleCommands.Maui.BleTransport;
 
-namespace IntegrationTests.Uwp
+namespace IntegrationTests.Maui
 {
 
     /// <summary>
@@ -24,23 +24,23 @@ namespace IntegrationTests.Uwp
         public static readonly Guid ServiceUuid                 = new("0000ffe0-0000-1000-8000-00805f9b34fb");
         public static readonly Guid UpdatesCharacteristicUuid   = new("0000ffe1-0000-1000-8000-00805f9b34fb");
         public static readonly Guid WriteCharacteristicUuid     = new("0000ffe2-0000-1000-8000-00805f9b34fb");
-        private static List<IDisposable> _disposableObjects = new();
+        private static readonly List<IDisposable> _disposableObjects = [];
 
         public static BleScanner BleScanner { get; } = new BleScanner();
 
-        public static Device Device { get; private set; }
+        public static Device? Device { get; private set; }
 
-        public static Service Service { get; private set; }
+        public static Service? Service { get; private set; }
 
-        public static BleTransport BleTransport { get; private set; }
+        public static BleTransport? BleTransport { get; private set; }
 
-        public static Characteristic CommandCharacteristic { get; private set; }
+        public static Characteristic? CommandCharacteristic { get; private set; }
 
-        public static Characteristic ResponseCharacteristic { get; private set; }
+        public static Characteristic? ResponseCharacteristic { get; private set; }
 
-        public static Characteristic ListeningCharacteristic { get; private set; }
+        public static Characteristic? ListeningCharacteristic { get; private set; }
 
-        public static Characteristic CharacteristicWithAttachedAggregator { get; private set; }
+        public static Characteristic? CharacteristicWithAttachedAggregator { get; private set; }
 
         [AssemblyInitialize]
         public static async Task InitializeAsync(TestContext context)
@@ -83,6 +83,7 @@ namespace IntegrationTests.Uwp
             RegisterDisposableObject(ListeningCharacteristic);
             CharacteristicWithAttachedAggregator =
                 await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid, context.CancellationToken);
+            Assert.IsNotNull(CharacteristicWithAttachedAggregator);
             CharacteristicWithAttachedAggregator.AttachTokenAggregator(new TokenAggregator());
             RegisterDisposableObject(CharacteristicWithAttachedAggregator);
             BleTransport = new BleTransport(
@@ -99,13 +100,15 @@ namespace IntegrationTests.Uwp
 
         public static async Task StopTableAsync()
         {
+            Assert.IsNotNull(BleTransport);
+
             var status = await BleTransport.SendCommandAsync("STATUS");
             if (status != "BUSY")
                 return;
 
             var tcs = new TaskCompletionSource<bool>();
             BleTransport.ListeningTokenReceived += Handler;
-            void Handler(object sender, TextEventArgs args)
+            void Handler(object? sender, TextEventArgs args)
             {
                 if (args.Text == "END")
                     tcs.TrySetResult(true);
@@ -121,6 +124,7 @@ namespace IntegrationTests.Uwp
 
         private static async Task RetrieveObjectsToCheckCorrectDisposingAsync()
         {
+            Assert.IsNotNull(Device);
             var services = await Device.GetServicesAsync();
             foreach (var service in services)
             {
@@ -143,8 +147,12 @@ namespace IntegrationTests.Uwp
         {
             var type = obj.GetType();
 
+#pragma warning disable IDE0079
+#pragma warning disable IL2075
             var disposedField = type.GetField("_disposed",
                 BindingFlags.NonPublic | BindingFlags.Instance);
+#pragma warning restore IL2075
+#pragma warning restore IDE0079
 
             var value = disposedField?.GetValue(obj);
             if (value != null)

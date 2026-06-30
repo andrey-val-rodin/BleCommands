@@ -5,9 +5,8 @@
     <Project Path="Samples/Wpf/WpfSample.csproj" />
   </Folder>
   <Project Path="Core/Core.csproj" />
-  <Project Path="IntegrationTests.Uwp/IntegrationTests.Uwp.csproj" Id="70e19a7d-61ba-4d71-b2b8-91ee8d1163a1">
+  <Project Path="IntegrationTests.Maui/IntegrationTests.Maui.csproj" Id="fde8465e-c1ba-4093-9bee-79e9c0367519">
     <Platform Project="x64" />
-    <Deploy />
   </Project>
   <Project Path="IntegrationTests.Windows/IntegrationTests.Windows.csproj" />
   <Project Path="Maui/Maui.csproj" />

@@ -132,7 +132,7 @@ namespace BleCommands.IntegrationTests.Windows
 
         private static void VerifyDisposeWasCalled(object obj)
         {
-            TestContext.Current.AddWarning($"VerifyDisposeWasCalled");
+            //TestContext.Current.AddWarning($"VerifyDisposeWasCalled");
             var type = obj.GetType();
 
             var disposedField = type.GetField("_disposed",

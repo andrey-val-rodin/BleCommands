@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "IntegrationTests.Maui": {
+      "commandName": "MsixPackage"
+    }
+  }
+}

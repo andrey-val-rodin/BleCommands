@@ -100,7 +100,6 @@ namespace BleCommands.IntegrationTests.Windows
 
         public ValueTask DisposeAsync()
         {
-            BleScanner.Dispose();
             BleTransport?.Dispose();
             return ValueTask.CompletedTask;
         }

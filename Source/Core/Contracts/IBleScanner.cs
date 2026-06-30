@@ -6,7 +6,7 @@
     /// <typeparam name="TDevice">
     /// A specific device implementation.
     /// </typeparam>
-    public interface IBleScanner<TDevice> : IDisposable
+    public interface IBleScanner<TDevice>
         where TDevice : IDevice
     {
         /// <summary>

@@ -69,7 +69,7 @@
 
         private static async Task<Device?> CreateDeviceAsync(string deviceName, CancellationToken token)
         {
-            using var scanner = new BleScanner();
+            var scanner = new BleScanner();
             var device = await scanner.FindDeviceAsync(deviceName).ConfigureAwait(false);
             if (device == null)
             {

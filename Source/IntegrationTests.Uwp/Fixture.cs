@@ -165,7 +165,6 @@ namespace IntegrationTests.Uwp
         [AssemblyCleanup]
         public static void Cleanup()
         {
-            BleScanner.Dispose();
             BleTransport?.Dispose();
 
             // Check whether all objects were disposed

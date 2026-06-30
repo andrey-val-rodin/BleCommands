@@ -14,7 +14,6 @@ namespace BleCommands.Windows
     {
         private readonly ulong _bluetoothAddress;
         private GattSession? _gattSession;
-        private readonly SemaphoreSlim _semaphore = new(1, 1);
         private readonly List<IDisposable> _children = new();
         private bool _disposed = false;
 
@@ -52,8 +51,11 @@ namespace BleCommands.Windows
         /// <summary>
         /// Initiates process of connection to the device.
         /// </summary>
-        /// <remarks>The connection will be established shortly.</remarks>
         /// <param name="token">Cancellation token to cancel the operation.</param>
+        /// <remarks>
+        /// This method is intended to be called once per instance lifecycle.
+        /// The connection will be established shortly.
+        /// </remarks>
         /// <exception cref="ObjectDisposedException">Thrown if the device has been disposed.</exception>
         /// <exception cref="DeviceException">Thrown on GATT-protocol errors.</exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
@@ -61,35 +63,27 @@ namespace BleCommands.Windows
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
 
-            await _semaphore.WaitAsync(token).ConfigureAwait(false);
-            try
-            {
-                if (NativeDevice != null)
-                    return;
+            if (NativeDevice != null)
+                return;
 
-                NativeDevice = await BluetoothLEDevice
-                    .FromBluetoothAddressAsync(_bluetoothAddress)
-                    .AsTask(token)
-                    .ConfigureAwait(false);
+            NativeDevice = await BluetoothLEDevice
+                .FromBluetoothAddressAsync(_bluetoothAddress)
+                .AsTask(token)
+                .ConfigureAwait(false);
 
-                if (NativeDevice == null)
-                    throw new DeviceException("Unable to find the device identified by bluetooth address " +
-                        $"{_bluetoothAddress}. Specifically, if the device isn't paired " +
-                        "and it isn't found in the system cache.");
+            if (NativeDevice == null)
+                throw new DeviceException("Unable to find the device identified by bluetooth address " +
+                    $"{_bluetoothAddress}. Specifically, if the device isn't paired " +
+                    "and it isn't found in the system cache.");
 
-                // Create and configure GATT session to maintain connection
-                _gattSession = await GattSession.FromDeviceIdAsync(NativeDevice.BluetoothDeviceId)
-                    .AsTask(token)
-                    .ConfigureAwait(false);
-                _gattSession.MaintainConnection = true;
+            // Create and configure GATT session to maintain connection
+            _gattSession = await GattSession.FromDeviceIdAsync(NativeDevice.BluetoothDeviceId)
+                .AsTask(token)
+                .ConfigureAwait(false);
+            _gattSession.MaintainConnection = true;
 
-                // Monitor connection status
-                NativeDevice.ConnectionStatusChanged += NativeDevice_ConnectionStatusChanged;
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
+            // Monitor connection status
+            NativeDevice.ConnectionStatusChanged += NativeDevice_ConnectionStatusChanged;
         }
 
         private void NativeDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
@@ -183,7 +177,6 @@ namespace BleCommands.Windows
                     }
 
                     _gattSession?.Dispose();
-                    _semaphore?.Dispose();
                 }
 
                 _disposed = true;

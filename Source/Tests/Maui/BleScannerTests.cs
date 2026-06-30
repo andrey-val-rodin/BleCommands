@@ -7,7 +7,7 @@ namespace BleCommands.Tests.Maui
         [Fact]
         public async Task FindDeviceAsync_DeviceNameIsNull_ArgumentNullException()
         {
-            using var scanner = new BleScanner();
+            var scanner = new BleScanner();
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
                 string? deviceName = null!;
@@ -19,7 +19,7 @@ namespace BleCommands.Tests.Maui
         [Fact]
         public async Task FindDeviceAsync_DeviceNameIsEmpty_ArgumentNullException()
         {
-            using var scanner = new BleScanner();
+            var scanner = new BleScanner();
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
                 string deviceName = string.Empty;
@@ -31,7 +31,7 @@ namespace BleCommands.Tests.Maui
         [Fact]
         public async Task FindDeviceAsync_TimeSpanIsZero_ArgumentOutOfRangeException()
         {
-            using var scanner = new BleScanner();
+            var scanner = new BleScanner();
             var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
             {
                 await scanner.FindDeviceAsync("Some device", TimeSpan.Zero);
@@ -42,7 +42,7 @@ namespace BleCommands.Tests.Maui
         [Fact]
         public async Task FindDeviceAsync_TimeSpanIsNegative_ArgumentOutOfRangeException()
         {
-            using var scanner = new BleScanner();
+            var scanner = new BleScanner();
             var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
             {
                 await scanner.FindDeviceAsync("Some device", TimeSpan.Zero - TimeSpan.FromSeconds(1));

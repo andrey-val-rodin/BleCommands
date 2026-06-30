@@ -1,6 +1,5 @@
 ﻿using BleCommands.Core.Contracts;
 using BleCommands.Core.Exceptions;
-using Microsoft.VisualStudio.Threading;
 using Windows.Devices.Bluetooth.Advertisement;
 
 namespace BleCommands.Windows
@@ -18,8 +17,6 @@ namespace BleCommands.Windows
         /// Maximum timeout for device search.
         /// </summary>
         public const int MaxTimeoutSeconds = 60;
-
-        private readonly AsyncSemaphore _scanLock = new(1);
 
         /// <summary>
         /// Searches for a Bluetooth device by name with default timeout (5 seconds).
@@ -71,7 +68,6 @@ namespace BleCommands.Windows
             string deviceName,
             CancellationToken token)
         {
-            var releaser = await _scanLock.EnterAsync(token).ConfigureAwait(false);
             try
             {
                 var tcs = new TaskCompletionSource<Device?>();
@@ -114,10 +110,6 @@ namespace BleCommands.Windows
             {
                 throw new DeviceException("BLE scanning error.", ex);
             }
-            finally
-            {
-                releaser.Dispose();
-            }
         }
 
         private static void ValidateDeviceName(string deviceName)
@@ -135,13 +127,6 @@ namespace BleCommands.Windows
             if (timeout > TimeSpan.FromSeconds(MaxTimeoutSeconds))
                 throw new ArgumentOutOfRangeException(nameof(timeout),
                     $"Timeout too long. Maximum is {MaxTimeoutSeconds} seconds.");
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            _scanLock.Dispose();
-            GC.SuppressFinalize(this);
         }
     }
 }

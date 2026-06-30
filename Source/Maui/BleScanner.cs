@@ -1,6 +1,5 @@
 ﻿using BleCommands.Core.Contracts;
 using BleCommands.Core.Exceptions;
-using Microsoft.VisualStudio.Threading;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
@@ -20,8 +19,6 @@ namespace BleCommands.Maui
         /// Maximum timeout for device search.
         /// </summary>
         public const int MaxTimeoutSeconds = 60;
-
-        private readonly AsyncSemaphore _scanLock = new(1);
 
         /// <summary>
         /// Gets reference to <see cref="IAdapter"/>.
@@ -84,7 +81,6 @@ namespace BleCommands.Maui
             string deviceName,
             CancellationTokenSource tokenSource)
         {
-            var releaser = await _scanLock.EnterAsync(tokenSource.Token).ConfigureAwait(false);
             try
             {
                 var tcs = new TaskCompletionSource<Device?>();
@@ -124,10 +120,6 @@ namespace BleCommands.Maui
             {
                 throw new DeviceException("BLE scanning error.", ex);
             }
-            finally
-            {
-                releaser.Dispose();
-            }
         }
 
         private static void ValidateDeviceName(string deviceName)
@@ -145,13 +137,6 @@ namespace BleCommands.Maui
             if (timeout > TimeSpan.FromSeconds(MaxTimeoutSeconds))
                 throw new ArgumentOutOfRangeException(nameof(timeout),
                     $"Timeout too long. Maximum is {MaxTimeoutSeconds} seconds.");
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            _scanLock.Dispose();
-            GC.SuppressFinalize(this);
         }
     }
 }

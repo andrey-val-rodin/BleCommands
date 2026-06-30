@@ -1,4 +1,5 @@
 ﻿using BleCommands.Core.Contracts;
+using BleCommands.Core.Exceptions;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
@@ -15,7 +16,6 @@ namespace BleCommands.Maui
     {
         private readonly Guid? _guid;
         private bool _connectionInvoked;
-        private readonly SemaphoreSlim _semaphore = new(1, 1);
         private bool _disconnected;
         private readonly object _lock = new();
         private readonly List<IDisposable> _children = new();
@@ -78,40 +78,42 @@ namespace BleCommands.Maui
         /// <summary>
         /// Initiates process of connection to the device.
         /// </summary>
-        /// <remarks>The connection will be established shortly.</remarks>
         /// <param name="token">Cancellation token to cancel the operation.</param>
+        /// <remarks>
+        /// This method is intended to be called once per instance lifecycle.
+        /// The connection will be established shortly.
+        /// </remarks>
         /// <exception cref="ObjectDisposedException">Thrown if the device has been disposed.</exception>
         /// <exception cref="DeviceConnectionException">Thrown on device connection errors.</exception>
+        /// <exception cref="DeviceException">
+        /// Thrown if <see cref="IAdapter.ConnectToKnownDeviceAsync"/> failed to find
+        /// the device with the specified UUID.
+        /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task ConnectAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
 
-            await _semaphore.WaitAsync(token).ConfigureAwait(false);
-            try
+            if (_connectionInvoked)
+                return;
+
+            // Different events can be fired on different platforms
+            Adapter.DeviceDisconnected += Adapter_DeviceDisconnected;
+            Adapter.DeviceConnectionLost += Adapter_DeviceDisconnected;
+
+            if (NativeDevice != null)
             {
-                if (_connectionInvoked)
-                    return;
-
-                // Different events can be fired on different platforms
-                Adapter.DeviceDisconnected += Adapter_DeviceDisconnected;
-                Adapter.DeviceConnectionLost += Adapter_DeviceDisconnected;
-
-                if (NativeDevice != null)
-                {
-                    await ConnectAsync(NativeDevice, token).ConfigureAwait(false);
-                }
-                else if (_guid != null)
-                {
-                    await ConnectAsync(_guid.Value, token).ConfigureAwait(false);
-                }
-
-                _connectionInvoked = true;
+                await ConnectAsync(NativeDevice, token).ConfigureAwait(false);
             }
-            finally
+            else if (_guid != null)
             {
-                _semaphore.Release();
+                await ConnectAsync(_guid.Value, token).ConfigureAwait(false);
+
+                if (NativeDevice == null)
+                    throw new DeviceException($"Unable to find the device identified by UUID {_guid}");
             }
+
+            _connectionInvoked = true;
         }
 
         private void Adapter_DeviceDisconnected(object sender, DeviceEventArgs e)

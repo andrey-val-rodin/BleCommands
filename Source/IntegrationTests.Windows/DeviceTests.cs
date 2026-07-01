@@ -7,6 +7,7 @@ namespace BleCommands.IntegrationTests.Windows
     /// These tests use real device called Rotating Table:
     /// <see href="https://table-360.ru/">https://table-360.ru/</see>
     /// </summary>
+    [Collection("IntegrationTests.Windows")]
     public class DeviceTests(Fixture fixture) : IDisposable
     {
         private readonly List<IDisposable> _disposableObjects = [];
@@ -122,6 +123,31 @@ namespace BleCommands.IntegrationTests.Windows
             if (!device.IsConnected)
                 throw new TimeoutException("Device did not connect within timeout");
             */
+        }
+
+        [Fact]
+        public async Task GetStatusConcurrently_Success()
+        {
+            const int ThreadCount = 5;
+            List<Task<string?>> tasks = [];
+            async Task<string?> TaskProc()
+            {
+                var response = await Fixture.BleTransport.SendCommandAsync(
+                    "STATUS", TestContext.Current.CancellationToken);
+                return response;
+            }
+
+            for (int i = 0; i < ThreadCount; i++)
+            {
+                tasks.Add(TaskProc());
+            }
+
+            await Task.WhenAll(tasks);
+
+            foreach (var task in tasks)
+            {
+                Assert.Equal("READY", await task);
+            }
         }
 
         private void RegisterDisposableObject(IDisposable obj)

@@ -114,9 +114,7 @@ namespace IntegrationTests.Maui
                     tcs.TrySetResult(true);
             }
 
-            var response = await BleTransport.SendCommandAsync("STOP");
-            if (response != "OK")
-                tcs.TrySetResult(true);
+            await BleTransport.SendCommandAsync("STOP");
 
             Assert.IsTrue(await tcs.Task);
             BleTransport.ListeningTokenReceived -= Handler;

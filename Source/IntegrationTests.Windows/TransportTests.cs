@@ -3,6 +3,7 @@ using BleCommands.Windows;
 
 namespace BleCommands.IntegrationTests.Windows
 {
+    [Collection("IntegrationTests.Windows")]
     public class TransportTests(Fixture fixture)
     {
         private Fixture Fixture { get; } = fixture;

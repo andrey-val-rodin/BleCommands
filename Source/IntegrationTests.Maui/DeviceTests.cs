@@ -1,6 +1,7 @@
 ﻿using BleCommands.Maui;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace IntegrationTests.Maui
@@ -77,5 +78,31 @@ namespace IntegrationTests.Maui
         //        throw new TimeoutException("Device did not connect within timeout");
         //    */
         //}
+
+        [TestMethod]
+        public async Task GetStatusConcurrently_Success()
+        {
+            const int ThreadCount = 5;
+            List<Task<string?>> tasks = [];
+            async Task<string?> TaskProc()
+            {
+                Assert.IsNotNull(Fixture.BleTransport);
+                var response = await Fixture.BleTransport.SendCommandAsync(
+                    "STATUS", TestContext.CancellationToken);
+                return response;
+            }
+
+            for (int i = 0; i < ThreadCount; i++)
+            {
+                tasks.Add(TaskProc());
+            }
+
+            await Task.WhenAll(tasks);
+
+            foreach (var task in tasks)
+            {
+                Assert.AreEqual("READY", await task);
+            }
+        }
     }
 }

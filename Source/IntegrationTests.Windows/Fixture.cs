@@ -90,9 +90,7 @@ namespace BleCommands.IntegrationTests.Windows
                     tcs.TrySetResult(true);
             }
 
-            var response = await BleTransport.SendCommandAsync("STOP");
-            if (response != "OK")
-                tcs.TrySetResult(true);
+            await BleTransport.SendCommandAsync("STOP");
 
             Assert.True(await tcs.Task);
             BleTransport.ListeningTokenReceived -= Handler;

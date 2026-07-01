@@ -53,5 +53,29 @@ namespace IntegrationTests.Maui
             Assert.Contains(c => c.Id == new Guid("0000ffe1-0000-1000-8000-00805f9b34fb"), characteristics);
             Assert.Contains(c => c.Id == new Guid("0000ffe2-0000-1000-8000-00805f9b34fb"), characteristics);
         }
+
+        // This test hangs due to known issue: https://github.com/dotnet-bluetooth-le/dotnet-bluetooth-le/issues/1003
+        //[TestMethod]
+        //public async Task ConnectToKnownDevice_Success()
+        //{
+        //    using var device = new Device(Fixture.DeviceUuid);
+        //    await device.ConnectAsync(TestContext.CancellationToken);
+        //
+        //    Assert.IsTrue(device.IsConnected);
+        //    /*
+        //     * If Assert.IsTrue fails, then instead of checking the connection status immediately,
+        //     * you should use the following code:
+        //    var timeout = TimeSpan.FromSeconds(5);
+        //    var start = DateTime.UtcNow;
+        //
+        //    while (!device.IsConnected && DateTime.UtcNow - start < timeout)
+        //    {
+        //        await Task.Delay(50, TestContext.Current.CancellationToken);
+        //    }
+        //
+        //    if (!device.IsConnected)
+        //        throw new TimeoutException("Device did not connect within timeout");
+        //    */
+        //}
     }
 }

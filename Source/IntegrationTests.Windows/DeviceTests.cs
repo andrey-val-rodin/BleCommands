@@ -102,7 +102,7 @@ namespace BleCommands.IntegrationTests.Windows
         }
 
         [Fact]
-        public async Task ConnectToKnownDeviceAsync_Success()
+        public async Task ConnectToKnownDevice_Success()
         {
             using var device = new Device(Fixture.MacAddress);
             RegisterDisposableObject(device);

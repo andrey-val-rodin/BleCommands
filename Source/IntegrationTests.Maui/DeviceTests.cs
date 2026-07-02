@@ -84,7 +84,7 @@ namespace IntegrationTests.Maui
         {
             const int ThreadCount = 5;
             List<Task<string?>> tasks = [];
-            async Task<string?> TaskProc()
+            async Task<string?> TaskProcAsync()
             {
                 Assert.IsNotNull(Fixture.BleTransport);
                 var response = await Fixture.BleTransport.SendCommandAsync(
@@ -94,7 +94,7 @@ namespace IntegrationTests.Maui
 
             for (int i = 0; i < ThreadCount; i++)
             {
-                tasks.Add(TaskProc());
+                tasks.Add(TaskProcAsync());
             }
 
             await Task.WhenAll(tasks);

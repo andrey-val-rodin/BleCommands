@@ -1,5 +1,7 @@
 # Changelog
 
+## 2.0.1
+- Deterministic build
 ## 2.0.0
 - Remove unnecessary semaphores
 - IBleScanner interface no longer inherits IDisposable

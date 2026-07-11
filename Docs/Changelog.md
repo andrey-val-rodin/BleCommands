@@ -1,5 +1,7 @@
 # Changelog
 
+## 2.0.2
+- Exclude Microsoft.VisualStudio.Threading
 ## 2.0.1
 - Deterministic build
 ## 2.0.0

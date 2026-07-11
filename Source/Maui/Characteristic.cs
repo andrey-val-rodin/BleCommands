@@ -82,23 +82,7 @@ namespace BleCommands.Maui
             }
         }
 
-        /// <summary>
-        /// Reads the characteristic value.
-        /// </summary>
-        /// <param name="token">A cancellation token to cancel the read operation.</param>
-        /// <returns>
-        /// A task that represents the asynchronous read operation.
-        /// The task result contains the characteristic value as a UTF-8 string.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if the characteristic does not support the Read operation.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown if the characteristic has been disposed.
-        /// </exception>
-        /// <exception cref="Exception">
-        /// Thrown if the read operation fails at the Bluetooth level.
-        /// </exception>
+        /// <inheritdoc/>
         public async Task<string> ReadAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
@@ -110,24 +94,7 @@ namespace BleCommands.Maui
             return ConvertToString(NativeCharacteristic.Value);
         }
 
-        /// <summary>
-        /// Writes a string value to the characteristic.
-        /// </summary>
-        /// <param name="text">The string value to write.</param>
-        /// <param name="token">A cancellation token to cancel the write operation.</param>
-        /// <returns>A task that represents the asynchronous write operation.</returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if the characteristic does not support Write or WriteWithoutResponse operations.
-        /// </exception>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if <paramref name="text"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown if the characteristic has been disposed.
-        /// </exception>
-        /// <exception cref="Exception">
-        /// Thrown if the write operation fails at the Bluetooth level.
-        /// </exception>
+        /// <inheritdoc/>
         public async Task WriteAsync(string text, CancellationToken token = default)
         {
             ThrowIfDisposed();

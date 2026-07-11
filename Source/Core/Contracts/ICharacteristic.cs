@@ -46,7 +46,7 @@ namespace BleCommands.Core.Contracts
         /// <summary>
         /// Reads the characteristic value.
         /// </summary>
-        /// <param name="token">Cancellation token for the operation.</param>
+        /// <param name="token">A cancellation token to cancel the read operation.</param>
         /// <returns>
         /// A task that represents the asynchronous read operation.
         /// The task result contains the characteristic value as a UTF-8 string.
@@ -57,13 +57,17 @@ namespace BleCommands.Core.Contracts
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
         /// </exception>
+        /// <exception cref="Exception">
+        /// Thrown if the read operation fails at the Bluetooth level.
+        /// </exception>
         Task<string> ReadAsync(CancellationToken token = default);
 
         /// <summary>
         /// Writes a string value to the characteristic.
         /// </summary>
         /// <param name="text">The string value to write.</param>
-        /// <param name="token">Cancellation token for the operation.</param>
+        /// <param name="token">A cancellation token to cancel the write operation.</param>
+        /// <returns>A task that represents the asynchronous write operation.</returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="CanWrite"/> is <c>false</c>.
         /// </exception>
@@ -72,6 +76,9 @@ namespace BleCommands.Core.Contracts
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
+        /// </exception>
+        /// <exception cref="Exception">
+        /// Thrown if the write operation fails at the Bluetooth level.
         /// </exception>
         Task WriteAsync(string text, CancellationToken token = default);
 

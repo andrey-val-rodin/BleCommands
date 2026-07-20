@@ -32,7 +32,6 @@
         /// Thrown if the specified timeout is less than or equal to zero,
         /// or greater than 60 seconds.
         /// </exception>
-        Task<TDevice?> FindDeviceAsync(
-            string deviceName, TimeSpan timeout);
+        Task<TDevice?> FindDeviceAsync(string deviceName, TimeSpan timeout);
     }
 }

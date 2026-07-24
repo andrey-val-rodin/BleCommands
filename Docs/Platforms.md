@@ -1,6 +1,6 @@
 # Platforms
 
-There are two libraries: `BleCommands.MAUI` and `BleCommands.Windows`.
+There are two libraries: `BleCommands.Maui` and `BleCommands.Windows`.
 
 ## Windows
 
@@ -18,6 +18,6 @@ Uses popular NuGet package `Plugin.BLE`. Native objects are:
 - `Plugin.BLE.Abstractions.Contracts.IService`
 - `Plugin.BLE.Abstractions.Contracts.ICharacteristic`
 
-## Windows.Core
+## Core
 
 Abstraction part that contains interfaces and base implementations.

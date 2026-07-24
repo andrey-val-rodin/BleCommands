@@ -36,7 +36,7 @@ namespace IntegrationTests.Maui
             Assert.HasCount(3, services);
             Assert.Contains(s => s.Id == new Guid("00001801-0000-1000-8000-00805f9b34fb"), services);
             Assert.Contains(s => s.Id == new Guid("00001800-0000-1000-8000-00805f9b34fb"), services);
-            Assert.Contains(s => s.Id == new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"), services);
+            Assert.Contains(s => s.Id == Fixture.ServiceUuid, services);
         }
 
         [TestMethod]
@@ -44,40 +44,39 @@ namespace IntegrationTests.Maui
         {
             var device = Fixture.Device;
             Assert.IsNotNull(device);
-            var service = await device.GetServiceAsync(
-                new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"), TestContext.CancellationToken);
+            var service = await device.GetServiceAsync(Fixture.ServiceUuid, TestContext.CancellationToken);
             Assert.IsNotNull(service);
             var characteristics = await service.GetCharacteristicsAsync(TestContext.CancellationToken);
 
             Assert.IsNotNull(characteristics);
             Assert.HasCount(2, characteristics);
-            Assert.Contains(c => c.Id == new Guid("0000ffe1-0000-1000-8000-00805f9b34fb"), characteristics);
-            Assert.Contains(c => c.Id == new Guid("0000ffe2-0000-1000-8000-00805f9b34fb"), characteristics);
+            Assert.Contains(c => c.Id == Fixture.UpdatesCharacteristicUuid, characteristics);
+            Assert.Contains(c => c.Id == Fixture.WriteCharacteristicUuid, characteristics);
         }
 
-        // This test hangs due to known issue: https://github.com/dotnet-bluetooth-le/dotnet-bluetooth-le/issues/1003
-        //[TestMethod]
-        //public async Task ConnectToKnownDevice_Success()
-        //{
-        //    using var device = new Device(Fixture.DeviceUuid);
-        //    await device.ConnectAsync(TestContext.CancellationToken);
-        //
-        //    Assert.IsTrue(device.IsConnected);
-        //    /*
-        //     * If Assert.IsTrue fails, then instead of checking the connection status immediately,
-        //     * you should use the following code:
-        //    var timeout = TimeSpan.FromSeconds(5);
-        //    var start = DateTime.UtcNow;
-        //
-        //    while (!device.IsConnected && DateTime.UtcNow - start < timeout)
-        //    {
-        //        await Task.Delay(50, TestContext.Current.CancellationToken);
-        //    }
-        //
-        //    if (!device.IsConnected)
-        //        throw new TimeoutException("Device did not connect within timeout");
-        //    */
-        //}
+        [TestMethod]
+        public async Task ConnectToKnownDevice_Success()
+        {
+            // Plugin.BLE stores devices in the cache, so we should not dispose our device object here
+            var device = new Device(Fixture.DeviceUuid);
+            await device.ConnectAsync(TestContext.CancellationToken);
+
+            Assert.IsTrue(device.IsConnected);
+            /*
+             * If Assert.IsTrue fails, then instead of checking the connection status immediately,
+             * you should use the following code:
+            var timeout = TimeSpan.FromSeconds(5);
+            var start = DateTime.UtcNow;
+        
+            while (!device.IsConnected && DateTime.UtcNow - start < timeout)
+            {
+                await Task.Delay(50, TestContext.Current.CancellationToken);
+            }
+        
+            if (!device.IsConnected)
+                throw new TimeoutException("Device did not connect within timeout");
+            */
+        }
 
         [TestMethod]
         public async Task GetStatusConcurrently_Success()

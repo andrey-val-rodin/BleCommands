@@ -78,28 +78,29 @@ namespace BleCommands.IntegrationTests.Windows
         public async Task GetServices_Success()
         {
             var device = Fixture.Device;
+            Assert.NotNull(device);
             var services = await device.GetServicesAsync(TestContext.Current.CancellationToken);
 
             Assert.NotNull(services);
             Assert.Equal(3, services.Count);
             Assert.Contains(services, s => s.Id == new Guid("00001801-0000-1000-8000-00805f9b34fb"));
             Assert.Contains(services, s => s.Id == new Guid("00001800-0000-1000-8000-00805f9b34fb"));
-            Assert.Contains(services, s => s.Id == new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"));
+            Assert.Contains(services, s => s.Id == Fixture.ServiceUuid);
         }
 
         [Fact]
         public async Task GetCharacteristics_Success()
         {
             var device = Fixture.Device;
-            var service = await device.GetServiceAsync(
-                new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"), TestContext.Current.CancellationToken);
+            Assert.NotNull(device);
+            var service = await device.GetServiceAsync(Fixture.ServiceUuid, TestContext.Current.CancellationToken);
             Assert.NotNull(service);
             var characteristics = await service.GetCharacteristicsAsync(TestContext.Current.CancellationToken);
 
             Assert.NotNull(characteristics);
             Assert.Equal(2, characteristics.Count);
-            Assert.Contains(characteristics, c => c.Id == new Guid("0000ffe1-0000-1000-8000-00805f9b34fb"));
-            Assert.Contains(characteristics, c => c.Id == new Guid("0000ffe2-0000-1000-8000-00805f9b34fb"));
+            Assert.Contains(characteristics, c => c.Id == Fixture.UpdatesCharacteristicUuid);
+            Assert.Contains(characteristics, c => c.Id == Fixture.WriteCharacteristicUuid);
         }
 
         [Fact]
@@ -132,6 +133,7 @@ namespace BleCommands.IntegrationTests.Windows
             List<Task<string?>> tasks = [];
             async Task<string?> TaskProcAsync()
             {
+                Assert.NotNull(Fixture.BleTransport);
                 var response = await Fixture.BleTransport.SendCommandAsync(
                     "STATUS", TestContext.Current.CancellationToken);
                 return response;

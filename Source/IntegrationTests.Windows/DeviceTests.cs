@@ -1,4 +1,5 @@
-﻿using BleCommands.Windows;
+﻿using BleCommands.Core.Exceptions;
+using BleCommands.Windows;
 using System.Reflection;
 
 namespace BleCommands.IntegrationTests.Windows
@@ -15,6 +16,23 @@ namespace BleCommands.IntegrationTests.Windows
         private Fixture Fixture { get; } = fixture;
 
         private BleScanner BleScanner => Fixture.BleScanner;
+
+        [Fact]
+        public async Task ConnectAsync_NonExistentBluetoothAddress_Exception()
+        {
+            // Arrange
+            var device = new Device(bluetoothAddress: 0);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<DeviceException>(async () =>
+            {
+                await device.ConnectAsync(TestContext.Current.CancellationToken);
+            });
+
+            Assert.Equal(
+                "Unable to find the device identified by bluetooth address 0. Specifically, if the device isn't paired and it isn't found in the system cache.",
+                exception.Message);
+        }
 
         [Fact]
         public async Task FindDeviceWithTimeout_Timeout_ReturnsNull()

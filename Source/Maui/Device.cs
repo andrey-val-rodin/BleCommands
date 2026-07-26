@@ -1,5 +1,4 @@
 ﻿using BleCommands.Core.Contracts;
-using BleCommands.Core.Exceptions;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
@@ -31,7 +30,6 @@ namespace BleCommands.Maui
         /// <remarks>
         /// The <see cref="ConnectAsync(CancellationToken)"/> method will use
         /// <see cref="IAdapter.ConnectToKnownDeviceAsync"/>
-        /// The recommended way for obtaining a device is using <see cref="BleScanner"/>.
         /// </remarks>
         public Device(Guid guid)
             : this(guid, Plugin.BLE.CrossBluetoothLE.Current.Adapter)
@@ -95,10 +93,10 @@ namespace BleCommands.Maui
             else if (_guid != null)
             {
                 await ConnectAsync(_guid.Value, token).ConfigureAwait(false);
-
-                if (NativeDevice == null)
-                    throw new DeviceException($"Unable to find the device identified by UUID {_guid}");
             }
+            else
+                throw new InvalidOperationException(
+                    "Object initialization error. Both NativeDevice and Guid are null.");
 
             _connectionInvoked = true;
         }

@@ -1,5 +1,6 @@
 ﻿using BleCommands.Maui;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Plugin.BLE.Abstractions.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,6 +17,23 @@ namespace IntegrationTests.Maui
         public TestContext TestContext { get; set; }
 
         private static BleScanner BleScanner => Fixture.BleScanner;
+
+        [TestMethod]
+        public async Task ConnectAsync_NonExistentBluetoothAddress_Exception()
+        {
+            // Arrange
+            var device = new Device(Guid.Empty);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<DeviceConnectionException>(async () =>
+            {
+                await device.ConnectAsync(TestContext.CancellationToken);
+            });
+
+            Assert.AreEqual(
+                "[Adapter] Device 00000000-0000-0000-0000-000000000000 not found.",
+                exception.Message);
+        }
 
         [TestMethod]
         public async Task FindDeviceWithTimeout_Timeout_ReturnsNull()

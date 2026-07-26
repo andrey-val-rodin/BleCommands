@@ -25,35 +25,14 @@ namespace BleCommands.Maui
         /// </summary>
         protected static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
 
-        /// <summary>
-        /// Searches for a Bluetooth device by name with default timeout (5 seconds).
-        /// </summary>
-        /// <param name="deviceName">Name to search for.</param>
-        /// <returns>Found device or <c>null</c> if timeout expired.</returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if <paramref name="deviceName"/> is <c>null</c>, empty, or whitespace.
-        /// </exception>
-        /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
+        /// <inheritdoc/>
         public async Task<Device?> FindDeviceAsync(string deviceName)
         {
             return await FindDeviceAsync(deviceName,
                 TimeSpan.FromSeconds(DefaultTimeoutSeconds)).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Searches for a Bluetooth device by name with the specified timeout.
-        /// </summary>
-        /// <param name="deviceName">The name of the device to search for.</param>
-        /// <param name="timeout">Maximum wait time for device discovery.</param>
-        /// <returns>Found device or <c>null</c> if timeout expired.</returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if <paramref name="deviceName"/> is <c>null</c>, empty, or whitespace.
-        /// </exception>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown if the specified timeout is less than or equal to zero,
-        /// or greater than 60 seconds.
-        /// </exception>
-        /// <exception cref="DeviceException">Thrown on Bluetooth errors.</exception>
+        /// <inheritdoc/>
         public async Task<Device?> FindDeviceAsync(string deviceName, TimeSpan timeout)
         {
             ValidateDeviceName(deviceName);

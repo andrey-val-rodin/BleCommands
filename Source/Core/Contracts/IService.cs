@@ -33,6 +33,9 @@
         /// <returns>
         /// A task representing the asynchronous operation, containing the list of characteristics.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the service has been disposed.
+        /// </exception>
         Task<IReadOnlyList<TCharacteristic>> GetCharacteristicsAsync(CancellationToken token = default);
 
         /// <summary>
@@ -44,6 +47,9 @@
         /// A task representing the asynchronous operation, containing the characteristic if found;
         /// otherwise, <c>null</c>.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the service has been disposed.
+        /// </exception>
         Task<TCharacteristic?> GetCharacteristicAsync(Guid id, CancellationToken token = default);
     }
 }

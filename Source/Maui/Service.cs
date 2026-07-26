@@ -31,7 +31,7 @@ namespace BleCommands.Maui
         /// Initializes a new instance of the <see cref="Service"/> class for testing purposes.
         /// </summary>
         /// <remarks>
-        /// This constructor is intended for unit testing only. It creates a characteristic
+        /// This constructor is intended for unit testing only. It creates a service
         /// without requiring an actual Bluetooth connection.
         /// </remarks>
         internal Service()
@@ -47,30 +47,6 @@ namespace BleCommands.Maui
         public NativeService NativeService { get; }
 
         /// <inheritdoc/>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown if the service has been disposed.
-        /// </exception>
-        /// <exception cref="Exception">Thrown on Bluetooth-level errors.</exception>
-        public async Task<Characteristic?> GetCharacteristicAsync(
-            Guid id, CancellationToken token = default)
-        {
-            ThrowIfDisposed();
-
-            var nativeCharacteristic = await NativeService.GetCharacteristicAsync(id, token)
-                .ConfigureAwait(false);
-            if (nativeCharacteristic == null)
-                return null;
-
-            var result = new Characteristic(nativeCharacteristic);
-            ((IChildDisposer)this).RegisterChild(result);
-
-            return result;
-        }
-
-        /// <inheritdoc/>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown if the service has been disposed.
-        /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth-level errors.</exception>
         public async Task<IReadOnlyList<Characteristic>> GetCharacteristicsAsync(
             CancellationToken token = default)
@@ -87,6 +63,24 @@ namespace BleCommands.Maui
             {
                 ((IChildDisposer)this).RegisterChild(characteristic);
             }
+
+            return result;
+        }
+
+        /// <inheritdoc/>
+        /// <exception cref="Exception">Thrown on Bluetooth-level errors.</exception>
+        public async Task<Characteristic?> GetCharacteristicAsync(
+            Guid id, CancellationToken token = default)
+        {
+            ThrowIfDisposed();
+
+            var nativeCharacteristic = await NativeService.GetCharacteristicAsync(id, token)
+                .ConfigureAwait(false);
+            if (nativeCharacteristic == null)
+                return null;
+
+            var result = new Characteristic(nativeCharacteristic);
+            ((IChildDisposer)this).RegisterChild(result);
 
             return result;
         }

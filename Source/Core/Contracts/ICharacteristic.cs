@@ -57,9 +57,6 @@ namespace BleCommands.Core.Contracts
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
         /// </exception>
-        /// <exception cref="Exception">
-        /// Thrown if the read operation fails at the Bluetooth level.
-        /// </exception>
         Task<string> ReadAsync(CancellationToken token = default);
 
         /// <summary>
@@ -76,9 +73,6 @@ namespace BleCommands.Core.Contracts
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
-        /// </exception>
-        /// <exception cref="Exception">
-        /// Thrown if the write operation fails at the Bluetooth level.
         /// </exception>
         Task WriteAsync(string text, CancellationToken token = default);
 
@@ -105,9 +99,10 @@ namespace BleCommands.Core.Contracts
         /// <summary>
         /// Starts receiving notifications or indications from the characteristic.
         /// </summary>
-        /// <param name="token">Cancellation token for the operation.</param>
+        /// <param name="token">A cancellation token to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="CanUpdate"/> is <c>false</c>.
+        /// Thrown if the characteristic does not support Notify or Indicate operations.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.

@@ -75,21 +75,8 @@ namespace BleCommands.Maui
 
         internal IAdapter Adapter { get; private set; }
 
-        /// <summary>
-        /// Initiates process of connection to the device.
-        /// </summary>
-        /// <param name="token">Cancellation token to cancel the operation.</param>
-        /// <remarks>
-        /// This method is intended to be called once per instance lifecycle.
-        /// The connection will be established shortly.
-        /// </remarks>
-        /// <exception cref="ObjectDisposedException">Thrown if the device has been disposed.</exception>
+        /// <inheritdoc/>
         /// <exception cref="DeviceConnectionException">Thrown on device connection errors.</exception>
-        /// <exception cref="DeviceException">
-        /// Thrown if <see cref="IAdapter.ConnectToKnownDeviceAsync"/> failed to find
-        /// the device with the specified UUID.
-        /// </exception>
-        /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task ConnectAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
@@ -157,10 +144,6 @@ namespace BleCommands.Maui
         }
 
         /// <inheritdoc/>
-        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="ConnectAsync(CancellationToken)"/> has not been called.
-        /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task<IReadOnlyList<Service>> GetServicesAsync(CancellationToken token = default)
         {
@@ -184,10 +167,6 @@ namespace BleCommands.Maui
         }
 
         /// <inheritdoc/>
-        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="ConnectAsync(CancellationToken)"/> has not been called.
-        /// </exception>
         /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
         public async Task<Service?> GetServiceAsync(Guid id, CancellationToken token = default)
         {

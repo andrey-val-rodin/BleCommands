@@ -48,17 +48,10 @@ namespace BleCommands.Windows
         /// </summary>
         public BluetoothLEDevice? NativeDevice { get; protected set; }
 
-        /// <summary>
-        /// Initiates process of connection to the device.
-        /// </summary>
-        /// <param name="token">Cancellation token to cancel the operation.</param>
-        /// <remarks>
-        /// This method is intended to be called once per instance lifecycle.
-        /// The connection will be established shortly.
-        /// </remarks>
-        /// <exception cref="ObjectDisposedException">Thrown if the device has been disposed.</exception>
-        /// <exception cref="DeviceException">Thrown on GATT-protocol errors.</exception>
-        /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
+        /// <inheritdoc/>
+        /// <exception cref="DeviceException">
+        /// Thrown if the device with the specified Bluetooth address is not found.
+        /// </exception>
         public async Task ConnectAsync(CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
@@ -93,11 +86,7 @@ namespace BleCommands.Windows
         }
 
         /// <inheritdoc/>
-        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="ConnectAsync"/> has not been called
-        /// </exception>
-        /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
+        /// <exception cref="DeviceException">Thrown on GATT-protocol errors.</exception>
         public async Task<IReadOnlyList<Service>> GetServicesAsync(CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
@@ -124,11 +113,7 @@ namespace BleCommands.Windows
         }
 
         /// <inheritdoc/>
-        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="ConnectAsync"/> has not been called
-        /// </exception>
-        /// <exception cref="Exception">Thrown on Bluetooth errors.</exception>
+        /// <exception cref="DeviceException">Thrown on GATT-protocol errors.</exception>
         public async Task<Service?> GetServiceAsync(Guid id, CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);

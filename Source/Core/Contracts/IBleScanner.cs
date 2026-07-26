@@ -1,4 +1,6 @@
-﻿namespace BleCommands.Core.Contracts
+﻿using BleCommands.Core.Exceptions;
+
+namespace BleCommands.Core.Contracts
 {
     /// <summary>
     /// Represents a Bluetooth Low Energy scanner that searches for a nearby BLE device.
@@ -17,6 +19,7 @@
         /// <exception cref="ArgumentNullException">
         /// Thrown if <paramref name="deviceName"/> is <c>null</c>, empty, or whitespace.
         /// </exception>
+        /// <exception cref="DeviceException">Thrown on BLE scanning errors.</exception>
         Task<TDevice?> FindDeviceAsync(string deviceName);
 
         /// <summary>
@@ -32,6 +35,7 @@
         /// Thrown if the specified timeout is less than or equal to zero,
         /// or greater than 60 seconds.
         /// </exception>
+        /// <exception cref="DeviceException">Thrown on BLE scanning errors.</exception>
         Task<TDevice?> FindDeviceAsync(string deviceName, TimeSpan timeout);
     }
 }

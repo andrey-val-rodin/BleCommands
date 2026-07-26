@@ -83,6 +83,9 @@ namespace BleCommands.Maui
         }
 
         /// <inheritdoc/>
+        /// <exception cref="Exception">
+        /// Thrown if the read operation fails at the Bluetooth level.
+        /// </exception>
         public async Task<string> ReadAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
@@ -95,6 +98,9 @@ namespace BleCommands.Maui
         }
 
         /// <inheritdoc/>
+        /// <exception cref="Exception">
+        /// Thrown if the write operation fails at the Bluetooth level.
+        /// </exception>
         public async Task WriteAsync(string text, CancellationToken token = default)
         {
             ThrowIfDisposed();
@@ -131,20 +137,7 @@ namespace BleCommands.Maui
             }
         }
 
-        /// <summary>
-        /// Attaches a token aggregator to collect incoming characteristic values.
-        /// </summary>
-        /// <param name="tokenAggregator">The token aggregator to attach.</param>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if the characteristic does not support Notify or Indicate operations,
-        /// or if a token aggregator is already attached.
-        /// </exception>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if <paramref name="tokenAggregator"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown if the characteristic has been disposed.
-        /// </exception>
+        /// <inheritdoc/>
         public void AttachTokenAggregator(TokenAggregator tokenAggregator)
         {
             ThrowIfDisposed();
@@ -174,17 +167,7 @@ namespace BleCommands.Maui
             }
         }
 
-        /// <summary>
-        /// Starts receiving notifications or indications from the characteristic.
-        /// </summary>
-        /// <param name="token">A cancellation token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if the characteristic does not support Notify or Indicate operations.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown if the characteristic has been disposed.
-        /// </exception>
+        /// <inheritdoc/>
         /// <exception cref="Exception">
         /// Thrown if the operation fails at the Bluetooth level.
         /// </exception>

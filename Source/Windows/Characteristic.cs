@@ -2,6 +2,7 @@
 using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
 using BleCommands.Core.Events;
+using BleCommands.Core.Exceptions;
 using BleCommands.Windows.Extensions;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
@@ -86,6 +87,9 @@ namespace BleCommands.Windows
         }
 
         /// <inheritdoc/>
+        /// <exception cref="DeviceException">
+        /// Thrown if the read operation fails at the Bluetooth level.
+        /// </exception>
         public async Task<string> ReadAsync(CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
@@ -102,6 +106,9 @@ namespace BleCommands.Windows
         }
 
         /// <inheritdoc/>
+        /// <exception cref="DeviceException">
+        /// Thrown if the write operation fails at the Bluetooth level.
+        /// </exception>
         public async Task WriteAsync(string text, CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
@@ -144,20 +151,7 @@ namespace BleCommands.Windows
             }
         }
 
-        /// <summary>
-        /// Attaches a token aggregator to collect incoming characteristic values.
-        /// </summary>
-        /// <param name="tokenAggregator">The token aggregator to attach.</param>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if the characteristic does not support Notify or Indicate operations,
-        /// or if a token aggregator is already attached.
-        /// </exception>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if <paramref name="tokenAggregator"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown if the characteristic has been disposed.
-        /// </exception>
+        /// <inheritdoc/>
         public void AttachTokenAggregator(TokenAggregator tokenAggregator)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
@@ -186,18 +180,8 @@ namespace BleCommands.Windows
             }
         }
 
-        /// <summary>
-        /// Starts receiving notifications or indications from the characteristic.
-        /// </summary>
-        /// <param name="token">A cancellation token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if the characteristic does not support Notify or Indicate operations.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown if the characteristic has been disposed.
-        /// </exception>
-        /// <exception cref="Exception">
+        /// <inheritdoc/>
+        /// <exception cref="DeviceException">
         /// Thrown if the operation fails at the Bluetooth level.
         /// </exception>
         public async Task StartReceivingAsync(CancellationToken token = default)

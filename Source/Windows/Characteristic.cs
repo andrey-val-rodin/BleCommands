@@ -170,7 +170,8 @@ namespace BleCommands.Windows
             lock (_lock)
             {
                 if (_tokenAggregator != null)
-                    throw new InvalidOperationException("TokenAggregator is already attached. Call DetachTokenAggregator first.");
+                    throw new InvalidOperationException(
+                        "TokenAggregator is already attached. Call DetachTokenAggregator first.");
 
                 _tokenAggregator = tokenAggregator;
             }

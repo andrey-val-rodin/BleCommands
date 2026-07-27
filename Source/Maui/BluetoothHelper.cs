@@ -5,7 +5,7 @@ namespace BleCommands.Maui
     /// <summary>
     /// Provides helper methods for checking Bluetooth state.
     /// </summary>
-    public class BluetoothHelper
+    public static class BluetoothHelper
     {
         /// <summary>
         /// Returns a value indicating whether Bluetooth hardware is available on the device.
@@ -13,10 +13,7 @@ namespace BleCommands.Maui
         /// <returns>
         /// <c>true</c> if Bluetooth hardware is available; <c>false</c> otherwise.
         /// </returns>
-        public static Task<bool> IsBluetoothAvailableAsync()
-        {
-            return Task.FromResult(CrossBluetoothLE.Current.IsAvailable);
-        }
+        public static bool IsBluetoothAvailable() => CrossBluetoothLE.Current.IsAvailable;
 
         /// <summary>
         /// Returns a value indicating whether Bluetooth is currently powered on.
@@ -24,9 +21,6 @@ namespace BleCommands.Maui
         /// <returns>
         /// <c>true</c> if Bluetooth is turned on; <c>false</c> otherwise.
         /// </returns>
-        public static Task<bool> IsBluetoothOnAsync()
-        {
-            return Task.FromResult(CrossBluetoothLE.Current.IsOn);
-        }
+        public static bool IsBluetoothOn() => CrossBluetoothLE.Current.IsOn;
     }
 }

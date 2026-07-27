@@ -6,7 +6,7 @@ namespace BleCommands.Windows
     /// <summary>
     /// Provides helper methods for checking Bluetooth state.
     /// </summary>
-    public class BluetoothHelper
+    public static class BluetoothHelper
     {
         /// <summary>
         /// Returns a value indicating whether Bluetooth hardware is available on the device.

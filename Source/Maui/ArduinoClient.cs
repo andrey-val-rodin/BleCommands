@@ -34,8 +34,8 @@
         /// </remarks>
         public static async Task<BleTransport?> CreateTransportAsync(string deviceName, CancellationToken token = default)
         {
-            if (!await BluetoothHelper.IsBluetoothAvailableAsync().ConfigureAwait(false) ||
-                !await BluetoothHelper.IsBluetoothOnAsync().ConfigureAwait(false))
+            if (!BluetoothHelper.IsBluetoothAvailable() ||
+                !BluetoothHelper.IsBluetoothOn())
                 return null;
 
             var device = await CreateDeviceAsync(deviceName, token).ConfigureAwait(false);

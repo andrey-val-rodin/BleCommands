@@ -57,7 +57,7 @@
         /// <returns>A read-only list of services exposed by the device.</returns>
         /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="IDevice.ConnectAsync(CancellationToken)"/> has not been called
+        /// Thrown when <see cref="IDevice.ConnectAsync(CancellationToken)"/> has not been called.
         /// </exception>
         Task<IReadOnlyList<TService>> GetServicesAsync(CancellationToken token = default);
 
@@ -69,7 +69,7 @@
         /// <returns>The requested service, or <c>null</c> if not found.</returns>
         /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="IDevice.ConnectAsync(CancellationToken)"/> has not been called
+        /// Thrown when <see cref="IDevice.ConnectAsync(CancellationToken)"/> has not been called.
         /// </exception>
         Task<TService?> GetServiceAsync(Guid id, CancellationToken token = default);
     }

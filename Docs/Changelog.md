@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.0
+- Breaking changes in BluetoothHelper class (MAUI and Windows)
+- Reorganize XML documentation
 ## 2.0.2
 - Exclude Microsoft.VisualStudio.Threading
 ## 2.0.1

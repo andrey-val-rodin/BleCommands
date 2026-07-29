@@ -217,14 +217,17 @@ namespace BleCommands.Windows
         {
             var bytes = args.CharacteristicValue.ToArray();
             ValueReceived?.Invoke(this, new ByteArrayEventArgs(bytes));
-            var text = ConvertToString(bytes);
 
             TokenAggregator? tokenAggregator;
             lock (_lock)
             {
                 tokenAggregator = _tokenAggregator;
             }
-            tokenAggregator?.Append(text);
+
+            if (tokenAggregator != null)
+            {
+                tokenAggregator?.Append(ConvertToString(bytes));
+            }
         }
 
         /// <summary>

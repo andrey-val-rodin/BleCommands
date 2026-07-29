@@ -194,14 +194,17 @@ namespace BleCommands.Maui
         {
             var bytes = e.Characteristic.Value;
             ValueReceived?.Invoke(this, new ByteArrayEventArgs(bytes));
-            var text = e.Characteristic.StringValue;
 
             TokenAggregator? tokenAggregator;
             lock (_lock)
             {
                 tokenAggregator = _tokenAggregator;
             }
-            tokenAggregator?.Append(text);
+
+            if (tokenAggregator != null)
+            {
+                tokenAggregator?.Append(e.Characteristic.StringValue);
+            }
         }
 
         private void ThrowIfDisposed()

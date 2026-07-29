@@ -71,16 +71,7 @@ namespace BleCommands.Maui
                                 Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse);
 
         /// <inheritdoc/>
-        public TokenAggregator? TokenAggregator
-        {
-            get
-            {
-                lock (_lock)
-                {
-                    return _tokenAggregator;
-                }
-            }
-        }
+        public TokenAggregator? TokenAggregator => _tokenAggregator;
 
         /// <inheritdoc/>
         /// <exception cref="Exception">
@@ -201,10 +192,7 @@ namespace BleCommands.Maui
                 tokenAggregator = _tokenAggregator;
             }
 
-            if (tokenAggregator != null)
-            {
-                tokenAggregator?.Append(e.Characteristic.StringValue);
-            }
+            tokenAggregator?.Append(e.Characteristic.StringValue);
         }
 
         private void ThrowIfDisposed()

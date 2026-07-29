@@ -75,16 +75,7 @@ namespace BleCommands.Windows
                                 Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse);
 
         /// <inheritdoc/>
-        public TokenAggregator? TokenAggregator
-        {
-            get
-            {
-                lock (_lock)
-                {
-                    return _tokenAggregator;
-                }
-            }
-        }
+        public TokenAggregator? TokenAggregator => _tokenAggregator;
 
         /// <inheritdoc/>
         /// <exception cref="DeviceException">
@@ -224,10 +215,7 @@ namespace BleCommands.Windows
                 tokenAggregator = _tokenAggregator;
             }
 
-            if (tokenAggregator != null)
-            {
-                tokenAggregator?.Append(ConvertToString(bytes));
-            }
+            tokenAggregator?.Append(ConvertToString(bytes));
         }
 
         /// <summary>

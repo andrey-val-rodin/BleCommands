@@ -17,6 +17,15 @@ namespace BleCommands.Tests.Maui
         }
 
         [Fact]
+        public void CreateNewCharacteristic_IsReceivingPropertyIsFalse()
+        {
+            // Arrange & Act
+            var characteristic = new Characteristic(CharacteristicPropertyFlags.Notify);
+
+            Assert.False(characteristic.IsReceiving);
+        }
+
+        [Fact]
         public async Task ReadAsync_CannotRead_ThrowsInvalidOperationException()
         {
             // Arrange

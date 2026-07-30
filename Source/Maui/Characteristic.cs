@@ -71,6 +71,9 @@ namespace BleCommands.Maui
                                 Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse);
 
         /// <inheritdoc/>
+        public bool IsReceiving { get; private set; }
+
+        /// <inheritdoc/>
         public TokenAggregator? TokenAggregator => _tokenAggregator;
 
         /// <inheritdoc/>
@@ -165,12 +168,30 @@ namespace BleCommands.Maui
         public async Task StartReceivingAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
+            if (IsReceiving)
+                throw new InvalidOperationException("Receiving is in progress already.");
 
             if (!CanUpdate)
                 throw new InvalidOperationException("The characteristic is neither Notify nor Indicate.");
 
             await NativeCharacteristic.StartUpdatesAsync(token).ConfigureAwait(false);
             NativeCharacteristic.ValueUpdated += NativeCharacteristic_ValueUpdated;
+            IsReceiving = true;
+        }
+
+        /// <inheritdoc/>
+        /// <exception cref="Exception">
+        /// Thrown if the operation fails at the Bluetooth level.
+        /// </exception>
+        public async Task StopReceivingAsync(CancellationToken token = default)
+        {
+            ThrowIfDisposed();
+            if (!IsReceiving)
+                throw new InvalidOperationException("Receiving is not in progress.");
+
+            await NativeCharacteristic.StopUpdatesAsync(token).ConfigureAwait(false);
+            NativeCharacteristic.ValueUpdated -= NativeCharacteristic_ValueUpdated;
+            IsReceiving = false;
         }
 
         /// <summary>

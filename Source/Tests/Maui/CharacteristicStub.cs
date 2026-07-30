@@ -25,6 +25,8 @@ namespace BleCommands.Tests.Maui
 
         public bool CanUpdate => throw new NotImplementedException();
 
+        public bool IsReceiving => throw new NotImplementedException();
+
         public TokenAggregator? TokenAggregator { get; private set; }
 
         public void EmulateReceiving(string text)
@@ -55,6 +57,11 @@ namespace BleCommands.Tests.Maui
         public Task StartReceivingAsync(CancellationToken token = default)
         {
             return Task.CompletedTask;
+        }
+
+        public Task StopReceivingAsync(CancellationToken token = default)
+        {
+            throw new NotImplementedException();
         }
 
         public void Dispose()

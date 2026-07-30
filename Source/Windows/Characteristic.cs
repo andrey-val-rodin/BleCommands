@@ -75,6 +75,9 @@ namespace BleCommands.Windows
                                 Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse);
 
         /// <inheritdoc/>
+        public bool IsReceiving { get; private set; }
+
+        /// <inheritdoc/>
         public TokenAggregator? TokenAggregator => _tokenAggregator;
 
         /// <inheritdoc/>
@@ -178,6 +181,8 @@ namespace BleCommands.Windows
         public async Task StartReceivingAsync(CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
+            if (IsReceiving)
+                throw new InvalidOperationException("Receiving is in progress already.");
 
             GattClientCharacteristicConfigurationDescriptorValue descriptor;
             if (Properties.HasFlag(CharacteristicPropertyFlags.Notify))
@@ -194,6 +199,27 @@ namespace BleCommands.Windows
             result.ThrowIfError();
 
             NativeCharacteristic.ValueChanged += NativeCharacteristic_ValueChanged;
+            IsReceiving = true;
+        }
+
+        /// <inheritdoc/>
+        /// <exception cref="DeviceException">
+        /// Thrown if the operation fails at the Bluetooth level.
+        /// </exception>
+        public async Task StopReceivingAsync(CancellationToken token = default)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            if (!IsReceiving)
+                throw new InvalidOperationException("Receiving is not in progress.");
+
+            var result = await NativeCharacteristic.WriteClientCharacteristicConfigurationDescriptorWithResultAsync(
+                GattClientCharacteristicConfigurationDescriptorValue.None)
+                .AsTask(token)
+                .ConfigureAwait(false);
+            result.ThrowIfError();
+
+            NativeCharacteristic.ValueChanged -= NativeCharacteristic_ValueChanged;
+            IsReceiving = false;
         }
 
         /// <summary>

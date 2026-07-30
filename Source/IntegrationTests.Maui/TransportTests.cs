@@ -72,7 +72,7 @@ namespace IntegrationTests.Maui
                 BleTransport.ListeningTimeoutElapsed += TimeoutHandler;
                 BleTransport.StartListening(TimeSpan.FromSeconds(3));
                 Assert.AreEqual("OK", await BleTransport.SendCommandAsync("FM 1", TestContext.CancellationToken));
-                Assert.IsTrue(await tcs.Task);
+                Assert.IsTrue(await tcs.Task, "MOVERR. Is Rotating Table turned on?");
                 await Fixture.StopTableAsync();
                 Assert.Contains(s => s.StartsWith("POS"), tokens);
                 Assert.AreEqual("READY", await BleTransport.SendCommandAsync("STATUS", TestContext.CancellationToken));

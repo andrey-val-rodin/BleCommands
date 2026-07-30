@@ -39,6 +39,11 @@ namespace BleCommands.Core.Contracts
         bool CanUpdate { get; }
 
         /// <summary>
+        /// Gets a value indicating whether receiving of notifications or indications is in progress.
+        /// </summary>
+        bool IsReceiving { get; }
+
+        /// <summary>
         /// Gets the attached token aggregator, or <c>null</c> if none is attached.
         /// </summary>
         TokenAggregator? TokenAggregator { get; }
@@ -102,12 +107,26 @@ namespace BleCommands.Core.Contracts
         /// <param name="token">A cancellation token to cancel the operation.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if the characteristic does not support Notify or Indicate operations.
+        /// Thrown if the characteristic does not support Notify or Indicate operations
+        /// or <see cref="IsReceiving"/> is true.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
         /// </exception>
         Task StartReceivingAsync(CancellationToken token = default);
+
+        /// <summary>
+        /// Stops receiving notifications or indications from the characteristic.
+        /// </summary>
+        /// <param name="token">A cancellation token to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="IsReceiving"/> is false.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the characteristic has been disposed.
+        /// </exception>
+        Task StopReceivingAsync(CancellationToken token = default);
     }
 
     /// <summary>

@@ -68,7 +68,7 @@ namespace BleCommands.IntegrationTests.Windows
                 BleTransport.ListeningTimeoutElapsed += TimeoutHandler;
                 BleTransport.StartListening(TimeSpan.FromSeconds(3));
                 Assert.Equal("OK", await BleTransport.SendCommandAsync("FM 1", TestContext.Current.CancellationToken));
-                Assert.True(await tcs.Task);
+                Assert.True(await tcs.Task, "MOVERR. Is Rotating Table turned on?");
                 await Fixture.StopTableAsync();
                 Assert.Contains(tokens, s => s.StartsWith("POS"));
                 Assert.Equal("READY", await BleTransport.SendCommandAsync("STATUS", TestContext.Current.CancellationToken));

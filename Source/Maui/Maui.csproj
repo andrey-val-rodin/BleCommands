@@ -14,7 +14,7 @@
     <Description>Simple text-based command/response protocol over BLE — MAUI library.</Description>
     <RepositoryUrl>https://github.com/andrey-val-rodin/BleCommands</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>windows;maui;ios;macos;android;ble;bluetooth;bluetoothle;arduino</PackageTags>
+    <PackageTags>maui;ios;macos;android;windows;ble;bluetooth;bluetoothle;arduino</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/andrey-val-rodin/BleCommands</PackageProjectUrl>
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>

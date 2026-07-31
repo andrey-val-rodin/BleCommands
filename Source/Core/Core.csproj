@@ -9,12 +9,12 @@
     <PackageIcon>Logo.png</PackageIcon>
     <PackageId>BleCommands.Core</PackageId>
     <Title>BleCommands.Core</Title>
-    <Version>3.0.0</Version>
+    <Version>3.1.0</Version>
     <Authors>Andrey Rodin</Authors>
     <Description>Simple text-based command/response protocol over BLE — Core library.</Description>
     <RepositoryUrl>https://github.com/andrey-val-rodin/BleCommands</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>ble;bluetooth;bluetooth-le;arduino;device;service;characteristic;command;gatt</PackageTags>
+    <PackageTags>windows;maui;ios;macos;android;ble;bluetooth;bluetoothle;arduino</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/andrey-val-rodin/BleCommands</PackageProjectUrl>
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>

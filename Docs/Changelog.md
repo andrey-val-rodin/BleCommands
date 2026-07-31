@@ -1,5 +1,7 @@
 # Changelog
 
+## 3.1.0
+- Add ICharacteristic.StopReceivingAsync() method and ICharacteristic.IsReceiving property
 ## 3.0.0
 - Breaking changes in BluetoothHelper class (MAUI and Windows)
 - Reorganize XML documentation

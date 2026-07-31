@@ -170,7 +170,6 @@ namespace BleCommands.Maui
             ThrowIfDisposed();
             if (IsReceiving)
                 throw new InvalidOperationException("Receiving is in progress already.");
-
             if (!CanUpdate)
                 throw new InvalidOperationException("The characteristic is neither Notify nor Indicate.");
 

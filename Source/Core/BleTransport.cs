@@ -246,6 +246,15 @@ namespace BleCommands.Core
         /// <c>true</c> to release both managed and unmanaged resources;
         /// <c>false</c> to release only unmanaged resources.
         /// </param>
+        /// <remarks>
+        /// <para>
+        /// This method disposes all owned objects including <see cref="Device"/>,
+        /// <see cref="Service"/>, and all characteristics. While the device's 
+        /// <see cref="IDisposable.Dispose">Dispose</see> implementation should properly 
+        /// dispose its child objects, explicit disposal is performed to ensure cleanup 
+        /// even if objects were created independently.
+        /// </para>
+        /// </remarks>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -256,14 +265,10 @@ namespace BleCommands.Core
 
                     ListeningTokenReceived -= ListeningHandler;
 
-                    // The device will dispose all its services and characteristics.
-                    // However, BleTransport owns all objects passed to the constructor,
-                    // so we need to dispose them all.
                     CommandCharacteristic?.Dispose();
                     ResponseCharacteristic?.Dispose();
                     ListeningCharacteristic?.Dispose();
                     Service?.Dispose();
-
                     Device?.Dispose();
 
                     _listeningTimer?.Stop();

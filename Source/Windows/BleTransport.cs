@@ -43,16 +43,6 @@ namespace BleCommands.Windows
             ArgumentNullException.ThrowIfNull(responseCharacteristic);
             ArgumentNullException.ThrowIfNull(listeningCharacteristic);
 
-            if (!CheckParent(device, commandCharacteristic))
-                throw new ArgumentException($"{nameof(commandCharacteristic)} does not belong to the specified device",
-                    nameof(commandCharacteristic));
-            if (!CheckParent(device, responseCharacteristic))
-                throw new ArgumentException($"{nameof(responseCharacteristic)} does not belong to the specified device",
-                    nameof(responseCharacteristic));
-            if (!CheckParent(device, listeningCharacteristic))
-                throw new ArgumentException($"{nameof(listeningCharacteristic)} does not belong to the specified device",
-                    nameof(listeningCharacteristic));
-
             if (!commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Write) &&
                 !commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse))
                 throw new ArgumentException(
@@ -110,27 +100,5 @@ namespace BleCommands.Windows
 
         /// <inheritdoc />
         public override ICharacteristic<GattCharacteristic> ListeningCharacteristic { get; }
-
-        /// <summary>
-        /// Checks whether the specified characteristic belongs to the device.
-        /// </summary>
-        /// <param name="device">The device to check against.</param>
-        /// <param name="characteristic">The characteristic to verify ownership for.</param>
-        /// <returns>
-        /// <c>true</c> if the characteristic belongs to the device's service; 
-        /// <c>false</c> otherwise.
-        /// </returns>
-        /// <remarks>
-        /// Both parameters must have non-null <see cref="IDevice{NativeDevice, Service}.NativeDevice"/> 
-        /// and <see cref="ICharacteristic{NativeCharacteristic}.NativeCharacteristic"/> properties.
-        /// In normal usage, this is always true when using properly constructed instances.
-        /// </remarks>
-        protected static bool CheckParent(IDevice<BluetoothLEDevice, Service> device,
-            ICharacteristic<GattCharacteristic> characteristic)
-        {
-            var nativeParent = device?.NativeDevice;
-            var nativeCharacteristic = characteristic?.NativeCharacteristic;
-            return nativeParent == nativeCharacteristic?.Service?.Device;
-        }
     }
 }

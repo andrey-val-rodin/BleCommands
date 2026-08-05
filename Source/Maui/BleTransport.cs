@@ -38,23 +38,13 @@ namespace BleCommands.Maui
             ICharacteristic<NativeCharacteristic> listeningCharacteristic,
             char tokenDelimiter = TokenAggregator.DefaultTokenDelimiter)
         {
-            if (device == null) throw new ArgumentNullException(nameof(device));
 #pragma warning disable IDE0016
+            if (device == null) throw new ArgumentNullException(nameof(device));
             if (service == null) throw new ArgumentNullException(nameof(service));
 #pragma warning restore IDE0016
             if (commandCharacteristic == null) throw new ArgumentNullException(nameof(commandCharacteristic));
             if (responseCharacteristic == null) throw new ArgumentNullException(nameof(responseCharacteristic));
             if (listeningCharacteristic == null) throw new ArgumentNullException(nameof(listeningCharacteristic));
-
-            if (!CheckParent(device, commandCharacteristic))
-                throw new ArgumentException($"{nameof(commandCharacteristic)} does not belong to the specified device",
-                    nameof(commandCharacteristic));
-            if (!CheckParent(device, responseCharacteristic))
-                throw new ArgumentException($"{nameof(responseCharacteristic)} does not belong to the specified device",
-                    nameof(responseCharacteristic));
-            if (!CheckParent(device, listeningCharacteristic))
-                throw new ArgumentException($"{nameof(listeningCharacteristic)} does not belong to the specified device",
-                    nameof(listeningCharacteristic));
 
             if (!commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Write) &&
                 !commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse))
@@ -113,27 +103,5 @@ namespace BleCommands.Maui
 
         /// <inheritdoc />
         public override ICharacteristic<NativeCharacteristic> ListeningCharacteristic { get; }
-
-        /// <summary>
-        /// Checks whether the specified characteristic belongs to the device.
-        /// </summary>
-        /// <param name="device">The device to check against.</param>
-        /// <param name="characteristic">The characteristic to verify ownership for.</param>
-        /// <returns>
-        /// <c>true</c> if the characteristic belongs to the device's service; 
-        /// <c>false</c> otherwise.
-        /// </returns>
-        /// <remarks>
-        /// Both parameters must have non-null <see cref="IDevice{NativeDevice, Service}.NativeDevice"/> 
-        /// and <see cref="ICharacteristic{NativeCharacteristic}.NativeCharacteristic"/> properties.
-        /// In normal usage, this is always true when using properly constructed instances.
-        /// </remarks>
-        protected static bool CheckParent(IDevice<NativeDevice, Service> device,
-            ICharacteristic<NativeCharacteristic> characteristic)
-        {
-            var nativeParent = device?.NativeDevice;
-            var nativeCharacteristic = characteristic?.NativeCharacteristic;
-            return nativeParent == nativeCharacteristic?.Service?.Device;
-        }
     }
 }

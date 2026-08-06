@@ -1,5 +1,7 @@
 # Changelog
 
+## 3.1.1
+- Remove redundant parent check in BleTransport
 ## 3.1.0
 - Add ICharacteristic.StopReceivingAsync() method and ICharacteristic.IsReceiving property
 ## 3.0.0

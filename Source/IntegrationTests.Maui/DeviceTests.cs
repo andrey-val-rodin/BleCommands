@@ -36,12 +36,58 @@ namespace IntegrationTests.Maui
         }
 
         [TestMethod]
-        public async Task FindDeviceWithTimeout_Timeout_ReturnsNull()
+        public async Task FindDeviceWithTimeout_InsufficientTimeout_ReturnsNull()
         {
             // Timeout 100 milliseconds
             var device = await BleScanner.FindDeviceAsync("Non-existent Device", TimeSpan.FromMilliseconds(100));
             Assert.IsNull(device);
         }
+
+        [TestMethod]
+        public async Task FindDeviceAndConnect_Success()
+        {
+            // Plugin.BLE stores devices in the cache, so we have to use the only one device
+            var device = Fixture.Device;
+
+            Assert.IsNotNull(device);
+            // Do not call ConnectAsync again, as Plugin.BLE will hang in this case
+            //await device.ConnectAsync(TestContext.CancellationToken);
+            Assert.IsTrue(device.IsConnected);
+            /*
+             * If Assert.IsTrue fails, then instead of checking the connection status immediately,
+             * you should use the following code:
+            var timeout = TimeSpan.FromSeconds(5);
+            var start = DateTime.UtcNow;
+
+            while (!device.IsConnected && DateTime.UtcNow - start < timeout)
+            {
+                await Task.Delay(50, TestContext.CancellationToken);
+            }
+
+            if (!device.IsConnected)
+                throw new TimeoutException("Device did not connect within timeout");
+            */
+
+            var services = await device.GetServicesAsync(TestContext.CancellationToken);
+
+            Assert.IsNotNull(services);
+            Assert.AreEqual(3, services.Count);
+            Assert.Contains(s => s.Id == new Guid("00001801-0000-1000-8000-00805f9b34fb"), services);
+            Assert.Contains(s => s.Id == new Guid("00001800-0000-1000-8000-00805f9b34fb"), services);
+            Assert.Contains(s => s.Id == new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"), services);
+
+            // Register children to ensure they are all disposed
+            foreach (var service in services)
+            {
+                if (service.Id == new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"))
+                    continue; // otherwise we will get Access Denied
+
+                var characteristics = await service.GetCharacteristicsAsync(
+                    TestContext.CancellationToken);
+                Assert.IsNotNull(characteristics);
+            }
+        }
+
 
         [TestMethod]
         public async Task GetServices_Success()
@@ -75,7 +121,7 @@ namespace IntegrationTests.Maui
         [TestMethod]
         public async Task ConnectToKnownDevice_Success()
         {
-            // Plugin.BLE stores devices in the cache, so we should not dispose our device object here
+            // Plugin.BLE stores devices in the cache, so we should not dispose our device object in this test
             var device = new Device(Fixture.DeviceUuid);
             await device.ConnectAsync(TestContext.CancellationToken);
 

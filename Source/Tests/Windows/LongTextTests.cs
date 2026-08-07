@@ -1,7 +1,7 @@
 ﻿using BleCommands.Windows;
 using System.Text;
 
-namespace BleCommands.Tests.Core
+namespace BleCommands.Tests.Windows
 {
     // These tests work with the following sketch:
     /*
@@ -126,12 +126,6 @@ void loop() {
     {
         public BleTransport BleTransport { get; set; } = null!;
 
-        public ValueTask DisposeAsync()
-        {
-            BleTransport?.Dispose();
-            return ValueTask.CompletedTask;
-        }
-
         public async ValueTask InitializeAsync()
         {
             var transport = await ArduinoClient.CreateTransportAsync(
@@ -140,6 +134,12 @@ void loop() {
             await transport.StartAsync(TestContext.Current.CancellationToken);
 
             BleTransport = transport;
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            BleTransport?.Dispose();
+            return ValueTask.CompletedTask;
         }
     }
 
@@ -240,7 +240,7 @@ void loop() {
                         {
                             if (pos + 1 <= SIZE)
                             {
-                                char c = (char)(32 + (i++ % 95));
+                                char c = (char)(32 + i++ % 95);
                                 sb.Append(c);
                                 pos += 1;
                             }

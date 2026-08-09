@@ -71,7 +71,7 @@ namespace IntegrationTests.Maui
             var services = await device.GetServicesAsync(TestContext.CancellationToken);
 
             Assert.IsNotNull(services);
-            Assert.AreEqual(3, services.Count);
+            Assert.HasCount(3, services);
             Assert.Contains(s => s.Id == new Guid("00001801-0000-1000-8000-00805f9b34fb"), services);
             Assert.Contains(s => s.Id == new Guid("00001800-0000-1000-8000-00805f9b34fb"), services);
             Assert.Contains(s => s.Id == new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"), services);

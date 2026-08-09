@@ -1,5 +1,7 @@
 # Changelog
 
+## 3.1.2
+- Ability to exchange long texts in Android without specifying MTU size
 ## 3.1.1
 - Remove redundant parent check in BleTransport
 ## 3.1.0

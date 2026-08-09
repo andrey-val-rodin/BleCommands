@@ -129,7 +129,7 @@ namespace IntegrationTests.Maui
             Assert.AreEqual("The characteristic is not Read.", exception.Message);
         }
 
-        [   TestMethod]
+        [TestMethod]
         public async Task ReadAsync_WhenCharacteristicIsReadable_ReturnsDeviceName()
         {
             // Arrange

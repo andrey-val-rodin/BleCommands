@@ -2,7 +2,6 @@
 using MauiSample.Models;
 using MauiSample.PageModels;
 using MauiSample.Pages;
-using Microsoft.Extensions.Logging;
 
 namespace MauiSample
 {
@@ -26,9 +25,6 @@ namespace MauiSample
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-#if DEBUG
-            builder.Logging.AddDebug();
-#endif
             builder.Services.AddSingleton<DeviceHolder>();
             builder.Services.AddSingleton<MainPageModel>();
             builder.Services.AddSingleton<ServicesPageModel>();

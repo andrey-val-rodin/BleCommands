@@ -248,6 +248,28 @@ namespace BleCommands.Tests.Maui
         }
 
         [Fact]
+        public void Instance_WithSpecifiedTokenDelimiter_AggregatorsUseThisTokenDelimiter()
+        {
+            const char delimiter = '\x04'; // EOT
+            var device = new DeviceStub();
+            var service = new ServiceStub();
+            var commandCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Write);
+            var responseCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Notify);
+            var listeningCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Notify);
+            using var transport = new BleTransport(
+                device,
+                service,
+                commandCharacteristic,
+                responseCharacteristic,
+                listeningCharacteristic,
+                delimiter);
+
+            Assert.Equal(delimiter, transport.TokenDelimiter);
+            Assert.Equal(delimiter, transport.ResponseCharacteristic.TokenAggregator?.TokenDelimiter);
+            Assert.Equal(delimiter, transport.ListeningCharacteristic.TokenAggregator?.TokenDelimiter);
+        }
+
+        [Fact]
         public void Instance_Dispose_EverythingIsDisposed()
         {
             var device = new DeviceStub();

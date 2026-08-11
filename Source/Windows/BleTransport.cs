@@ -15,7 +15,7 @@ namespace BleCommands.Windows
         /// <summary>
         /// A constructor.
         /// </summary>
-        /// <param name="device">A Bluetooth LE device.</param>
+        /// <param name="device">A Bluetooth LE device. The device must be connected.</param>
         /// <param name="service"> A service.</param>
         /// <param name="commandCharacteristic">
         /// Characteristic for sending commands to the device (Write or WriteWithoutResponse).
@@ -77,12 +77,12 @@ namespace BleCommands.Windows
 
             if (ResponseCharacteristic == ListeningCharacteristic)
             {
-                ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator());
+                ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator(tokenDelimiter));
             }
             else
             {
-                ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator());
-                ListeningCharacteristic.AttachTokenAggregator(new TokenAggregator());
+                ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator(tokenDelimiter));
+                ListeningCharacteristic.AttachTokenAggregator(new TokenAggregator(tokenDelimiter));
             }
         }
 

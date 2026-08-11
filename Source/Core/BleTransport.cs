@@ -104,7 +104,7 @@ namespace BleCommands.Core
         public bool IsListening { get; protected set; }
 
         /// <inheritdoc />
-        public char TokenDelimiter { get; set; }
+        public char TokenDelimiter { get; protected set; }
 
         /// <inheritdoc />
         public TimeSpan ResponseTimeout { get; set; } = TimeSpan.FromMilliseconds(1000);

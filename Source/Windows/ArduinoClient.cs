@@ -1,4 +1,6 @@
-﻿namespace BleCommands.Windows
+﻿using BleCommands.Core;
+
+namespace BleCommands.Windows
 {
     /// <summary>
     /// A client for working together with the accompanying BLECommands.Arduino library.
@@ -32,7 +34,27 @@
         /// Be sure to call the Dispose method or use the using statement on the transport object
         /// to release all system resources after use.
         /// </remarks>
-        public static async Task<BleTransport?> CreateTransportAsync(string deviceName, CancellationToken token = default)
+        public static async Task<BleTransport?> CreateTransportAsync(
+            string deviceName, CancellationToken token = default)
+        {
+            return await CreateTransportAsync(deviceName, TokenAggregator.DefaultTokenDelimiter, token);
+        }
+
+        /// <summary>
+        /// Creates BleTransport object.
+        /// </summary>
+        /// <param name="deviceName">A device name.</param>
+        /// <param name="tokenDelimiter">The character that marks the end of a token.</param>
+        /// <param name="token">Cancellation token to cancel the operation.</param>
+        /// <returns>A BleTransport object, or <c>null</c> if something went wrong.</returns>
+        /// <remarks>
+        /// Be sure to call the Dispose method or use the using statement on the transport object
+        /// to release all system resources after use.
+        /// </remarks>
+        public static async Task<BleTransport?> CreateTransportAsync(
+            string deviceName,
+            char tokenDelimiter,
+            CancellationToken token = default)
         {
             if (!await BluetoothHelper.IsBluetoothAvailableAsync().ConfigureAwait(false) ||
                 !await BluetoothHelper.IsBluetoothOnAsync().ConfigureAwait(false))
@@ -64,7 +86,13 @@
                 return null;
             }
 
-            return new BleTransport(device, service, commandCharacteristic, responseCharacteristic, listeningCharacteristic);
+            return new BleTransport(
+                device,
+                service,
+                commandCharacteristic,
+                responseCharacteristic,
+                listeningCharacteristic,
+                tokenDelimiter);
         }
 
         private static async Task<Device?> CreateDeviceAsync(string deviceName, CancellationToken token)

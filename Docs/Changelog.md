@@ -1,5 +1,7 @@
 # Changelog
 
+## 3.2.0
+- Ability to override token delimiter
 ## 3.1.2
 - Ability to exchange long texts in Android without specifying MTU size
 ## 3.1.1

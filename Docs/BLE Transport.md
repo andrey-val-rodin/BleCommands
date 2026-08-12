@@ -21,4 +21,14 @@ Both client and server use predefined UUIDs for the service and characteristics:
 # Interaction
 ![](img/Interaction.png)
 
-Maximum size of command with arguments is 512 bytes. The length of responses to commands and outgoing messages is limited only by available memory; texts are encoded as UTF-8 strings.
+Maximum size of a command with arguments is 512 bytes. The length of responses to commands and outgoing messages is limited only by available memory; texts are encoded as UTF-8 strings.
+To send large text, the [Arduino BleCommands library](https://github.com/andrey-val-rodin/BleCommands.Arduino) splits the message into chunks of up to 200 bytes. Each chunk is written to the Response or Listening characteristic and transmitted as a separate BLE notification. The client receives these notifications and reassembles the original message.
+To allow the client to detect the end of the transmission, a special delimiter character is used. The default is '\n'.
+You can specify your own terminator in setup, for example:
+```c++
+TERMINATOR = '\x04'; // EOT
+```
+On the client side, create a BleTransport with the *tokenDelimiter* parameter specified:
+```c#
+await ArduinoClient.CreateTransportAsync("My BLE device", '\x04');
+```

@@ -66,8 +66,8 @@ namespace BleCommands.Windows
 
             if (NativeDevice == null)
                 throw new DeviceException("Unable to find the device identified by bluetooth address " +
-                    $"{_bluetoothAddress}. Specifically, if the device isn't paired " +
-                    "and it isn't found in the system cache.");
+                    $"{_bluetoothAddress}. This occurs especially often if the device is not paired " +
+                    $"and is not found in the system cache.");
 
             // Create and configure GATT session to maintain connection
             _gattSession = await GattSession.FromDeviceIdAsync(NativeDevice.BluetoothDeviceId)

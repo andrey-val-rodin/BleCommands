@@ -3,7 +3,7 @@
 namespace BleCommands.Core.Contracts
 {
     /// <summary>
-    /// Represents a Bluetooth Low Energy scanner that searches for a nearby BLE device.
+    /// Represents a Bluetooth Low Energy scanner that searches for nearby BLE devices.
     /// </summary>
     /// <typeparam name="TDevice">
     /// A specific device implementation.

@@ -30,7 +30,7 @@ namespace BleCommands.IntegrationTests.Windows
             });
 
             Assert.Equal(
-                "Unable to find the device identified by bluetooth address 0. Specifically, if the device isn't paired and it isn't found in the system cache.",
+                "Unable to find the device identified by bluetooth address 0. This occurs especially often if the device is not paired and is not found in the system cache.",
                 exception.Message);
         }
 

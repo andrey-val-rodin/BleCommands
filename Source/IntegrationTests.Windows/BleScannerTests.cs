@@ -9,8 +9,24 @@ namespace BleCommands.IntegrationTests.Windows
     /// <see href="https://table-360.ru/">https://table-360.ru/</see>
     /// </summary>
     [Collection("IntegrationTests.Windows")]
-    public class BleScannerTests()
+    public class BleScannerTests(Fixture fixture)
     {
+        private BleScanner BleScanner => fixture.BleScanner;
+
+        [Fact]
+        public async Task FindDeviceWithTimeout_InsufficientTimeout_ReturnsNull()
+        {
+            var device = await BleScanner.FindDeviceAsync("Rotating Table", TimeSpan.FromMilliseconds(1));
+            Assert.Null(device);
+        }
+
+        [Fact]
+        public async Task FindDevice_NonExistentDevice_ReturnsNull()
+        {
+            var device = await BleScanner.FindDeviceAsync("Non-existent Device", TimeSpan.FromMilliseconds(500));
+            Assert.Null(device);
+        }
+        /*
         [Fact]
         public async Task Test()
         {
@@ -38,5 +54,6 @@ namespace BleCommands.IntegrationTests.Windows
                 await device.ConnectAsync(TestContext.Current.CancellationToken);
             }
         }
+        */
     }
 }

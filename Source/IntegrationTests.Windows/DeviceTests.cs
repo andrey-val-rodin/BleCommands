@@ -35,14 +35,6 @@ namespace BleCommands.IntegrationTests.Windows
         }
 
         [Fact]
-        public async Task FindDeviceWithTimeout_InsufficientTimeout_ReturnsNull()
-        {
-            // Timeout 100 milliseconds
-            var device = await BleScanner.FindDeviceAsync("Non-existent Device", TimeSpan.FromMilliseconds(100));
-            Assert.Null(device);
-        }
-
-        [Fact]
         public async Task FindDeviceAndConnect_Success()
         {
             using var device = await BleScanner.FindDeviceAsync("Rotating Table");

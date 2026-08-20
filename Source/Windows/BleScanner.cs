@@ -20,12 +20,60 @@ namespace BleCommands.Windows
         /// </summary>
         public const int MaxTimeoutSeconds = 60;
 
+        /// <summary>
+        /// Occurs when a new Bluetooth Low Energy device is discovered during scanning.
+        /// </summary>
+        /// <remarks>
+        /// This event is raised for each unique device detected by the scanner. 
+        /// The <see cref="DeviceDiscoveredEventArgs"/> contains the Bluetooth address of the device.
+        /// </remarks>
         public event EventHandler<DeviceDiscoveredEventArgs>? DeviceDiscovered;
 
+        /// <summary>
+        /// Scans for Bluetooth Low Energy devices.
+        /// </summary>
+        /// <param name="mode">The scanning mode (Active or Passive). 
+        /// Active mode provides more data but consumes more power.</param>
+        /// <param name="filter">Optional filter to narrow the range of devices to be scanned.</param>
+        /// <param name="token">Cancellation token to stop the scanning operation.
+        /// If not provided (default), the scan will run indefinitely.</param>
+        /// <returns>A task that represents the asynchronous scanning operation.</returns>
+        /// <exception cref="DeviceException">
+        /// Thrown when an error occurs during the BLE scanning process.
+        /// </exception>
+        /// <remarks>
+        /// <para>
+        /// The scanning continues indefinitely until the cancellation token is triggered.
+        /// Each time a new unique device is discovered, the <see cref="DeviceDiscovered"/> event is raised.
+        /// </para>
+        /// <para>
+        /// <b>Important:</b> If you call this method without providing a cancellation token,
+        /// the scan will never stop. Always either provide a token or call it from a context
+        /// where cancellation is managed externally.
+        /// </para>
+        /// <para>
+        /// <b>Usage examples:</b>
+        /// <code>
+        /// // Scan with timeout (recommended)
+        /// using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        /// await scanner.ScanAsync(token: cts.Token);
+        /// 
+        /// // Scan with filter and timeout
+        /// var filter = new BluetoothLEAdvertisementFilter { ... };
+        /// await scanner.ScanAsync(
+        ///     mode: BluetoothLEScanningMode.Active,
+        ///     filter: filter,
+        ///     token: cts.Token);
+        /// 
+        /// // Scan indefinitely (use with caution)
+        /// await scanner.ScanAsync();
+        /// </code>
+        /// </para>
+        /// </remarks>
         public async Task ScanAsync(
-            CancellationToken token,
             BluetoothLEScanningMode mode = BluetoothLEScanningMode.Active,
-            BluetoothLEAdvertisementFilter? filter = null)
+            BluetoothLEAdvertisementFilter? filter = null,
+            CancellationToken token = default)
         {
             try
             {
@@ -124,7 +172,7 @@ namespace BleCommands.Windows
                 };
 
                 DeviceDiscovered += Handler;
-                await ScanAsync(cts.Token, BluetoothLEScanningMode.Active, filter);
+                await ScanAsync(BluetoothLEScanningMode.Active, filter, cts.Token);
                 
                 return device;
             }

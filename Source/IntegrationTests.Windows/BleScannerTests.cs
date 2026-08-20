@@ -47,7 +47,7 @@ namespace BleCommands.IntegrationTests.Windows
                 }
             };
 
-            await scanner.ScanAsync(cts.Token, BluetoothLEScanningMode.Active, filter);
+            await scanner.ScanAsync(BluetoothLEScanningMode.Active, filter, cts.Token);
 
             foreach (var device in devices)
             {

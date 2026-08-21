@@ -2,6 +2,7 @@
   <Folder Name="/Samples/">
     <Project Path="Samples/Console/ConsoleSample.csproj" />
     <Project Path="Samples/Maui/MauiSample.csproj" />
+    <Project Path="Samples/ScanningDemo/ScanningDemo.csproj" />
     <Project Path="Samples/Wpf/WpfSample.csproj" />
   </Folder>
   <Project Path="Core/Core.csproj" />

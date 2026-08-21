@@ -32,24 +32,36 @@ namespace BleCommands.Windows
         /// <summary>
         /// Scans for Bluetooth Low Energy devices.
         /// </summary>
-        /// <param name="mode">The scanning mode (Active or Passive). 
-        /// Active mode provides more data but consumes more power.</param>
+        /// <param name="mode">The scanning mode.
+        /// <list type="bullet">
+        ///   <item>
+        ///     <description>
+        ///       <b>Passive</b> — Listens to advertising packets only. Faster, lower power.
+        ///     </description>
+        ///   </item>
+        ///   <item>
+        ///     <description>
+        ///       <b>Active</b> — Sends Scan Requests and receives Scan Responses. Required for
+        ///       filters that match Scan Response data.
+        ///     </description>
+        ///   </item>
+        /// </list>
+        /// </param>
         /// <param name="filter">Optional filter to narrow the range of devices to be scanned.</param>
-        /// <param name="token">Cancellation token to stop the scanning operation.
-        /// If not provided (default), the scan will run indefinitely.</param>
+        /// <param name="token">Cancellation token to stop the scanning operation.</param>
         /// <returns>A task that represents the asynchronous scanning operation.</returns>
-        /// <exception cref="DeviceException">
-        /// Thrown when an error occurs during the BLE scanning process.
-        /// </exception>
+        /// <exception cref="DeviceException">Thrown when an error occurs during the BLE scanning process.</exception>
         /// <remarks>
         /// <para>
         /// The scanning continues indefinitely until the cancellation token is triggered.
         /// Each time a new unique device is discovered, the <see cref="DeviceDiscovered"/> event is raised.
         /// </para>
         /// <para>
-        /// <b>Important:</b> If you call this method without providing a cancellation token,
-        /// the scan will never stop. Always either provide a token or call it from a context
-        /// where cancellation is managed externally.
+        /// <b>Important:</b> Without a cancellation token, the scan will never stop.
+        /// </para>
+        /// <para>
+        /// <b>Filter behavior:</b> Some filters match data only available in Scan Responses.
+        /// Use <b>Active</b> mode when filtering by such data (e.g., <see cref="BluetoothLEAdvertisement.LocalName"/>).
         /// </para>
         /// <para>
         /// <b>Usage examples:</b>
@@ -58,7 +70,7 @@ namespace BleCommands.Windows
         /// using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         /// await scanner.ScanAsync(token: cts.Token);
         /// 
-        /// // Scan with filter and timeout
+        /// // Scan with filter
         /// var filter = new BluetoothLEAdvertisementFilter { ... };
         /// await scanner.ScanAsync(
         ///     mode: BluetoothLEScanningMode.Active,
@@ -157,7 +169,7 @@ namespace BleCommands.Windows
             Device? device = null;
             void Handler(object? sender, DeviceDiscoveredEventArgs e)
             {
-                device =  new Device(e.BluetoothAddress);
+                device = new Device(e.BluetoothAddress);
                 cts.Cancel();
             }
 
@@ -173,7 +185,7 @@ namespace BleCommands.Windows
 
                 DeviceDiscovered += Handler;
                 await ScanAsync(BluetoothLEScanningMode.Active, filter, cts.Token);
-                
+
                 return device;
             }
             finally

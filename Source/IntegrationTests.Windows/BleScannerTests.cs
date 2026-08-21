@@ -1,6 +1,5 @@
 ﻿using BleCommands.Windows;
 using BleCommands.Windows.Events;
-using Windows.Devices.Bluetooth.Advertisement;
 
 namespace BleCommands.IntegrationTests.Windows
 {
@@ -14,46 +13,63 @@ namespace BleCommands.IntegrationTests.Windows
         private BleScanner BleScanner => fixture.BleScanner;
 
         [Fact]
-        public async Task FindDeviceWithTimeout_InsufficientTimeout_ReturnsNull()
+        public async Task FindDevice_NonExistentDeviceAndInsufficientTimeout_ReturnsNull()
         {
-            var device = await BleScanner.FindDeviceAsync("Rotating Table", TimeSpan.FromMilliseconds(1));
+            var device = await BleScanner.FindDeviceAsync("Non-existent Device", TimeSpan.FromMilliseconds(10));
             Assert.Null(device);
         }
 
         [Fact]
-        public async Task FindDevice_NonExistentDevice_ReturnsNull()
+        public async Task ScanAsync_UntilRotatingTableIsFoundOrTimeRunsOut_Found()
         {
-            var device = await BleScanner.FindDeviceAsync("Non-existent Device", TimeSpan.FromMilliseconds(500));
-            Assert.Null(device);
-        }
-        /*
-        [Fact]
-        public async Task Test()
-        {
-            var scanner = new BleScanner();
             var devices = new List<Device>();
-            scanner.DeviceDiscovered += Handler;
-            void Handler(object? sender, DeviceDiscoveredEventArgs e)
+            var cts = new CancellationTokenSource(5000);
+            async Task Handler(object? sender, DeviceDiscoveredEventArgs e)
             {
-                devices.Add(new Device(e.BluetoothAddress));
+                var device = new Device(e.BluetoothAddress);
+                await device.ConnectAsync();
+                devices.Add(device);
+                if (device.Name == "Rotating Table")
+                    cts.Cancel();
             }
 
-            var cts = new CancellationTokenSource(5000);
-            var filter = new BluetoothLEAdvertisementFilter
+            BleScanner.DeviceDiscovered += async (s, a) => await Handler(s, a);
+
+            await BleScanner.ScanAsync(token: cts.Token);
+
+            Assert.NotNull(devices.FirstOrDefault(d => d.Name == "Rotating Table"));
+        }
+
+        [Fact]
+        public async Task ScanConcurrently_NoExceptions()
+        {
+            const int ThreadCount = 5;
+            List<Task<Exception?>> tasks = [];
+            async Task<Exception?> TaskProcAsync()
             {
-                Advertisement = new BluetoothLEAdvertisement
+                try
                 {
-                    LocalName = "Rotating Table"
+                    var cts = new CancellationTokenSource(100);
+                    await BleScanner.ScanAsync(token: cts.Token);
+                    return null;
                 }
-            };
+                catch (Exception ex)
+                {
+                    return ex;
+                }
+            }
 
-            await scanner.ScanAsync(BluetoothLEScanningMode.Active, filter, cts.Token);
-
-            foreach (var device in devices)
+            for (int i = 0; i < ThreadCount; i++)
             {
-                await device.ConnectAsync(TestContext.Current.CancellationToken);
+                tasks.Add(TaskProcAsync());
+            }
+
+            await Task.WhenAll(tasks);
+
+            foreach (var task in tasks)
+            {
+                Assert.Null(await task);
             }
         }
-        */
     }
 }

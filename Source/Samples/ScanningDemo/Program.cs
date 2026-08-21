@@ -16,13 +16,13 @@ async void Handler(object? sender, DeviceDiscoveredEventArgs e)
         Console.Write(ToMacString(e.BluetoothAddress));
         Console.WriteLine("\tConnecting...");
 
-        using var device = new Device(e.BluetoothAddress);
-        await device.ConnectAsync();
-
-        Console.WriteLine($"\"{device.Name}\"");
-
         try
         {
+            using var device = new Device(e.BluetoothAddress);
+            await device.ConnectAsync();
+
+            Console.WriteLine($"\"{device.Name}\"");
+
             var services = await device.GetServicesAsync();
             foreach (var service in services)
             {

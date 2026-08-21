@@ -32,20 +32,10 @@ namespace BleCommands.Windows
         /// <summary>
         /// Scans for Bluetooth Low Energy devices.
         /// </summary>
-        /// <param name="mode">The scanning mode.
-        /// <list type="bullet">
-        ///   <item>
-        ///     <description>
-        ///       <b>Passive</b> — Listens to advertising packets only. Faster, lower power.
-        ///     </description>
-        ///   </item>
-        ///   <item>
-        ///     <description>
-        ///       <b>Active</b> — Sends Scan Requests and receives Scan Responses. Required for
-        ///       filters that match Scan Response data.
-        ///     </description>
-        ///   </item>
-        /// </list>
+        /// <param name="mode">The scanning mode. Defaults to <see cref="BluetoothLEScanningMode.Passive"/>,
+        /// which is the system default and offers the best balance of performance and power consumption.
+        /// Use <see cref="BluetoothLEScanningMode.Active"/> when you need to receive additional data
+        /// from Scan Responses, such as when filtering by <see cref="BluetoothLEAdvertisement.LocalName"/>.
         /// </param>
         /// <param name="filter">Optional filter to narrow the range of devices to be scanned.</param>
         /// <param name="token">Cancellation token to stop the scanning operation.</param>
@@ -66,24 +56,24 @@ namespace BleCommands.Windows
         /// <para>
         /// <b>Usage examples:</b>
         /// <code>
-        /// // Scan with timeout (recommended)
-        /// using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        /// await scanner.ScanAsync(token: cts.Token);
+        ///   // Scan with timeout (recommended)
+        ///   using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        ///   await scanner.ScanAsync(token: cts.Token);
         /// 
-        /// // Scan with filter
-        /// var filter = new BluetoothLEAdvertisementFilter { ... };
-        /// await scanner.ScanAsync(
-        ///     mode: BluetoothLEScanningMode.Active,
-        ///     filter: filter,
-        ///     token: cts.Token);
+        ///   // Scan with filter
+        ///   var filter = new BluetoothLEAdvertisementFilter { ... };
+        ///   await scanner.ScanAsync(
+        ///       mode: BluetoothLEScanningMode.Active,
+        ///       filter: filter,
+        ///       token: cts.Token);
         /// 
-        /// // Scan indefinitely (use with caution)
-        /// await scanner.ScanAsync();
+        ///   // Scan indefinitely (use with caution)
+        ///   await scanner.ScanAsync();
         /// </code>
         /// </para>
         /// </remarks>
         public async Task ScanAsync(
-            BluetoothLEScanningMode mode = BluetoothLEScanningMode.Active,
+            BluetoothLEScanningMode mode = BluetoothLEScanningMode.Passive,
             BluetoothLEAdvertisementFilter? filter = null,
             CancellationToken token = default)
         {

@@ -160,7 +160,8 @@ namespace BleCommands.Windows
             void Handler(object? sender, DeviceDiscoveredEventArgs e)
             {
                 device = new Device(e.BluetoothAddress);
-                cts.Cancel();
+                if (!cts.IsCancellationRequested)
+                    cts.Cancel();
             }
 
             try

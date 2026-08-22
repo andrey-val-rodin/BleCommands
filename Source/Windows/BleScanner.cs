@@ -143,7 +143,7 @@ namespace BleCommands.Windows
             using var cts = new CancellationTokenSource(timeout);
             try
             {
-                return await FindDeviceInternalAsync(deviceName, cts).ConfigureAwait(false);
+                return await FindDeviceInternalAsync(deviceName, cts.Token).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -154,34 +154,49 @@ namespace BleCommands.Windows
 
         private async Task<Device?> FindDeviceInternalAsync(
             string deviceName,
-            CancellationTokenSource cts)
+            CancellationToken token)
         {
-            Device? device = null;
-            void Handler(object? sender, DeviceDiscoveredEventArgs e)
-            {
-                device = new Device(e.BluetoothAddress);
-                if (!cts.IsCancellationRequested)
-                    cts.Cancel();
-            }
-
             try
             {
-                var filter = new BluetoothLEAdvertisementFilter
+                var tcs = new TaskCompletionSource<Device?>();
+
+                var deviceWatcher = new BluetoothLEAdvertisementWatcher
                 {
-                    Advertisement = new BluetoothLEAdvertisement
+                    ScanningMode = BluetoothLEScanningMode.Active,
+                    AdvertisementFilter = new BluetoothLEAdvertisementFilter
                     {
-                        LocalName = deviceName
+                        Advertisement = new BluetoothLEAdvertisement
+                        {
+                            LocalName = deviceName
+                        }
                     }
                 };
 
-                DeviceDiscovered += Handler;
-                await ScanAsync(BluetoothLEScanningMode.Active, filter, cts.Token);
+                void Handler(object sender, BluetoothLEAdvertisementReceivedEventArgs args)
+                {
+                    if (args.Advertisement.LocalName == deviceName)
+                        tcs.TrySetResult(new Device(args.BluetoothAddress));
+                }
 
-                return device;
+                try
+                {
+                    deviceWatcher.Received += Handler;
+                    deviceWatcher.Start();
+
+                    using (token.Register(() => tcs.TrySetCanceled()))
+                    {
+                        return await tcs.Task.ConfigureAwait(false);
+                    }
+                }
+                finally
+                {
+                    deviceWatcher.Received -= Handler;
+                    deviceWatcher.Stop();
+                }
             }
-            finally
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                DeviceDiscovered -= Handler;
+                throw new DeviceException("BLE scanning error.", ex);
             }
         }
 

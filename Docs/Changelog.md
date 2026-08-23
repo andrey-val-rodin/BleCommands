@@ -1,5 +1,7 @@
 # Changelog
 
+## 3.3.0
+- Add scanning capability
 ## 3.2.0
 - Ability to override token delimiter
 ## 3.1.2

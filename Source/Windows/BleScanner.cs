@@ -174,8 +174,7 @@ namespace BleCommands.Windows
 
                 void Handler(object sender, BluetoothLEAdvertisementReceivedEventArgs args)
                 {
-                    if (args.Advertisement.LocalName == deviceName)
-                        tcs.TrySetResult(new Device(args.BluetoothAddress));
+                    tcs.TrySetResult(new Device(args.BluetoothAddress));
                 }
 
                 try

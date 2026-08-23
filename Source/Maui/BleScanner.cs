@@ -23,7 +23,95 @@ namespace BleCommands.Maui
         /// <summary>
         /// Gets reference to <see cref="IAdapter"/>.
         /// </summary>
-        protected static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
+        public static IAdapter Adapter => Plugin.BLE.CrossBluetoothLE.Current.Adapter;
+
+        /// <summary>
+        /// Occurs when a new Bluetooth Low Energy device is discovered during scanning.
+        /// </summary>
+        /// <remarks>
+        /// This event is raised for each unique device detected by the scanner. 
+        /// The <see cref="DeviceEventArgs"/> contains the native device.
+        /// </remarks>
+        public event EventHandler<DeviceEventArgs>? DeviceDiscovered
+        {
+            add { Adapter.DeviceDiscovered += value; }
+            remove { Adapter.DeviceDiscovered -= value; }
+        }
+
+        /// <summary>
+        /// Scans for Bluetooth Low Energy devices.
+        /// </summary>
+        /// <param name="filter">Optional filter to narrow the range of devices to be scanned.</param>
+        /// <param name="token">Cancellation token to stop the scanning operation.
+        /// If not provided (default), the scan will run indefinitely.</param>
+        /// <returns>A task that represents the asynchronous scanning operation.</returns>
+        /// <exception cref="DeviceException">
+        /// Thrown when an error occurs during the BLE scanning process.
+        /// </exception>
+        /// <remarks>
+        /// <para>
+        /// The scanning continues indefinitely until the cancellation token is triggered.
+        /// Each time a new unique device is discovered, the <see cref="DeviceDiscovered"/> event is raised.
+        /// </para>
+        /// <para>
+        /// <b>Important:</b> Without a cancellation token, the scan will never stop.
+        /// </para>
+        /// <para>
+        /// <b>Configuration:</b>
+        /// Before calling this method, you can configure the scan behavior by setting properties
+        /// on <see cref="Adapter"/>:
+        /// <list type="bullet">
+        ///   <item>
+        ///     <description>
+        ///       <see cref="IAdapter.ScanMode"/> — Controls the scan mode (LowPower, Balanced, LowLatency).
+        ///       Default is <see cref="ScanMode.LowLatency"/>.
+        ///     </description>
+        ///   </item>
+        ///   <item>
+        ///     <description>
+        ///       <see cref="IAdapter.ScanMatchMode"/> — (Android only) Controls how advertisements are matched.
+        ///     </description>
+        ///   </item>
+        /// </list>
+        /// </para>
+        /// <para>
+        /// <b>Usage examples:</b>
+        /// <code>
+        ///   // Configure scan mode (optional)
+        ///   BleScanner.Adapter.ScanMode = ScanMode.LowLatency;
+        /// 
+        ///   // Scan with timeout (recommended)
+        ///   using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        ///   await scanner.ScanAsync(token: cts.Token);
+        /// 
+        ///   // Scan with filter
+        ///   var filter = new ScanFilterOptions { DeviceNames = new[] { "MyDevice" } };
+        ///   await scanner.ScanAsync(filter: filter, token: cts.Token);
+        /// 
+        ///   // Scan indefinitely (use with caution)
+        ///   await scanner.ScanAsync();
+        /// </code>
+        /// </para>
+        /// </remarks>
+        public async Task ScanAsync(
+            ScanFilterOptions? filter = null,
+            CancellationToken token = default)
+        {
+            try
+            {
+                await Adapter.StartScanningForDevicesAsync(
+                    scanFilterOptions: filter,
+                    cancellationToken: token).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new DeviceException("BLE scanning error.", ex);
+            }
+            finally
+            {
+                await Adapter.StopScanningForDevicesAsync().ConfigureAwait(false);
+            }
+        }
 
         /// <inheritdoc/>
         public async Task<Device?> FindDeviceAsync(string deviceName)
@@ -85,8 +173,7 @@ namespace BleCommands.Maui
                 finally
                 {
                     Adapter.DeviceDiscovered -= Handler;
-                    if (Adapter.IsScanning)
-                        await Adapter.StopScanningForDevicesAsync().ConfigureAwait(false);
+                    await Adapter.StopScanningForDevicesAsync().ConfigureAwait(false);
                 }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)

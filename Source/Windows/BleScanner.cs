@@ -121,7 +121,7 @@ namespace BleCommands.Windows
             {
                 return;
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            catch (Exception ex)
             {
                 throw new DeviceException("BLE scanning error.", ex);
             }
@@ -174,7 +174,8 @@ namespace BleCommands.Windows
 
                 void Handler(object sender, BluetoothLEAdvertisementReceivedEventArgs args)
                 {
-                    tcs.TrySetResult(new Device(args.BluetoothAddress));
+                    if (args.Advertisement.LocalName == deviceName)
+                        tcs.TrySetResult(new Device(args.BluetoothAddress));
                 }
 
                 try

@@ -6,7 +6,7 @@ This sample works together with example LED of Arduino library `BleCommands.Ardu
 
 ![ConsoleSample](img/ConsoleSample.png)
 
-The sample demonstrates sending commands to Arduino BLE device and receiving response.
+The sample demonstrates sending commands to Arduino BLE device and receiving responses.
 
 ## WPFSample
 
@@ -25,3 +25,7 @@ Enter name of any advertised device and connect to it. Then you can explore devi
 <img src="img/MauiSample1.jpg" width="360" height="780"/> <img src="img/MauiSample2.jpg" width="360" height="780"/>
 
 <img src="img/MauiSample3.jpg" width="360" height="780"/> <img src="img/MauiSample4.jpg" width="360" height="780"/>
+
+## ScanningDemo
+
+The application demonstrates scanning capabilities (i.e., the BleScanner.ScanAsync method)

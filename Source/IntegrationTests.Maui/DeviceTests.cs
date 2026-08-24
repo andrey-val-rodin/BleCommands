@@ -118,7 +118,7 @@ namespace IntegrationTests.Maui
             using var device = new Device(Fixture.DeviceUuid);
             // Plugin.BLE hangs in this call when running together with other tests:
             await device.ConnectAsync(TestContext.CancellationToken);
-            
+
             Assert.IsTrue(device.IsConnected);
             /*
              * If Assert.IsTrue fails, then instead of checking the connection status immediately,

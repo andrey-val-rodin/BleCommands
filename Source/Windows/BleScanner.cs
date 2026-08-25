@@ -38,9 +38,12 @@ namespace BleCommands.Windows
         /// from Scan Responses, such as when filtering by <see cref="BluetoothLEAdvertisement.LocalName"/>.
         /// </param>
         /// <param name="filter">Optional filter to narrow the range of devices to be scanned.</param>
-        /// <param name="token">Cancellation token to stop the scanning operation.</param>
+        /// <param name="token">Cancellation token to stop the scanning operation.
+        /// If not provided (default), the scan will run indefinitely.</param>
         /// <returns>A task that represents the asynchronous scanning operation.</returns>
-        /// <exception cref="DeviceException">Thrown when an error occurs during the BLE scanning process.</exception>
+        /// <exception cref="DeviceException">
+        /// Thrown when an error occurs during the BLE scanning process.
+        /// </exception>
         /// <remarks>
         /// <para>
         /// The scanning continues indefinitely until the cancellation token is triggered.

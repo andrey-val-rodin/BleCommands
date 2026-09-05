@@ -98,8 +98,11 @@ namespace BleCommands.Maui
                 throw new InvalidOperationException(
                     "Object initialization error. Both NativeDevice and Guid are null.");
 
+            if (NativeDevice == null)
+                throw new InvalidOperationException("Unexpected null device after successful connection.");
+
             // Request MTU size in Android
-            await NativeDevice!.RequestMtuAsync(512);
+            await NativeDevice.RequestMtuAsync(512).ConfigureAwait(false);
 
             _connectionInvoked = true;
         }

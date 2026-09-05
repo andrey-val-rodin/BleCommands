@@ -37,7 +37,8 @@ namespace BleCommands.Windows
         public static async Task<BleTransport?> CreateTransportAsync(
             string deviceName, CancellationToken token = default)
         {
-            return await CreateTransportAsync(deviceName, TokenAggregator.DefaultTokenDelimiter, token);
+            return await CreateTransportAsync(
+                deviceName, TokenAggregator.DefaultTokenDelimiter, token).ConfigureAwait(false);
         }
 
         /// <summary>

@@ -1,5 +1,7 @@
 # Changelog
 
+## 3.3.1
+- Add missing ConfigureAwait calls
 ## 3.3.0
 - Add scanning capability
 ## 3.2.0

@@ -51,7 +51,9 @@ namespace BleCommands.IntegrationTests.Windows
             {
                 BleScanner.DeviceDiscovered += Handler;
                 await BleScanner.ScanAsync(token: cts.Token);
-
+            }
+            catch (OperationCanceledException)
+            {
                 Assert.True(rotatingTableFound);
             }
             finally

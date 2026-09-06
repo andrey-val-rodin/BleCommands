@@ -45,9 +45,6 @@ namespace BleCommands.Maui
         /// <param name="token">Cancellation token to stop the scanning operation.
         /// If not provided (default), the scan will run indefinitely.</param>
         /// <returns>A task that represents the asynchronous scanning operation.</returns>
-        /// <exception cref="DeviceException">
-        /// Thrown when an error occurs during the BLE scanning process.
-        /// </exception>
         /// <remarks>
         /// <para>
         /// The scanning continues indefinitely until the cancellation token is triggered.
@@ -82,7 +79,8 @@ namespace BleCommands.Maui
         /// 
         ///   // Scan with timeout (recommended)
         ///   using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        ///   await scanner.ScanAsync(token: cts.Token);
+        ///   try { await scanner.ScanAsync(token: cts.Token); }
+        ///   catch (OperationCanceledException) { /* timeout */ }
         /// 
         ///   // Scan with filter
         ///   var filter = new ScanFilterOptions { DeviceNames = new[] { "MyDevice" } };
@@ -102,10 +100,8 @@ namespace BleCommands.Maui
                 await Adapter.StartScanningForDevicesAsync(
                     scanFilterOptions: filter,
                     cancellationToken: token).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw new DeviceException("BLE scanning error.", ex);
+
+                token.ThrowIfCancellationRequested();
             }
             finally
             {

@@ -14,6 +14,7 @@ namespace BleCommands.Core
         private readonly SemaphoreSlim _semaphore = new(1, 1);
         private readonly object _timerLock = new();
         private readonly System.Timers.Timer _listeningTimer = new(3000) { AutoReset = false };
+        private TimeSpan _responseTimeout = TimeSpan.FromMilliseconds(1000);
         private bool _disposed;
 
         /// <inheritdoc />
@@ -107,7 +108,18 @@ namespace BleCommands.Core
         public char TokenDelimiter { get; protected set; }
 
         /// <inheritdoc />
-        public TimeSpan ResponseTimeout { get; set; } = TimeSpan.FromMilliseconds(1000);
+        public TimeSpan ResponseTimeout
+        {
+            get => _responseTimeout;
+            set
+            {
+                if (value <= TimeSpan.Zero)
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value), "Response timeout must be greater than zero.");
+
+                _responseTimeout = value;
+            }
+        }
 
         /// <summary>
         /// Returns <c>true</c> if the <see cref="StartAsync(CancellationToken)"/> method was called.
@@ -140,8 +152,7 @@ namespace BleCommands.Core
 
 #if DEBUG
             System.Diagnostics.Debug.WriteLine($"Command: {command}");
-            var stopwatch = new System.Diagnostics.Stopwatch();
-            stopwatch.Start();
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 #endif
 
             await _semaphore.WaitAsync(token).ConfigureAwait(false);
@@ -160,22 +171,24 @@ namespace BleCommands.Core
                 // Send command
                 await CommandCharacteristic.WriteAsync(command, token).ConfigureAwait(false);
 
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-                cts.CancelAfter(ResponseTimeout);
+                using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+                timeoutCts.CancelAfter(ResponseTimeout);
 
-                using (cts.Token.Register(() => tcs.TrySetCanceled()))
+                var completedTask = await Task.WhenAny(
+                    tcs.Task,
+                    Task.Delay(Timeout.InfiniteTimeSpan, timeoutCts.Token)).ConfigureAwait(false);
+
+                if (completedTask == tcs.Task)
                 {
-                    var result = await tcs.Task.ConfigureAwait(false);
 #if DEBUG
                     stopwatch.Stop();
                     System.Diagnostics.Debug.WriteLine(
                         $"[{command}] Elapsed time: {stopwatch.ElapsedMilliseconds} ms");
 #endif
-                    return result;
+                    return await tcs.Task.ConfigureAwait(false);
                 }
-            }
-            catch (TaskCanceledException)
-            {
+
+                token.ThrowIfCancellationRequested();
                 return null;
             }
             finally

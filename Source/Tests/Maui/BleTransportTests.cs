@@ -215,6 +215,40 @@ namespace BleCommands.Tests.Maui
         }
 
         [Fact]
+        public async Task SendCommandAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            {
+                var transport = new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+                await transport.StartAsync(TestContext.Current.CancellationToken);
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(TimeSpan.FromMilliseconds(50));
+
+                await transport.SendCommandAsync("STATUS", cts.Token);
+            });
+        }
+
+        [Fact]
+        public void ResponseTimeout_ZeroTimeout_ArgumentOutOfRangeException()
+        {
+            var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+            void act() => transport.ResponseTimeout = TimeSpan.Zero;
+            Assert.Throws<ArgumentOutOfRangeException>(act);
+        }
+
+        [Fact]
         public void StartListening_NotStarted_InvalidOperationException()
         {
             Assert.Throws<InvalidOperationException>(() =>

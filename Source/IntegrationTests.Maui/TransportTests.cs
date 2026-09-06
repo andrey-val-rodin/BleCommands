@@ -35,12 +35,12 @@ namespace IntegrationTests.Maui
                 BleTransport.ResponseTimeout = TimeSpan.FromMilliseconds(1);
                 BleTransport.ListeningTokenReceived += Handler;
                 Assert.IsNull(await BleTransport.SendCommandAsync("STATUS", TestContext.CancellationToken));
-
-                // Wait until we receive an actual response
-                await tcs.Task;
             }
             finally
             {
+                // Wait until we receive an actual response
+                await tcs.Task;
+
                 BleTransport.ListeningTokenReceived -= Handler;
                 BleTransport.ResponseTimeout = oldTimeout;
             }

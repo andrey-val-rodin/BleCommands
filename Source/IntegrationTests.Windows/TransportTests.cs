@@ -31,12 +31,12 @@ namespace BleCommands.IntegrationTests.Windows
                 BleTransport.ResponseTimeout = TimeSpan.FromMilliseconds(1);
                 BleTransport.ListeningTokenReceived += Handler;
                 Assert.Null(await BleTransport.SendCommandAsync("STATUS", TestContext.Current.CancellationToken));
-
-                // Wait until we receive an actual response
-                await tcs.Task;
             }
             finally
             {
+                // Wait until we receive an actual response
+                await tcs.Task;
+
                 BleTransport.ListeningTokenReceived -= Handler;
                 BleTransport.ResponseTimeout = oldTimeout;
             }

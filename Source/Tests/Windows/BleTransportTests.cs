@@ -182,6 +182,25 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
+        public async Task StartAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            {
+                var transport = new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+                using var cts = new CancellationTokenSource();
+                cts.Cancel();
+
+                await transport.StartAsync(cts.Token);
+            });
+        }
+
+        [Fact]
         public async Task SendCommandAsync_Disposed_ObjectDisposedException()
         {
             await Assert.ThrowsAsync<ObjectDisposedException>(async () =>

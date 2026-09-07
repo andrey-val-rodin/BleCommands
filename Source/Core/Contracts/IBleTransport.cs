@@ -58,6 +58,12 @@ namespace BleCommands.Core.Contracts
         TCharacteristic ListeningCharacteristic { get; }
 
         /// <summary>
+        /// Gets a value indicating whether this object has been initialized
+        /// (i.e., whether the <see cref="StartAsync"/> method was called.)
+        /// </summary>
+        public bool IsStarted { get; }
+
+        /// <summary>
         /// Gets a value indicating whether listening is currently in progress.
         /// </summary>
         bool IsListening { get; }

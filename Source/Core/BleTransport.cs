@@ -101,6 +101,10 @@ namespace BleCommands.Core
             ListeningCharacteristic.TokenAggregator ??
             throw new InvalidOperationException("TokenAggregator not attached to ListeningCharacteristic");
 
+
+        /// <inheritdoc />
+        public bool IsStarted { get; protected set; }
+
         /// <inheritdoc />
         public bool IsListening { get; protected set; }
 
@@ -120,11 +124,6 @@ namespace BleCommands.Core
                 _responseTimeout = value;
             }
         }
-
-        /// <summary>
-        /// Returns <c>true</c> if the <see cref="StartAsync(CancellationToken)"/> method was called.
-        /// </summary>
-        public bool IsStarted { get; protected set; }
 
         /// <inheritdoc />
         public async Task StartAsync(CancellationToken token = default)

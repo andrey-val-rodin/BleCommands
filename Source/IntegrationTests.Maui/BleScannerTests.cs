@@ -55,12 +55,14 @@ namespace IntegrationTests.Maui
             }
             catch (OperationCanceledException)
             {
-                Assert.IsTrue(rotatingTableFound);
+                // Canceled in handler
             }
             finally
             {
                 BleScanner.DeviceDiscovered -= Handler;
             }
+
+            Assert.IsTrue(rotatingTableFound);
         }
     }
 }

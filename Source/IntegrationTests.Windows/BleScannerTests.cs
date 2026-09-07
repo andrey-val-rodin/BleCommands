@@ -54,12 +54,14 @@ namespace BleCommands.IntegrationTests.Windows
             }
             catch (OperationCanceledException)
             {
-                Assert.True(rotatingTableFound);
+                // Canceled in handler
             }
             finally
             {
                 BleScanner.DeviceDiscovered -= Handler;
             }
+
+            Assert.True(rotatingTableFound);
         }
     }
 }

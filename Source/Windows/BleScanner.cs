@@ -58,16 +58,15 @@ namespace BleCommands.Windows
         /// <code>
         ///   // Scan with timeout (recommended)
         ///   using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        ///   try { await scanner.ScanAsync(token: cts.Token); }
-        ///   catch (OperationCanceledException) { /* timeout */ }
-        /// 
-        ///   // Scan with filter
-        ///   var filter = new BluetoothLEAdvertisementFilter { ... };
-        ///   await scanner.ScanAsync(
-        ///       mode: BluetoothLEScanningMode.Active,
-        ///       filter: filter,
-        ///       token: cts.Token);
-        /// 
+        ///   try
+        ///   {
+        ///       await scanner.ScanAsync(token: cts.Token);
+        ///   }
+        ///   catch (OperationCanceledException)
+        ///   {
+        ///       // Expected upon cancellation request
+        ///   }
+        ///   
         ///   // Scan indefinitely (use with caution)
         ///   await scanner.ScanAsync();
         /// </code>

@@ -18,6 +18,21 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
+        public async Task ConnectAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            // Arrange
+            var device = new DeviceStub();
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                await device.ConnectAsync(cts.Token);
+            });
+        }
+
+        [Fact]
         public async Task GetServicesAsync_Disposed_ObjectDisposedException()
         {
             var exception = await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
@@ -42,6 +57,21 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
+        public async Task GetServicesAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            // Arrange
+            var device = new DeviceStub();
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                await device.GetServicesAsync(cts.Token);
+            });
+        }
+
+        [Fact]
         public async Task GetServiceAsync_Disposed_ObjectDisposedException()
         {
             var exception = await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
@@ -62,6 +92,21 @@ namespace BleCommands.Tests.Windows
                 var device = new Device(0);
 
                 await device.GetServiceAsync(Guid.Empty, TestContext.Current.CancellationToken);
+            });
+        }
+
+        [Fact]
+        public async Task GetServiceAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            // Arrange
+            var device = new DeviceStub();
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                await device.GetServiceAsync(Guid.NewGuid(), cts.Token);
             });
         }
     }

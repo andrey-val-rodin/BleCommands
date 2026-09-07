@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.3.2
+- Validation of BleTransport.ResponseTimeout
+- Throw OperationCanceledException in case of external cancellation request
 ## 3.3.1
 - Add missing ConfigureAwait calls
 ## 3.3.0

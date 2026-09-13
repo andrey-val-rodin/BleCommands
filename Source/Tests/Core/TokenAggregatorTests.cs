@@ -31,8 +31,8 @@ namespace BleCommands.Tests.Core
             {
                 Aggregator.Append($"{token}{D}");
 
-                Assert.Single(Tokens);
-                Assert.Equal(token, Tokens[0]);
+                var item = Assert.Single(Tokens);
+                Assert.Equal(token, item);
             }
             finally
             {
@@ -49,8 +49,8 @@ namespace BleCommands.Tests.Core
             {
                 Aggregator.Append($"{token}{D}");
 
-                Assert.Single(Tokens);
-                Assert.Equal(token, Tokens[0]);
+                var item = Assert.Single(Tokens);
+                Assert.Equal(token, item);
             }
             finally
             {

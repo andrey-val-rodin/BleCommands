@@ -40,6 +40,11 @@ namespace BleCommands.Core
         /// <summary>
         /// Occurs when a complete token has been accumulated.
         /// </summary>
+        /// <remarks>
+        /// Event handlers are invoked synchronously and sequentially while the aggregator
+        /// processes incoming fragments. Event handlers should complete promptly and must
+        /// not throw exceptions.
+        /// </remarks>
         public event EventHandler<TextEventArgs>? TokenReceived;
 
         /// <summary>

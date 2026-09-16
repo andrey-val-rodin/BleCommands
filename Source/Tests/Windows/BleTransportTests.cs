@@ -215,6 +215,22 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
+        public async Task StartListening_ZeroTimeout_ArgumentOutOfRangeException()
+        {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+            await transport.StartAsync(TestContext.Current.CancellationToken);
+
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => transport.StartListening(TimeSpan.Zero));
+        }
+
+        [Fact]
         public void StartListening_NotStarted_InvalidOperationException()
         {
             Assert.Throws<InvalidOperationException>(() =>

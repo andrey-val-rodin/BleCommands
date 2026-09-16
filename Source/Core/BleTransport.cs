@@ -193,6 +193,10 @@ namespace BleCommands.Core
             if (!IsStarted)
                 throw new InvalidOperationException("BleTransport has not been started.");
 
+            if (timeout <= TimeSpan.Zero)
+                throw new ArgumentOutOfRangeException(
+                    nameof(timeout), "Listening timeout must be greater than zero.");
+
             lock (_timerLock)
             {
                 if (IsListening)

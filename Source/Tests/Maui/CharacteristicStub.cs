@@ -46,22 +46,26 @@ namespace BleCommands.Tests.Maui
 
         public Task<string> ReadAsync(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            token.ThrowIfCancellationRequested();
+            return Task.FromResult(string.Empty);
         }
 
         public Task WriteAsync(string data, CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
             return Task.CompletedTask;
         }
 
         public Task StartReceivingAsync(CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
             return Task.CompletedTask;
         }
 
         public Task StopReceivingAsync(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            token.ThrowIfCancellationRequested();
+            return Task.CompletedTask;
         }
 
         public void Dispose()

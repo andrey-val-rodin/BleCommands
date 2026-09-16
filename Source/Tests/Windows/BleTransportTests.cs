@@ -182,6 +182,25 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
+        public async Task StartAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            {
+                var transport = new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+                using var cts = new CancellationTokenSource();
+                cts.Cancel();
+
+                await transport.StartAsync(cts.Token);
+            });
+        }
+
+        [Fact]
         public async Task SendCommandAsync_Disposed_ObjectDisposedException()
         {
             await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
@@ -215,19 +234,37 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
-        public async Task StartListening_ZeroTimeout_ArgumentOutOfRangeException()
+        public async Task SendCommandAsync_ExternalCancellation_ThrowsOperationCanceledException()
         {
-            using var transport = new BleTransport(
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            {
+                var transport = new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+                await transport.StartAsync(TestContext.Current.CancellationToken);
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(TimeSpan.FromMilliseconds(50));
+
+                await transport.SendCommandAsync("STATUS", cts.Token);
+            });
+        }
+
+        [Fact]
+        public void ResponseTimeout_ZeroTimeout_ArgumentOutOfRangeException()
+        {
+            var transport = new BleTransport(
                 new DeviceStub(),
                 new ServiceStub(),
                 new CharacteristicStub(CharacteristicPropertyFlags.Write),
                 new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                 new CharacteristicStub(CharacteristicPropertyFlags.Notify));
 
-            await transport.StartAsync(TestContext.Current.CancellationToken);
-
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => transport.StartListening(TimeSpan.Zero));
+            void act() => transport.ResponseTimeout = TimeSpan.Zero;
+            Assert.Throws<ArgumentOutOfRangeException>(act);
         }
 
         [Fact]

@@ -27,6 +27,21 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
+        public async Task GetCharacteristicAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            // Arrange
+            var service = new ServiceStub();
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                await service.GetCharacteristicAsync(Guid.NewGuid(), cts.Token);
+            });
+        }
+
+        [Fact]
         public async Task GetCharacteristicsAsync_WhenServiceDisposed_ThrowsObjectDisposedException()
         {
             // Arrange
@@ -37,6 +52,21 @@ namespace BleCommands.Tests.Windows
             var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
                 async () => await service.GetCharacteristicsAsync(TestContext.Current.CancellationToken));
             Assert.Equal(typeof(Service).FullName, exception.ObjectName);
+        }
+
+        [Fact]
+        public async Task GetCharacteristicsAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            // Arrange
+            var service = new ServiceStub();
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                await service.GetCharacteristicsAsync(cts.Token);
+            });
         }
 
         [Fact]

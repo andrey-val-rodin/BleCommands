@@ -41,9 +41,6 @@ namespace BleCommands.Windows
         /// <param name="token">Cancellation token to stop the scanning operation.
         /// If not provided (default), the scan will run indefinitely.</param>
         /// <returns>A task that represents the asynchronous scanning operation.</returns>
-        /// <exception cref="DeviceException">
-        /// Thrown when an error occurs during the BLE scanning process.
-        /// </exception>
         /// <remarks>
         /// <para>
         /// The scanning continues indefinitely until the cancellation token is triggered.
@@ -61,15 +58,15 @@ namespace BleCommands.Windows
         /// <code>
         ///   // Scan with timeout (recommended)
         ///   using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        ///   await scanner.ScanAsync(token: cts.Token);
-        /// 
-        ///   // Scan with filter
-        ///   var filter = new BluetoothLEAdvertisementFilter { ... };
-        ///   await scanner.ScanAsync(
-        ///       mode: BluetoothLEScanningMode.Active,
-        ///       filter: filter,
-        ///       token: cts.Token);
-        /// 
+        ///   try
+        ///   {
+        ///       await scanner.ScanAsync(token: cts.Token);
+        ///   }
+        ///   catch (OperationCanceledException)
+        ///   {
+        ///       // Expected upon cancellation request
+        ///   }
+        ///   
         ///   // Scan indefinitely (use with caution)
         ///   await scanner.ScanAsync();
         /// </code>
@@ -80,53 +77,43 @@ namespace BleCommands.Windows
             BluetoothLEAdvertisementFilter? filter = null,
             CancellationToken token = default)
         {
+            var tcs = new TaskCompletionSource(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+
+            var deviceWatcher = new BluetoothLEAdvertisementWatcher
+            {
+                ScanningMode = mode
+            };
+            if (filter != null)
+                deviceWatcher.AdvertisementFilter = filter;
+
+            ConcurrentDictionary<ulong, byte> deviceRegistry = new();
+
+            void Handler(object sender, BluetoothLEAdvertisementReceivedEventArgs args)
+            {
+                if (deviceRegistry.TryAdd(args.BluetoothAddress, 0))
+                {
+                    DeviceDiscovered?.Invoke(
+                        this,
+                        new DeviceDiscoveredEventArgs(args.BluetoothAddress));
+                }
+            }
+
             try
             {
-                var tcs = new TaskCompletionSource();
+                deviceWatcher.Received += Handler;
+                deviceWatcher.Start();
 
-                var deviceWatcher = new BluetoothLEAdvertisementWatcher
+                using (token.Register(() => tcs.TrySetCanceled()))
                 {
-                    ScanningMode = mode
-                };
-                if (filter != null)
-                    deviceWatcher.AdvertisementFilter = filter;
-
-                ConcurrentDictionary<ulong, byte> deviceRegistry = new();
-
-                void Handler(object sender, BluetoothLEAdvertisementReceivedEventArgs args)
-                {
-                    if (deviceRegistry.TryAdd(args.BluetoothAddress, 0))
-                    {
-                        DeviceDiscovered?.Invoke(
-                            this,
-                            new DeviceDiscoveredEventArgs(args.BluetoothAddress));
-                    }
-                }
-
-                try
-                {
-                    deviceWatcher.Received += Handler;
-                    deviceWatcher.Start();
-
-                    using (token.Register(() => tcs.TrySetCanceled()))
-                    {
-                        await tcs.Task.ConfigureAwait(false);
-                        return;
-                    }
-                }
-                finally
-                {
-                    deviceWatcher.Received -= Handler;
-                    deviceWatcher.Stop();
+                    await tcs.Task.ConfigureAwait(false);
+                    return;
                 }
             }
-            catch (OperationCanceledException)
+            finally
             {
-                return;
-            }
-            catch (Exception ex)
-            {
-                throw new DeviceException("BLE scanning error.", ex);
+                deviceWatcher.Received -= Handler;
+                deviceWatcher.Stop();
             }
         }
 
@@ -161,7 +148,8 @@ namespace BleCommands.Windows
         {
             try
             {
-                var tcs = new TaskCompletionSource<Device?>();
+                var tcs = new TaskCompletionSource<Device?>(
+                    TaskCreationOptions.RunContinuationsAsynchronously);
 
                 var deviceWatcher = new BluetoothLEAdvertisementWatcher
                 {

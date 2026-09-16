@@ -51,13 +51,17 @@ namespace BleCommands.IntegrationTests.Windows
             {
                 BleScanner.DeviceDiscovered += Handler;
                 await BleScanner.ScanAsync(token: cts.Token);
-
-                Assert.True(rotatingTableFound);
+            }
+            catch (OperationCanceledException)
+            {
+                // Canceled in handler
             }
             finally
             {
                 BleScanner.DeviceDiscovered -= Handler;
             }
+
+            Assert.True(rotatingTableFound);
         }
     }
 }

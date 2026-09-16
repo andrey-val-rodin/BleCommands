@@ -58,6 +58,12 @@ namespace BleCommands.Core.Contracts
         TCharacteristic ListeningCharacteristic { get; }
 
         /// <summary>
+        /// Gets a value indicating whether this object has been initialized
+        /// (i.e., whether the <see cref="StartAsync"/> method was called.)
+        /// </summary>
+        public bool IsStarted { get; }
+
+        /// <summary>
         /// Gets a value indicating whether listening is currently in progress.
         /// </summary>
         bool IsListening { get; }
@@ -76,6 +82,11 @@ namespace BleCommands.Core.Contracts
         /// Starts process of communication between Bluetooth transport and device.
         /// </summary>
         /// <param name="token">A token to cancel the operation.</param>
+        /// <remarks>
+        /// This method is intended to be called once after the transport is created.
+        /// If initialization fails, the transport should be disposed and recreated
+        /// instead of attempting to start it again.
+        /// </remarks>
         Task StartAsync(CancellationToken token = default);
 
         /// <summary>

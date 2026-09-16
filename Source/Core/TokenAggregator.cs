@@ -40,6 +40,11 @@ namespace BleCommands.Core
         /// <summary>
         /// Occurs when a complete token has been accumulated.
         /// </summary>
+        /// <remarks>
+        /// Event handlers are invoked synchronously and sequentially while the aggregator
+        /// processes incoming fragments. Event handlers should complete promptly and must
+        /// not throw exceptions.
+        /// </remarks>
         public event EventHandler<TextEventArgs>? TokenReceived;
 
         /// <summary>
@@ -51,6 +56,8 @@ namespace BleCommands.Core
         /// <remarks>
         /// This method is thread-safe and guarantees that tokens from concurrent calls
         /// are raised in the order they are received.
+        /// The input is expected to be text fragments decoded from complete UTF-8
+        /// sequences by the underlying BleCommands transport.
         /// </remarks>
         public void Append(string text)
         {

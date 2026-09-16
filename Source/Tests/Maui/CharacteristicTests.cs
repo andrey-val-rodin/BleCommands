@@ -41,6 +41,21 @@ namespace BleCommands.Tests.Maui
         }
 
         [Fact]
+        public async Task ReadAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            // Arrange
+            var characteristic = new CharacteristicStub(CharacteristicPropertyFlags.Read);
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                await characteristic.ReadAsync(cts.Token);
+            });
+        }
+
+        [Fact]
         public async Task WriteAsync_CannotWrite_ThrowsInvalidOperationException()
         {
             // Arrange
@@ -65,6 +80,21 @@ namespace BleCommands.Tests.Maui
             await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
                 await characteristic.WriteAsync(null!, TestContext.Current.CancellationToken);
+            });
+        }
+
+        [Fact]
+        public async Task WriteAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            // Arrange
+            var characteristic = new CharacteristicStub(CharacteristicPropertyFlags.Write);
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                await characteristic.ReadAsync(cts.Token);
             });
         }
 
@@ -168,6 +198,21 @@ namespace BleCommands.Tests.Maui
             await Assert.ThrowsAsync<NullReferenceException>(async () =>
             {
                 await characteristic.StartReceivingAsync(TestContext.Current.CancellationToken);
+            });
+        }
+
+        [Fact]
+        public async Task StartReceivingAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            // Arrange
+            var characteristic = new CharacteristicStub(CharacteristicPropertyFlags.Notify);
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                await characteristic.StartReceivingAsync(cts.Token);
             });
         }
 

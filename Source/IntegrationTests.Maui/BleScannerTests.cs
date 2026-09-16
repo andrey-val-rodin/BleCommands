@@ -52,13 +52,17 @@ namespace IntegrationTests.Maui
             {
                 BleScanner.DeviceDiscovered += Handler;
                 await BleScanner.ScanAsync(token: cts.Token);
-
-                Assert.IsTrue(rotatingTableFound);
+            }
+            catch (OperationCanceledException)
+            {
+                // Canceled in handler
             }
             finally
             {
                 BleScanner.DeviceDiscovered -= Handler;
             }
+
+            Assert.IsTrue(rotatingTableFound);
         }
     }
 }

@@ -15,13 +15,15 @@ namespace BleCommands.Tests.Windows
         public Task<Characteristic?> GetCharacteristicAsync(
             Guid id, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            token.ThrowIfCancellationRequested();
+            return Task.FromResult<Characteristic?>(null!);
         }
 
         public Task<IReadOnlyList<Characteristic>> GetCharacteristicsAsync(
             CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            token.ThrowIfCancellationRequested();
+            return Task.FromResult<IReadOnlyList<Characteristic>>([]);
         }
 
         public void RegisterChild(IDisposable child)

@@ -169,7 +169,7 @@ namespace BleCommands.Tests.Windows
         {
             await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
             {
-                var transport = new BleTransport(
+                using var transport = new BleTransport(
                     new DeviceStub(),
                     new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
@@ -186,7 +186,7 @@ namespace BleCommands.Tests.Windows
         {
             await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
             {
-                var transport = new BleTransport(
+                using var transport = new BleTransport(
                     new DeviceStub(),
                     new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
@@ -205,7 +205,7 @@ namespace BleCommands.Tests.Windows
         {
             await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
             {
-                var transport = new BleTransport(
+                using var transport = new BleTransport(
                     new DeviceStub(),
                     new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
@@ -222,7 +222,7 @@ namespace BleCommands.Tests.Windows
         {
             await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             {
-                var transport = new BleTransport(
+                using var transport = new BleTransport(
                     new DeviceStub(),
                     new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
@@ -234,11 +234,27 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
+        public async Task StartListening_ZeroTimeout_ArgumentOutOfRangeException()
+        {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+            await transport.StartAsync(TestContext.Current.CancellationToken);
+
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => transport.StartListening(TimeSpan.Zero));
+        }
+
+        [Fact]
         public async Task SendCommandAsync_ExternalCancellation_ThrowsOperationCanceledException()
         {
             await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
             {
-                var transport = new BleTransport(
+                using var transport = new BleTransport(
                     new DeviceStub(),
                     new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
@@ -256,7 +272,7 @@ namespace BleCommands.Tests.Windows
         [Fact]
         public void ResponseTimeout_ZeroTimeout_ArgumentOutOfRangeException()
         {
-            var transport = new BleTransport(
+            using var transport = new BleTransport(
                 new DeviceStub(),
                 new ServiceStub(),
                 new CharacteristicStub(CharacteristicPropertyFlags.Write),
@@ -272,7 +288,7 @@ namespace BleCommands.Tests.Windows
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                var transport = new BleTransport(
+                using var transport = new BleTransport(
                     new DeviceStub(),
                     new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
@@ -288,7 +304,7 @@ namespace BleCommands.Tests.Windows
         {
             Assert.Throws<ObjectDisposedException>(() =>
             {
-                var transport = new BleTransport(
+                using var transport = new BleTransport(
                     new DeviceStub(),
                     new ServiceStub(),
                     new CharacteristicStub(CharacteristicPropertyFlags.Write),
@@ -330,7 +346,7 @@ namespace BleCommands.Tests.Windows
             var commandCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Write);
             var responseCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Notify);
             var listeningCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Notify);
-            var transport = new BleTransport(
+            using var transport = new BleTransport(
                 device,
                 service,
                 commandCharacteristic,

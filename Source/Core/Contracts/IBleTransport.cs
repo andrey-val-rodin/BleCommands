@@ -118,6 +118,9 @@ namespace BleCommands.Core.Contracts
         /// <exception cref="InvalidOperationException">
         /// Thrown if the transport has not been started or listening is already in progress.
         /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown if <paramref name="timeout"/> is less than or equal to zero.
+        /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the transport has been disposed.
         /// </exception>

@@ -54,7 +54,7 @@ namespace BleCommands.Core.Contracts
         /// <param name="token">A cancellation token to cancel the read operation.</param>
         /// <returns>
         /// A task that represents the asynchronous read operation.
-        /// The task result contains the characteristic value as a UTF-8 string.
+        /// The task result contains the characteristic value as string decoded from UTF-8 bytes.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="CanRead"/> is <c>false</c>.

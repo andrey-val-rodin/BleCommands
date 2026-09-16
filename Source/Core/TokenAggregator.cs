@@ -51,6 +51,8 @@ namespace BleCommands.Core
         /// <remarks>
         /// This method is thread-safe and guarantees that tokens from concurrent calls
         /// are raised in the order they are received.
+        /// The input is expected to be text fragments decoded from complete UTF-8
+        /// sequences by the underlying BleCommands transport.
         /// </remarks>
         public void Append(string text)
         {

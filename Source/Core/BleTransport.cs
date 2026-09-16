@@ -156,7 +156,8 @@ namespace BleCommands.Core
 
             await _semaphore.WaitAsync(token).ConfigureAwait(false);
 
-            var tcs = new TaskCompletionSource<string>();
+            var tcs = new TaskCompletionSource<string>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
 
             void Handler(object? sender, TextEventArgs args)
             {

@@ -142,7 +142,8 @@ namespace BleCommands.Maui
         {
             try
             {
-                var tcs = new TaskCompletionSource<Device?>();
+                var tcs = new TaskCompletionSource<Device?>(
+                    TaskCreationOptions.RunContinuationsAsynchronously);
 
                 void Handler(object sender, DeviceEventArgs args)
                 {

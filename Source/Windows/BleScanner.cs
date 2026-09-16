@@ -77,7 +77,8 @@ namespace BleCommands.Windows
             BluetoothLEAdvertisementFilter? filter = null,
             CancellationToken token = default)
         {
-            var tcs = new TaskCompletionSource();
+            var tcs = new TaskCompletionSource(
+                TaskCreationOptions.RunContinuationsAsynchronously);
 
             var deviceWatcher = new BluetoothLEAdvertisementWatcher
             {
@@ -147,7 +148,8 @@ namespace BleCommands.Windows
         {
             try
             {
-                var tcs = new TaskCompletionSource<Device?>();
+                var tcs = new TaskCompletionSource<Device?>(
+                    TaskCreationOptions.RunContinuationsAsynchronously);
 
                 var deviceWatcher = new BluetoothLEAdvertisementWatcher
                 {

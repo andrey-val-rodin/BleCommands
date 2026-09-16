@@ -82,6 +82,11 @@ namespace BleCommands.Core.Contracts
         /// Starts process of communication between Bluetooth transport and device.
         /// </summary>
         /// <param name="token">A token to cancel the operation.</param>
+        /// <remarks>
+        /// This method is intended to be called once after the transport is created.
+        /// If initialization fails, the transport should be disposed and recreated
+        /// instead of attempting to start it again.
+        /// </remarks>
         Task StartAsync(CancellationToken token = default);
 
         /// <summary>

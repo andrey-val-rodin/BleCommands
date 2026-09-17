@@ -104,6 +104,15 @@ namespace BleCommands.Core.Contracts
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the transport has been disposed.
         /// </exception>
+        /// <remarks>
+        /// Responses are matched to commands only by arrival order. The transport does not
+        /// provide correlation IDs. If a command times out or is cancelled, a delayed response
+        /// from that command may be received by a subsequent call to <see cref="SendCommandAsync"/>
+        /// and cannot be distinguished from its response.
+        /// Configure <see cref="ResponseTimeout"/> with sufficient margin for the device and
+        /// communication conditions. For reliable correlation, the application protocol must
+        /// include a command identifier in the command and response payloads.
+        /// </remarks>
         Task<string?> SendCommandAsync(string command, CancellationToken token = default);
 
         /// <summary>

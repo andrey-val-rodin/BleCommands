@@ -53,3 +53,16 @@ The protocol uses UTF-8 text and a token delimiter:
 A peripheral that sends arbitrary binary fragments or splits UTF-8 sequences across
 notifications is not compatible with the text transport implemented by
 `BleCommands`.
+
+## Command responses and timeouts
+`SendCommandAsync` matches responses to commands by arrival order. The transport does
+not provide correlation IDs.
+
+If a command times out or is cancelled, the command may still be processed by the
+device and its response may arrive later. A delayed response can then be returned by
+the next `SendCommandAsync` call, where it cannot be distinguished from that call's
+actual response.
+
+Set `ResponseTimeout` with sufficient margin for the device and communication
+conditions. If reliable request/response matching is required, include a unique
+command identifier in the application protocol and validate it in each response.

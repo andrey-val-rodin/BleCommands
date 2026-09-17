@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.3
+- Validate timeout in StartListening
+- Use option RunContinuationsAsynchronously in TaskCompletionSource
+- Update documentation
 ## 3.3.2
 - Validation of BleTransport.ResponseTimeout
 - Throw OperationCanceledException in case of external cancellation request

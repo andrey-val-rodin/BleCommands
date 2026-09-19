@@ -102,7 +102,7 @@ namespace BleCommands.Maui
                 throw new InvalidOperationException("Unexpected null device after successful connection.");
 
             // Request MTU size in Android
-            await NativeDevice.RequestMtuAsync(512).ConfigureAwait(false);
+            await NativeDevice.RequestMtuAsync(512, token).ConfigureAwait(false);
 
             _connectionInvoked = true;
         }
@@ -127,6 +127,9 @@ namespace BleCommands.Maui
         /// </summary>
         /// <param name="nativeDevice">The native device to connect to.</param>
         /// <param name="token">Cancellation token to cancel the operation.</param>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         protected async Task ConnectAsync(
             NativeDevice nativeDevice, CancellationToken token = default)
         {
@@ -140,6 +143,9 @@ namespace BleCommands.Maui
         /// </summary>
         /// <param name="guid">The device UUID.</param>
         /// <param name="token">Cancellation token to cancel the operation.</param>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         protected async Task ConnectAsync(Guid guid, CancellationToken token = default)
         {
             NativeDevice = await Adapter.ConnectToKnownDeviceAsync(guid,

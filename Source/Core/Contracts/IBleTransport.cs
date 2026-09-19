@@ -82,6 +82,9 @@ namespace BleCommands.Core.Contracts
         /// Starts process of communication between Bluetooth transport and device.
         /// </summary>
         /// <param name="token">A token to cancel the operation.</param>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         /// <remarks>
         /// This method is intended to be called once after the transport is created.
         /// If initialization fails, the transport should be disposed and recreated
@@ -103,6 +106,9 @@ namespace BleCommands.Core.Contracts
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the transport has been disposed.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
         /// </exception>
         /// <remarks>
         /// Responses are matched to commands only by arrival order. The transport does not

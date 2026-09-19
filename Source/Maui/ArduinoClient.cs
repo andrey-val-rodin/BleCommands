@@ -30,6 +30,9 @@ namespace BleCommands.Maui
         /// <param name="deviceName">A device name.</param>
         /// <param name="token">Cancellation token to cancel the operation.</param>
         /// <returns>A BleTransport object, or <c>null</c> if something went wrong.</returns>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         /// <remarks>
         /// Be sure to call the Dispose method or use the using statement on the transport object
         /// to release all system resources after use.
@@ -48,6 +51,9 @@ namespace BleCommands.Maui
         /// <param name="tokenDelimiter">The character that marks the end of a token.</param>
         /// <param name="token">Cancellation token to cancel the operation.</param>
         /// <returns>A BleTransport object, or <c>null</c> if something went wrong.</returns>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         /// <remarks>
         /// Be sure to call the Dispose method or use the using statement on the transport object
         /// to release all system resources after use.

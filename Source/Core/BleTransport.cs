@@ -56,6 +56,10 @@ namespace BleCommands.Core
         /// <summary>
         /// Gets the <see cref="TokenAggregator"/> instance used by <see cref="ResponseCharacteristic"/>.
         /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="ICharacteristic.TokenAggregator"/> is <c>null</c>.
+        /// This indicates that the derived class failed to properly initialize the transport.
+        /// </exception>
         /// <remarks>
         /// <para>
         /// This property is expected to be initialized by derived classes in their constructor.
@@ -69,10 +73,6 @@ namespace BleCommands.Core
         /// <see cref="ICharacteristic.TokenAggregator"/> is set before this property is accessed.
         /// </para>
         /// </remarks>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="ICharacteristic.TokenAggregator"/> is <c>null</c>.
-        /// This indicates that the derived class failed to properly initialize the transport.
-        /// </exception>
         protected TokenAggregator ResponseAggregator =>
             ResponseCharacteristic.TokenAggregator ??
             throw new InvalidOperationException("TokenAggregator not attached to ResponseCharacteristic");
@@ -80,6 +80,10 @@ namespace BleCommands.Core
         /// <summary>
         /// Gets the <see cref="TokenAggregator"/> instance used by <see cref="ListeningCharacteristic"/>.
         /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="ICharacteristic.TokenAggregator"/> is <c>null</c>.
+        /// This indicates that the derived class failed to properly initialize the transport.
+        /// </exception>
         /// <remarks>
         /// <para>
         /// This property is expected to be initialized by derived classes in their constructor.
@@ -93,10 +97,6 @@ namespace BleCommands.Core
         /// <see cref="ICharacteristic.TokenAggregator"/> is set before this property is accessed.
         /// </para>
         /// </remarks>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="ICharacteristic.TokenAggregator"/> is <c>null</c>.
-        /// This indicates that the derived class failed to properly initialize the transport.
-        /// </exception>
         protected TokenAggregator ListeningAggregator =>
             ListeningCharacteristic.TokenAggregator ??
             throw new InvalidOperationException("TokenAggregator not attached to ListeningCharacteristic");

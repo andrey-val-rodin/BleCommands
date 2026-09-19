@@ -72,6 +72,9 @@ namespace BleCommands.Windows
         /// </code>
         /// </para>
         /// </remarks>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         public async Task ScanAsync(
             BluetoothLEScanningMode mode = BluetoothLEScanningMode.Passive,
             BluetoothLEAdvertisementFilter? filter = null,

@@ -36,6 +36,9 @@
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the service has been disposed.
         /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         Task<IReadOnlyList<TCharacteristic>> GetCharacteristicsAsync(CancellationToken token = default);
 
         /// <summary>
@@ -49,6 +52,9 @@
         /// </returns>
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the service has been disposed.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
         /// </exception>
         Task<TCharacteristic?> GetCharacteristicAsync(Guid id, CancellationToken token = default);
     }

@@ -29,11 +29,16 @@
         /// Initiates process of connection to the device.
         /// </summary>
         /// <param name="token">Cancellation token to cancel the operation.</param>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the device has been disposed.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         /// <remarks>
         /// This method is intended to be called once per instance lifecycle.
         /// The connection will be established shortly.
         /// </remarks>
-        /// <exception cref="ObjectDisposedException">Thrown if the device has been disposed.</exception>
         Task ConnectAsync(CancellationToken token = default);
     }
 
@@ -55,9 +60,14 @@
         /// </summary>
         /// <param name="token">Cancellation token to cancel the operation.</param>
         /// <returns>A read-only list of services exposed by the device.</returns>
-        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown when the device has been disposed.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="IDevice.ConnectAsync(CancellationToken)"/> has not been called.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
         /// </exception>
         Task<IReadOnlyList<TService>> GetServicesAsync(CancellationToken token = default);
 
@@ -67,9 +77,14 @@
         /// <param name="id">The UUID of the service to retrieve.</param>
         /// <param name="token">Cancellation token to cancel the operation.</param>
         /// <returns>The requested service, or <c>null</c> if not found.</returns>
-        /// <exception cref="ObjectDisposedException">Thrown when the device has been disposed.</exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown when the device has been disposed.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="IDevice.ConnectAsync(CancellationToken)"/> has not been called.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
         /// </exception>
         Task<TService?> GetServiceAsync(Guid id, CancellationToken token = default);
     }

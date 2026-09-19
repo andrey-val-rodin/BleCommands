@@ -62,6 +62,9 @@ namespace BleCommands.Core.Contracts
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
         /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         Task<string> ReadAsync(CancellationToken token = default);
 
         /// <summary>
@@ -78,6 +81,9 @@ namespace BleCommands.Core.Contracts
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the characteristic has been disposed.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
         /// </exception>
         Task WriteAsync(string text, CancellationToken token = default);
 
@@ -106,6 +112,9 @@ namespace BleCommands.Core.Contracts
         /// </summary>
         /// <param name="token">A cancellation token to cancel the operation.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown if the characteristic does not support Notify or Indicate operations
         /// or <see cref="IsReceiving"/> is true.
@@ -120,6 +129,9 @@ namespace BleCommands.Core.Contracts
         /// </summary>
         /// <param name="token">A cancellation token to cancel the operation.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="IsReceiving"/> is false.
         /// </exception>

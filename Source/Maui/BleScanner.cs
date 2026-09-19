@@ -93,6 +93,9 @@ namespace BleCommands.Maui
         /// </code>
         /// </para>
         /// </remarks>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         public async Task ScanAsync(
             ScanFilterOptions? filter = null,
             CancellationToken token = default)

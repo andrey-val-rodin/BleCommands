@@ -8,6 +8,21 @@ namespace BleCommands.Core.Contracts
     /// <typeparam name="TDevice">
     /// A specific device implementation.
     /// </typeparam>
+    /// <remarks>
+    /// <para>
+    /// This interface defines a platform-independent contract for <b>finding</b> a BLE device
+    /// by its name. The actual scanning mechanism is platform-specific and is intentionally
+    /// not part of this contract: implementations for MAUI and Windows expose their own
+    /// <c>ScanAsync</c> overloads with platform-specific parameters (scan modes, advertisement
+    /// filters, etc.) and a <c>DeviceDiscovered</c> event.
+    /// </para>
+    /// <para>
+    /// Consumers that only need to locate a device by name should program against this
+    /// interface. Consumers that need fine-grained control over the scanning process
+    /// (custom filters, scan modes, continuous discovery) should use the concrete
+    /// platform-specific implementation directly.
+    /// </para>
+    /// </remarks>
     public interface IBleScanner<TDevice>
         where TDevice : IDevice
     {

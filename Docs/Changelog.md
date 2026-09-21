@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.3.4
+- Improvements in transport disposal
+- Update documentation
 ## 3.3.3
 - Validate timeout in StartListening
 - Use option RunContinuationsAsynchronously in TaskCompletionSource

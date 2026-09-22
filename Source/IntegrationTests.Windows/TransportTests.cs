@@ -29,6 +29,8 @@ namespace BleCommands.IntegrationTests.Windows
             try
             {
                 BleTransport.ResponseTimeout = TimeSpan.FromMilliseconds(1);
+                // In real device Rotating Table Listening and Response characteristics are identical,
+                // so we can control receiving via ListeningTokenReceived event
                 BleTransport.ListeningTokenReceived += Handler;
                 Assert.Null(await BleTransport.SendCommandAsync("STATUS", TestContext.Current.CancellationToken));
             }

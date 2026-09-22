@@ -92,8 +92,7 @@ namespace IntegrationTests.Maui
             }
             finally
             {
-                // The old state must be restored, otherwise other tests will fail.
-                // This is because Plugin.BLE caches the device with its services and characteristics.
+                // Restore characteristic to an operational state
                 await characteristic.StartReceivingAsync(TestContext.CancellationToken);
             }
         }

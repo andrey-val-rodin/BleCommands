@@ -79,11 +79,19 @@ namespace BleCommands.IntegrationTests.Windows
             using var characteristic = await GetUpdatesCharacteristicAsync();
             await characteristic.StartReceivingAsync(TestContext.Current.CancellationToken);
 
-            // Act
-            await characteristic.StopReceivingAsync(TestContext.Current.CancellationToken);
+            try
+            {
+                // Act
+                await characteristic.StopReceivingAsync(TestContext.Current.CancellationToken);
 
-            // Assert
-            Assert.False(characteristic.IsReceiving);
+                // Assert
+                Assert.False(characteristic.IsReceiving);
+            }
+            finally
+            {
+                // Restore characteristic to an operational state
+                await characteristic.StartReceivingAsync(TestContext.Current.CancellationToken);
+            }
         }
 
         [Fact]

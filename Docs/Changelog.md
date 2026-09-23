@@ -1,5 +1,7 @@
 # Changelog
 
+## 3.4.0
+- Ability to cancel operation FindDeviceAsync
 ## 3.3.4
 - Improvements in transport disposal
 - Update documentation

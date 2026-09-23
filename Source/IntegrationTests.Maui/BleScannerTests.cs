@@ -20,10 +20,82 @@ namespace IntegrationTests.Maui
         private static BleScanner BleScanner => Fixture.BleScanner;
 
         [TestMethod]
-        public async Task FindDevice_NonExistentDeviceAndInsufficientTimeout_ReturnsNull()
+        public async Task FindDeviceAsync_NonExistentDeviceAndInsufficientTimeout_ReturnsNull()
         {
-            var device = await BleScanner.FindDeviceAsync("Non-existent Device", TimeSpan.FromMilliseconds(1));
+            var device = await BleScanner.FindDeviceAsync(
+                "Non-existent Device", TimeSpan.FromMilliseconds(1), TestContext.CancellationToken);
             Assert.IsNull(device);
+        }
+
+        [TestMethod]
+        public async Task FindDeviceAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            using var cts = new CancellationTokenSource();
+
+            var searchTask = BleScanner.FindDeviceAsync(
+                "Non-existent device for cancellation test",
+                TimeSpan.FromSeconds(30),
+                cts.Token);
+
+            await Task.Delay(20, TestContext.CancellationToken);
+            cts.Cancel();
+
+            await Assert.ThrowsAsync<OperationCanceledException>(
+                async () => await searchTask);
+        }
+
+        [TestMethod]
+        public async Task FindDeviceAsync_UsesRequestedTimeout()
+        {
+            var adapter = BleScanner.Adapter;
+            var originalScanTimeout = adapter.ScanTimeout;
+
+            try
+            {
+                adapter.ScanTimeout = 1;
+
+                var started = DateTime.UtcNow;
+                var device = await BleScanner.FindDeviceAsync(
+                    "Non-existent device for timeout test",
+                    TimeSpan.FromMilliseconds(50),
+                    TestContext.CancellationToken);
+                var elapsed = DateTime.UtcNow - started;
+
+                Assert.IsNull(device);
+                Assert.IsGreaterThanOrEqualTo(TimeSpan.FromMilliseconds(30), elapsed);
+            }
+            finally
+            {
+                adapter.ScanTimeout = originalScanTimeout;
+            }
+        }
+
+        [TestMethod]
+        public async Task FindDeviceAsync_ExternalCancellation_RestoresScanTimeout()
+        {
+            var adapter = BleScanner.Adapter;
+            var originalScanTimeout = adapter.ScanTimeout;
+            adapter.ScanTimeout = 1234;
+
+            try
+            {
+                using var cts = new CancellationTokenSource();
+                var searchTask = BleScanner.FindDeviceAsync(
+                    "Non-existent device for restoration test",
+                    TimeSpan.FromSeconds(30),
+                    cts.Token);
+
+                cts.Cancel();
+
+                await Assert.ThrowsAsync<OperationCanceledException>(
+                    async () => await searchTask);
+
+                Assert.AreEqual(1234, adapter.ScanTimeout);
+            }
+            finally
+            {
+                adapter.ScanTimeout = originalScanTimeout;
+            }
         }
 
         [TestMethod]

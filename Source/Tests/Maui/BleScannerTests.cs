@@ -34,7 +34,8 @@ namespace BleCommands.Tests.Maui
             var scanner = new BleScanner();
             var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
             {
-                await scanner.FindDeviceAsync("Some device", TimeSpan.Zero);
+                await scanner.FindDeviceAsync(
+                    "Some device", TimeSpan.Zero, TestContext.Current.CancellationToken);
             });
             Assert.Equal("timeout", exception.ParamName);
         }
@@ -45,9 +46,24 @@ namespace BleCommands.Tests.Maui
             var scanner = new BleScanner();
             var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
             {
-                await scanner.FindDeviceAsync("Some device", TimeSpan.Zero - TimeSpan.FromSeconds(1));
+                await scanner.FindDeviceAsync(
+                    "Some device", TimeSpan.Zero - TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
             });
             Assert.Equal("timeout", exception.ParamName);
+        }
+
+        [Fact]
+        public async Task FindDeviceAsync_TokenIsCanceled_OperationCanceledException()
+        {
+            var scanner = new BleScanner();
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                scanner.FindDeviceAsync(
+                    "Some device",
+                    TimeSpan.FromSeconds(1),
+                    cts.Token));
         }
     }
 }

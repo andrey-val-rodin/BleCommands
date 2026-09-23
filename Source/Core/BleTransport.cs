@@ -174,11 +174,11 @@ namespace BleCommands.Core
                 using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(token);
                 timeoutCts.CancelAfter(ResponseTimeout);
 
-                var completedTask = await Task.WhenAny(
+                await Task.WhenAny(
                     tcs.Task,
                     Task.Delay(Timeout.InfiniteTimeSpan, timeoutCts.Token)).ConfigureAwait(false);
 
-                if (completedTask == tcs.Task)
+                if (tcs.Task.IsCompleted)
                 {
 #if DEBUG
                     stopwatch.Stop();

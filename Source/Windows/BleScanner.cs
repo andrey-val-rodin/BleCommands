@@ -130,17 +130,31 @@ namespace BleCommands.Windows
         /// <inheritdoc/>
         public async Task<Device?> FindDeviceAsync(string deviceName, TimeSpan timeout)
         {
+            return await FindDeviceAsync(deviceName, timeout, CancellationToken.None)
+                .ConfigureAwait(false);
+        }
+
+        /// <inheritdoc/>
+        public async Task<Device?> FindDeviceAsync(
+            string deviceName,
+            TimeSpan timeout,
+            CancellationToken token)
+        {
             ValidateDeviceName(deviceName);
             ValidateTimeout(timeout);
+            token.ThrowIfCancellationRequested();
 
-            using var cts = new CancellationTokenSource(timeout);
+            using var timeoutCts = new CancellationTokenSource(timeout);
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+                timeoutCts.Token, token);
             try
             {
-                return await FindDeviceInternalAsync(deviceName, cts.Token).ConfigureAwait(false);
+                return await FindDeviceInternalAsync(deviceName, linkedCts.Token)
+                    .ConfigureAwait(false);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (
+                timeoutCts.IsCancellationRequested && !token.IsCancellationRequested)
             {
-                // Timeout
                 return null;
             }
         }
@@ -177,10 +191,16 @@ namespace BleCommands.Windows
                     deviceWatcher.Received += Handler;
                     deviceWatcher.Start();
 
-                    using (token.Register(() => tcs.TrySetCanceled()))
+                    await Task.WhenAny(
+                        tcs.Task,
+                        Task.Delay(Timeout.InfiniteTimeSpan, token)).ConfigureAwait(false);
+
+                    if (tcs.Task.IsCompleted)
                     {
                         return await tcs.Task.ConfigureAwait(false);
                     }
+
+                    throw new OperationCanceledException(token);
                 }
                 finally
                 {

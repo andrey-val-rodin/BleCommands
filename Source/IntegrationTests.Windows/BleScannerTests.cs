@@ -14,10 +14,28 @@ namespace BleCommands.IntegrationTests.Windows
         private BleScanner BleScanner => fixture.BleScanner;
 
         [Fact]
-        public async Task FindDevice_NonExistentDeviceAndInsufficientTimeout_ReturnsNull()
+        public async Task FindDeviceAsync_NonExistentDeviceAndInsufficientTimeout_ReturnsNull()
         {
-            var device = await BleScanner.FindDeviceAsync("Non-existent Device", TimeSpan.FromMilliseconds(1));
+            var device = await BleScanner.FindDeviceAsync(
+                "Non-existent Device", TimeSpan.FromMilliseconds(1), TestContext.Current.CancellationToken);
             Assert.Null(device);
+        }
+
+        [Fact]
+        public async Task FindDeviceAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            using var cts = new CancellationTokenSource();
+
+            var searchTask = BleScanner.FindDeviceAsync(
+                "Non-existent device for cancellation test",
+                TimeSpan.FromSeconds(30),
+                cts.Token);
+
+            await Task.Delay(20, TestContext.Current.CancellationToken);
+            cts.Cancel();
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(
+                async () => await searchTask);
         }
 
         [Fact]

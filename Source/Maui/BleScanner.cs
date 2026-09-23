@@ -124,17 +124,30 @@ namespace BleCommands.Maui
         /// <inheritdoc/>
         public async Task<Device?> FindDeviceAsync(string deviceName, TimeSpan timeout)
         {
+            return await FindDeviceAsync(deviceName, timeout, CancellationToken.None)
+                .ConfigureAwait(false);
+        }
+
+        /// <inheritdoc/>
+        public async Task<Device?> FindDeviceAsync(
+            string deviceName,
+            TimeSpan timeout,
+            CancellationToken token)
+        {
             ValidateDeviceName(deviceName);
             ValidateTimeout(timeout);
+            token.ThrowIfCancellationRequested();
 
-            using var cts = new CancellationTokenSource(timeout);
+            using var timeoutCts = new CancellationTokenSource(timeout);
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+                timeoutCts.Token, token);
             try
             {
-                return await FindDeviceInternalAsync(deviceName, cts).ConfigureAwait(false);
+                return await FindDeviceInternalAsync(deviceName, linkedCts).ConfigureAwait(false);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (
+                timeoutCts.IsCancellationRequested && !token.IsCancellationRequested)
             {
-                // Timeout
                 return null;
             }
         }
@@ -161,15 +174,24 @@ namespace BleCommands.Maui
                 {
                     Adapter.ScanMode = ScanMode.LowLatency;
                     Adapter.DeviceDiscovered += Handler;
+                    var scanTimeout = Adapter.ScanTimeout;
+                    Adapter.ScanTimeout = Timeout.Infinite;
 
-                    await Adapter.StartScanningForDevicesAsync(
-                        scanFilterOptions: new ScanFilterOptions { DeviceNames = new[] { deviceName } },
-                        cancellationToken: tokenSource.Token
-                    ).ConfigureAwait(false);
-
-                    using (tokenSource.Token.Register(() => tcs.TrySetCanceled()))
+                    try
                     {
-                        return await tcs.Task.ConfigureAwait(false);
+                        using (tokenSource.Token.Register(() => tcs.TrySetCanceled()))
+                        {
+                            await Adapter.StartScanningForDevicesAsync(
+                                scanFilterOptions: new ScanFilterOptions { DeviceNames = new[] { deviceName } },
+                                cancellationToken: tokenSource.Token
+                            ).ConfigureAwait(false);
+
+                            return await tcs.Task.ConfigureAwait(false);
+                        }
+                    }
+                    finally
+                    {
+                        Adapter.ScanTimeout = scanTimeout;
                     }
                 }
                 finally

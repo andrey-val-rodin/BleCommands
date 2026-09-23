@@ -52,5 +52,28 @@ namespace BleCommands.Core.Contracts
         /// </exception>
         /// <exception cref="DeviceException">Thrown on BLE scanning errors.</exception>
         Task<TDevice?> FindDeviceAsync(string deviceName, TimeSpan timeout);
+
+        /// <summary>
+        /// Searches for a Bluetooth device by name with the specified timeout.
+        /// </summary>
+        /// <param name="deviceName">The name of the device to search for.</param>
+        /// <param name="timeout">Maximum wait time for device discovery.</param>
+        /// <param name="token">Token that cancels the search before the timeout.</param>
+        /// <returns>Found device or <c>null</c> if the timeout expired.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if <paramref name="deviceName"/> is <c>null</c>, empty, or whitespace.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown if the specified timeout is less than or equal to zero,
+        /// or greater than 60 seconds.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// Thrown if the search is canceled by <paramref name="token"/>.
+        /// </exception>
+        /// <exception cref="DeviceException">Thrown on BLE scanning errors.</exception>
+        Task<TDevice?> FindDeviceAsync(
+            string deviceName,
+            TimeSpan timeout,
+            CancellationToken token);
     }
 }

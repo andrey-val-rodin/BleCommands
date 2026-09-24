@@ -170,33 +170,28 @@ namespace BleCommands.Maui
                     }
                 }
 
+                Adapter.DeviceDiscovered += Handler;
+                var scanMode = Adapter.ScanMode;
+                Adapter.ScanMode = ScanMode.LowLatency;
+                var scanTimeout = Adapter.ScanTimeout;
+                Adapter.ScanTimeout = Timeout.Infinite;
                 try
                 {
-                    Adapter.ScanMode = ScanMode.LowLatency;
-                    Adapter.DeviceDiscovered += Handler;
-                    var scanTimeout = Adapter.ScanTimeout;
-                    Adapter.ScanTimeout = Timeout.Infinite;
-
-                    try
+                    using (tokenSource.Token.Register(() => tcs.TrySetCanceled()))
                     {
-                        using (tokenSource.Token.Register(() => tcs.TrySetCanceled()))
-                        {
-                            await Adapter.StartScanningForDevicesAsync(
-                                scanFilterOptions: new ScanFilterOptions { DeviceNames = new[] { deviceName } },
-                                cancellationToken: tokenSource.Token
-                            ).ConfigureAwait(false);
+                        await Adapter.StartScanningForDevicesAsync(
+                            scanFilterOptions: new ScanFilterOptions { DeviceNames = new[] { deviceName } },
+                            cancellationToken: tokenSource.Token
+                        ).ConfigureAwait(false);
 
-                            return await tcs.Task.ConfigureAwait(false);
-                        }
-                    }
-                    finally
-                    {
-                        Adapter.ScanTimeout = scanTimeout;
+                        return await tcs.Task.ConfigureAwait(false);
                     }
                 }
                 finally
                 {
                     Adapter.DeviceDiscovered -= Handler;
+                    Adapter.ScanTimeout = scanTimeout;
+                    Adapter.ScanMode = scanMode;
                     await Adapter.StopScanningForDevicesAsync().ConfigureAwait(false);
                 }
             }

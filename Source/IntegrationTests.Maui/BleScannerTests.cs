@@ -105,18 +105,11 @@ namespace IntegrationTests.Maui
             using var cts = new CancellationTokenSource(5000);
             void Handler(object? sender, DeviceEventArgs e)
             {
-                try
+                if (e.Device.Name == "Rotating Table")
                 {
-                    if (e.Device.Name == "Rotating Table")
-                    {
-                        rotatingTableFound = true;
-                        if (!cts.IsCancellationRequested)
-                            cts.Cancel();
-                    }
-                }
-                catch (DeviceException)
-                {
-                    // failed to connect
+                    rotatingTableFound = true;
+                    if (!cts.IsCancellationRequested)
+                        cts.Cancel();
                 }
             }
 

@@ -17,7 +17,7 @@ namespace BleCommands.IntegrationTests.Windows
         {
             // Act
             using var characteristic = await Fixture.Service.GetCharacteristicAsync(
-                Fixture.UpdatesCharacteristicUuid,
+                Fixture.CommandCharacteristicUuid,
                 TestContext.Current.CancellationToken);
 
             // Assert
@@ -30,7 +30,7 @@ namespace BleCommands.IntegrationTests.Windows
         public async Task StartReceivingAsync_WhenCharacteristicSupportsNotify_StartsReceiving()
         {
             // Arrange
-            using var characteristic = await GetUpdatesCharacteristicAsync();
+            using var characteristic = await GetListeningCharacteristicAsync();
 
             // Act
             await characteristic.StartReceivingAsync(TestContext.Current.CancellationToken);
@@ -43,7 +43,7 @@ namespace BleCommands.IntegrationTests.Windows
         public async Task StartReceivingAsync_WhenAlreadyReceiving_ThrowsInvalidOperationException()
         {
             // Arrange
-            using var characteristic = await GetUpdatesCharacteristicAsync();
+            using var characteristic = await GetListeningCharacteristicAsync();
             await characteristic.StartReceivingAsync(TestContext.Current.CancellationToken);
 
             // Act
@@ -76,7 +76,7 @@ namespace BleCommands.IntegrationTests.Windows
         public async Task StopReceivingAsync_WhenCharacteristicSupportsNotify_StopsReceiving()
         {
             // Arrange
-            using var characteristic = await GetUpdatesCharacteristicAsync();
+            using var characteristic = await GetListeningCharacteristicAsync();
             await characteristic.StartReceivingAsync(TestContext.Current.CancellationToken);
 
             try
@@ -98,7 +98,7 @@ namespace BleCommands.IntegrationTests.Windows
         public async Task StopReceivingAsync_WhenNotReceiving_ThrowsInvalidOperationException()
         {
             // Arrange
-            using var characteristic = await GetUpdatesCharacteristicAsync();
+            using var characteristic = await GetListeningCharacteristicAsync();
 
             // Act
             async Task act() => await characteristic.StopReceivingAsync(
@@ -115,7 +115,7 @@ namespace BleCommands.IntegrationTests.Windows
         public async Task ReadAsync_WhenCharacteristicIsNotReadable_ThrowsInvalidOperationException()
         {
             // Arrange
-            using var characteristic = await GetUpdatesCharacteristicAsync();
+            using var characteristic = await GetListeningCharacteristicAsync();
 
             // Act
             async Task act() => await characteristic.ReadAsync(TestContext.Current.CancellationToken);
@@ -157,10 +157,10 @@ namespace BleCommands.IntegrationTests.Windows
         #endregion
 
         #region Helpers
-        private async Task<Characteristic> GetUpdatesCharacteristicAsync()
+        private async Task<Characteristic> GetListeningCharacteristicAsync()
         {
             var characteristic = await Fixture.Service.GetCharacteristicAsync(
-                Fixture.UpdatesCharacteristicUuid,
+                Fixture.ListeningCharacteristicUuid,
                 TestContext.Current.CancellationToken);
 
             return characteristic ?? throw new InvalidOperationException(

@@ -66,12 +66,12 @@ namespace IntegrationTests.Maui
             Assert.HasCount(3, services);
             Assert.Contains(s => s.Id == new Guid("00001801-0000-1000-8000-00805f9b34fb"), services);
             Assert.Contains(s => s.Id == new Guid("00001800-0000-1000-8000-00805f9b34fb"), services);
-            Assert.Contains(s => s.Id == new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"), services);
+            Assert.Contains(s => s.Id == Fixture.ServiceUuid, services);
 
             // Register children to ensure they are all disposed
             foreach (var service in services)
             {
-                if (service.Id == new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"))
+                if (service.Id == Fixture.ServiceUuid)
                     continue; // otherwise we will get Access Denied
 
                 var characteristics = await service.GetCharacteristicsAsync(
@@ -105,9 +105,10 @@ namespace IntegrationTests.Maui
             var characteristics = await service.GetCharacteristicsAsync(TestContext.CancellationToken);
 
             Assert.IsNotNull(characteristics);
-            Assert.HasCount(2, characteristics);
-            Assert.Contains(c => c.Id == Fixture.UpdatesCharacteristicUuid, characteristics);
-            Assert.Contains(c => c.Id == Fixture.WriteCharacteristicUuid, characteristics);
+            Assert.HasCount(3, characteristics);
+            Assert.Contains(c => c.Id == Fixture.CommandCharacteristicUuid, characteristics);
+            Assert.Contains(c => c.Id == Fixture.ResponseCharacteristicUuid, characteristics);
+            Assert.Contains(c => c.Id == Fixture.ListeningCharacteristicUuid, characteristics);
         }
 
         [TestMethod]

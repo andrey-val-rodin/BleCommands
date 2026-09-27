@@ -20,7 +20,7 @@ namespace IntegrationTests.Maui
         {
             // Act
             using var characteristic = await Fixture.Service!.GetCharacteristicAsync(
-                Fixture.UpdatesCharacteristicUuid,
+                Fixture.CommandCharacteristicUuid,
                 TestContext.CancellationToken);
 
             // Assert
@@ -33,7 +33,7 @@ namespace IntegrationTests.Maui
         public async Task StartReceivingAsync_WhenCharacteristicSupportsNotify_StartsReceiving()
         {
             // Arrange
-            using var characteristic = await GetUpdatesCharacteristicAsync();
+            using var characteristic = await GetListeningCharacteristicAsync();
 
             // Act
             await characteristic.StartReceivingAsync(TestContext.CancellationToken);
@@ -46,7 +46,7 @@ namespace IntegrationTests.Maui
         public async Task StartReceivingAsync_WhenAlreadyReceiving_ThrowsInvalidOperationException()
         {
             // Arrange
-            using var characteristic = await GetUpdatesCharacteristicAsync();
+            using var characteristic = await GetListeningCharacteristicAsync();
             await characteristic.StartReceivingAsync(TestContext.CancellationToken);
 
             // Act
@@ -79,7 +79,7 @@ namespace IntegrationTests.Maui
         public async Task StopReceivingAsync_WhenCharacteristicSupportsNotify_StopsReceiving()
         {
             // Arrange
-            using var characteristic = await GetUpdatesCharacteristicAsync();
+            using var characteristic = await GetListeningCharacteristicAsync();
             await characteristic.StartReceivingAsync(TestContext.CancellationToken);
 
             try
@@ -101,7 +101,7 @@ namespace IntegrationTests.Maui
         public async Task StopReceivingAsync_WhenNotReceiving_ThrowsInvalidOperationException()
         {
             // Arrange
-            using var characteristic = await GetUpdatesCharacteristicAsync();
+            using var characteristic = await GetListeningCharacteristicAsync();
 
             // Act
             async Task act() => await characteristic.StopReceivingAsync(
@@ -118,7 +118,7 @@ namespace IntegrationTests.Maui
         public async Task ReadAsync_WhenCharacteristicIsNotReadable_ThrowsInvalidOperationException()
         {
             // Arrange
-            using var characteristic = await GetUpdatesCharacteristicAsync();
+            using var characteristic = await GetListeningCharacteristicAsync();
 
             // Act
             async Task act() => await characteristic.ReadAsync(TestContext.CancellationToken);
@@ -160,10 +160,10 @@ namespace IntegrationTests.Maui
         #endregion
 
         #region Helpers
-        private async Task<Characteristic> GetUpdatesCharacteristicAsync()
+        private async Task<Characteristic> GetListeningCharacteristicAsync()
         {
             var characteristic = await Fixture.Service!.GetCharacteristicAsync(
-                Fixture.UpdatesCharacteristicUuid,
+                Fixture.ListeningCharacteristicUuid,
                 TestContext.CancellationToken);
 
             return characteristic ?? throw new InvalidOperationException(

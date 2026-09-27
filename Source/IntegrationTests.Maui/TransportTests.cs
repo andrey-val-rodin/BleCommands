@@ -21,34 +21,6 @@ namespace IntegrationTests.Maui
         }
 
         [TestMethod]
-        public async Task SendCommandAsync_InsufficientTimeout_Null()
-        {
-            var oldTimeout = BleTransport.ResponseTimeout;
-            var tcs = new TaskCompletionSource<bool>();
-            void Handler(object? sender, TextEventArgs args)
-            {
-                tcs.SetResult(true);
-            }
-
-            try
-            {
-                BleTransport.ResponseTimeout = TimeSpan.FromMilliseconds(1);
-                // In real device Rotating Table Listening and Response characteristics are identical,
-                // so we can control receiving via ListeningTokenReceived event
-                BleTransport.ListeningTokenReceived += Handler;
-                Assert.IsNull(await BleTransport.SendCommandAsync("STATUS", TestContext.CancellationToken));
-            }
-            finally
-            {
-                // Wait until we receive an actual response
-                await tcs.Task;
-
-                BleTransport.ListeningTokenReceived -= Handler;
-                BleTransport.ResponseTimeout = oldTimeout;
-            }
-        }
-
-        [TestMethod]
         public async Task ListeningIsInProgress_RotateTable_ReceiveTokens()
         {
             Assert.AreEqual("OK", await BleTransport.SendCommandAsync("RUN FM", TestContext.CancellationToken));

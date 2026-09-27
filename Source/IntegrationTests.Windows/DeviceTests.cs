@@ -64,13 +64,13 @@ namespace BleCommands.IntegrationTests.Windows
             Assert.Equal(3, services.Count);
             Assert.Contains(services, s => s.Id == new Guid("00001801-0000-1000-8000-00805f9b34fb"));
             Assert.Contains(services, s => s.Id == new Guid("00001800-0000-1000-8000-00805f9b34fb"));
-            Assert.Contains(services, s => s.Id == new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"));
+            Assert.Contains(services, s => s.Id == Fixture.ServiceUuid);
 
             // Register children to ensure they are all disposed
             foreach (var service in services)
             {
                 RegisterDisposableObject(service);
-                if (service.Id == new Guid("0000ffe0-0000-1000-8000-00805f9b34fb"))
+                if (service.Id == Fixture.ServiceUuid)
                     continue; // otherwise we will get Access Denied
 
                 var characteristics = await service.GetCharacteristicsAsync(
@@ -108,9 +108,10 @@ namespace BleCommands.IntegrationTests.Windows
             var characteristics = await service.GetCharacteristicsAsync(TestContext.Current.CancellationToken);
 
             Assert.NotNull(characteristics);
-            Assert.Equal(2, characteristics.Count);
-            Assert.Contains(characteristics, c => c.Id == Fixture.UpdatesCharacteristicUuid);
-            Assert.Contains(characteristics, c => c.Id == Fixture.WriteCharacteristicUuid);
+            Assert.Equal(3, characteristics.Count);
+            Assert.Contains(characteristics, c => c.Id == Fixture.CommandCharacteristicUuid);
+            Assert.Contains(characteristics, c => c.Id == Fixture.ResponseCharacteristicUuid);
+            Assert.Contains(characteristics, c => c.Id == Fixture.ListeningCharacteristicUuid);
         }
 
         [Fact]

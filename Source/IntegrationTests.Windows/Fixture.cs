@@ -15,9 +15,10 @@ namespace BleCommands.IntegrationTests.Windows
     {
         public const string Id = "BluetoothLE#BluetoothLE90:e8:68:ad:f0:54-f8:b3:b7:22:09:3e";
         public const ulong MacAddress = 0xf8b3b722093e;
-        public static readonly Guid ServiceUuid                 = new("0000ffe0-0000-1000-8000-00805f9b34fb");
-        public static readonly Guid UpdatesCharacteristicUuid   = new("0000ffe1-0000-1000-8000-00805f9b34fb");
-        public static readonly Guid WriteCharacteristicUuid     = new("0000ffe2-0000-1000-8000-00805f9b34fb");
+        public static readonly Guid ServiceUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B901");
+        public static readonly Guid CommandCharacteristicUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B902");
+        public static readonly Guid ResponseCharacteristicUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B903");
+        public static readonly Guid ListeningCharacteristicUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B904");
 
         public BleScanner BleScanner { get; } = new BleScanner();
 
@@ -37,39 +38,18 @@ namespace BleCommands.IntegrationTests.Windows
 
         public async ValueTask InitializeAsync()
         {
-            var scanner = new BleScanner();
-            var device = await scanner.FindDeviceAsync("Rotating Table");
-            Assert.True(device != null, "Turn on Rotating Table!");
-            Device = device;
-            await Device.ConnectAsync();
-            // Verify connection
-            var timeout = TimeSpan.FromSeconds(5);
-            var start = DateTime.UtcNow;
+            var transport = await ArduinoClient.CreateTransportAsync("Rotating Table");
+            Assert.True(transport != null, "Turn on Rotating Table!");
 
-            while (!device.IsConnected && DateTime.UtcNow - start < timeout)
-            {
-                await Task.Delay(50, TestContext.Current.CancellationToken);
-            }
-
-            if (!device.IsConnected)
-                throw new TimeoutException("Device did not connect within timeout");
-
-            Service = (await Device.GetServiceAsync(ServiceUuid))!;
-            Assert.NotNull(Service);
-            CommandCharacteristic = (await Service.GetCharacteristicAsync(WriteCharacteristicUuid))!;
-            Assert.NotNull(CommandCharacteristic);
-            ListeningCharacteristic = ResponseCharacteristic = (await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
-            Assert.NotNull(ResponseCharacteristic);
-            Assert.NotNull(ListeningCharacteristic);
-            CharacteristicWithAttachedAggregator = (await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
+            BleTransport = transport;
+            Device = (Device)BleTransport.Device;
+            Service = (Service)BleTransport.Service;
+            CommandCharacteristic = (Characteristic)BleTransport.CommandCharacteristic;
+            ResponseCharacteristic = (Characteristic)BleTransport.ResponseCharacteristic;
+            ListeningCharacteristic = (Characteristic)BleTransport.ListeningCharacteristic;
+            CharacteristicWithAttachedAggregator = (await Service.GetCharacteristicAsync(ListeningCharacteristicUuid))!;
+            Assert.NotNull(CharacteristicWithAttachedAggregator);
             CharacteristicWithAttachedAggregator.AttachTokenAggregator(new TokenAggregator());
-            BleTransport = new BleTransport(
-                Device,
-                Service,
-                CommandCharacteristic,
-                ResponseCharacteristic,
-                ListeningCharacteristic,
-                '\n');
 
             await BleTransport.StartAsync();
             await StopTableAsync();

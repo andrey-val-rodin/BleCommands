@@ -134,8 +134,7 @@ namespace BleCommands.Core
                 return;
 
             await ResponseCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
-            if (!ReferenceEquals(ResponseCharacteristic, ListeningCharacteristic))
-                await ListeningCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
+            await ListeningCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
 
             IsStarted = true;
         }
@@ -289,8 +288,7 @@ namespace BleCommands.Core
 
                     CommandCharacteristic?.Dispose();
                     ResponseCharacteristic?.Dispose();
-                    if (!ReferenceEquals(ResponseCharacteristic, ListeningCharacteristic))
-                        ListeningCharacteristic?.Dispose();
+                    ListeningCharacteristic?.Dispose();
                     Service?.Dispose();
                     Device?.Dispose();
                 }

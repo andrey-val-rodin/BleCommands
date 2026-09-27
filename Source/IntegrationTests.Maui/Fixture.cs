@@ -21,9 +21,10 @@ namespace IntegrationTests.Maui
         public const string Id = "BluetoothLE#BluetoothLE90:e8:68:ad:f0:54-f8:b3:b7:22:09:3e";
         public const ulong MacAddress = 0xf8b3b722093e;
         public static readonly Guid DeviceUuid                  = new("00000000-0000-0000-0000-f8b3b722093e");
-        public static readonly Guid ServiceUuid                 = new("0000ffe0-0000-1000-8000-00805f9b34fb");
-        public static readonly Guid UpdatesCharacteristicUuid   = new("0000ffe1-0000-1000-8000-00805f9b34fb");
-        public static readonly Guid WriteCharacteristicUuid     = new("0000ffe2-0000-1000-8000-00805f9b34fb");
+        public static readonly Guid ServiceUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B901");
+        public static readonly Guid CommandCharacteristicUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B902");
+        public static readonly Guid ResponseCharacteristicUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B903");
+        public static readonly Guid ListeningCharacteristicUuid = new("DB341FB3-8977-4C2D-AC6C-74540BD8B904");
         private static readonly List<IDisposable> _disposableObjects = [];
 
         public static BleScanner BleScanner { get; } = new BleScanner();
@@ -45,54 +46,27 @@ namespace IntegrationTests.Maui
         [AssemblyInitialize]
         public static async Task InitializeAsync(TestContext context)
         {
-            var scanner = new BleScanner();
-            Device = await scanner.FindDeviceAsync("Rotating Table");
-            Assert.IsNotNull(Device, "Turn on Rotating Table!");
-            await Device.ConnectAsync(context.CancellationToken);
-            Assert.IsTrue(Device.IsConnected);
-            /*
-             * If Assert.IsTrue fails, then instead of checking the connection status immediately,
-             * you should use the following code:
-            var timeout = TimeSpan.FromSeconds(5);
-            var start = DateTime.UtcNow;
+            var transport = await ArduinoClient.CreateTransportAsync(
+                "Rotating Table", context.CancellationToken);
+            Assert.IsNotNull(transport, "Turn on Rotating Table!");
 
-            while (!device.IsConnected && DateTime.UtcNow - start < timeout)
-            {
-                await Task.Delay(50, TestContext.Current.CancellationToken);
-            }
-
-            if (!device.IsConnected)
-                throw new TimeoutException("Device did not connect within timeout");
-            */
+            BleTransport = transport;
+            Device = (Device)BleTransport.Device;
             RegisterDisposableObject(Device);
-            await RetrieveObjectsToCheckCorrectDisposingAsync();
-
-            Service = await Device.GetServiceAsync(ServiceUuid, context.CancellationToken);
-            Assert.IsNotNull(Service);
+            Service = (Service)BleTransport.Service;
             RegisterDisposableObject(Service);
-
-            CommandCharacteristic = await Service.GetCharacteristicAsync
-                (WriteCharacteristicUuid, context.CancellationToken);
-            Assert.IsNotNull(CommandCharacteristic);
+            CommandCharacteristic = (Characteristic)BleTransport.CommandCharacteristic;
+            ResponseCharacteristic = (Characteristic)BleTransport.ResponseCharacteristic;
+            ListeningCharacteristic = (Characteristic)BleTransport.ListeningCharacteristic;
             RegisterDisposableObject(CommandCharacteristic);
-            ListeningCharacteristic = ResponseCharacteristic =
-                await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid, context.CancellationToken);
-            Assert.IsNotNull(ResponseCharacteristic);
-            Assert.IsNotNull(ListeningCharacteristic);
             RegisterDisposableObject(ResponseCharacteristic);
             RegisterDisposableObject(ListeningCharacteristic);
-            CharacteristicWithAttachedAggregator =
-                await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid, context.CancellationToken);
+            CharacteristicWithAttachedAggregator = 
+                (await Service.GetCharacteristicAsync(
+                    ListeningCharacteristicUuid, context.CancellationToken))!;
             Assert.IsNotNull(CharacteristicWithAttachedAggregator);
             CharacteristicWithAttachedAggregator.AttachTokenAggregator(new TokenAggregator());
             RegisterDisposableObject(CharacteristicWithAttachedAggregator);
-            BleTransport = new BleTransport(
-                Device,
-                Service,
-                CommandCharacteristic,
-                ResponseCharacteristic,
-                ListeningCharacteristic,
-                '\n');
 
             await BleTransport.StartAsync(context.CancellationToken);
             await StopTableAsync();

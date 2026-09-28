@@ -25,7 +25,7 @@ namespace BleCommands.IntegrationTests.Windows
 
         public Service Service { get; private set; } = null!;
 
-        public BleTransport BleTransport { get; private set; } = null!;
+        public RotatingTableTransport BleTransport { get; private set; } = null!;
 
         public Characteristic CommandCharacteristic { get; private set; } = null!;
 
@@ -63,7 +63,7 @@ namespace BleCommands.IntegrationTests.Windows
             Assert.NotNull(ListeningCharacteristic);
             CharacteristicWithAttachedAggregator = (await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
             CharacteristicWithAttachedAggregator.AttachTokenAggregator(new TokenAggregator());
-            BleTransport = new BleTransport(
+            BleTransport = new RotatingTableTransport(
                 Device,
                 Service,
                 CommandCharacteristic,

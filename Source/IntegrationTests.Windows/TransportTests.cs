@@ -1,5 +1,4 @@
 ﻿using BleCommands.Core.Events;
-using BleCommands.Windows;
 
 namespace BleCommands.IntegrationTests.Windows
 {
@@ -8,7 +7,7 @@ namespace BleCommands.IntegrationTests.Windows
     {
         private Fixture Fixture { get; } = fixture;
 
-        private BleTransport BleTransport => Fixture.BleTransport;
+        private RotatingTableTransport BleTransport => Fixture.BleTransport;
 
         [Fact]
         public async Task SendCommandAsync_Status_ValidResponse()

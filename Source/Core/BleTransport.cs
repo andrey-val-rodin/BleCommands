@@ -1,4 +1,5 @@
 ﻿using BleCommands.Core.Contracts;
+using BleCommands.Core.Enums;
 using BleCommands.Core.Events;
 using System.Timers;
 
@@ -125,17 +126,75 @@ namespace BleCommands.Core
             }
         }
 
+        /// <summary>
+        /// Method for validating parameters in derived class constructors.
+        /// </summary>
+        /// <param name="device">A Bluetooth LE device. The device must be connected.</param>
+        /// <param name="service"> A service.</param>
+        /// <param name="commandCharacteristic">
+        /// Characteristic for sending commands to the device (Write or WriteWithoutResponse).
+        /// </param>
+        /// <param name="responseCharacteristic">
+        /// Characteristic for receiving command responses from the device (Notify or Indicate).
+        /// </param>
+        /// <param name="listeningCharacteristic">
+        /// Characteristic for receiving token stream during listening (Notify or Indicate).
+        /// </param>
+        /// <exception cref="ArgumentNullException">Thrown if any parameter is null.</exception>
+        /// <exception cref="ArgumentException">Thrown if any characteristic has invalid properties.</exception>
+        protected void VerifyParameters(
+            TDevice device,
+            TService service,
+            TCharacteristic commandCharacteristic,
+            TCharacteristic responseCharacteristic,
+            TCharacteristic listeningCharacteristic)
+        {
+            if (device == null) throw new ArgumentNullException(nameof(device));
+            if (service == null) throw new ArgumentNullException(nameof(service));
+
+            if (commandCharacteristic == null) throw new ArgumentNullException(nameof(commandCharacteristic));
+            if (responseCharacteristic == null) throw new ArgumentNullException(nameof(responseCharacteristic));
+            if (listeningCharacteristic == null) throw new ArgumentNullException(nameof(listeningCharacteristic));
+
+            if (!commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Write) &&
+                !commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse))
+                throw new ArgumentException(
+                    $"{nameof(commandCharacteristic)} is neither Write nor Write without response.",
+                    nameof(commandCharacteristic));
+            if (!responseCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Notify) &&
+                !responseCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Indicate))
+                throw new ArgumentException(
+                    $"{nameof(responseCharacteristic)} is neither Update nor Indicate.",
+                    nameof(responseCharacteristic));
+            if (!listeningCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Notify) &&
+                !listeningCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Indicate))
+                throw new ArgumentException(
+                    $"{nameof(listeningCharacteristic)} is neither Update nor Indicate.",
+                    nameof(listeningCharacteristic));
+
+            if (responseCharacteristic.TokenAggregator != null)
+                throw new ArgumentException(
+                    $"{nameof(responseCharacteristic)} has attached TokenAggregator already.",
+                    nameof(responseCharacteristic));
+            if (listeningCharacteristic.TokenAggregator != null)
+                throw new ArgumentException(
+                    $"{nameof(listeningCharacteristic)} has attached TokenAggregator already.",
+                    nameof(listeningCharacteristic));
+        }
+
         /// <inheritdoc />
-        public async Task StartAsync(CancellationToken token = default)
+        public virtual async Task StartAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
 
             if (IsStarted)
                 return;
 
+            ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator(TokenDelimiter));
+            ListeningCharacteristic.AttachTokenAggregator(new TokenAggregator(TokenDelimiter));
+
             await ResponseCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
-            if (!ReferenceEquals(ResponseCharacteristic, ListeningCharacteristic))
-                await ListeningCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
+            await ListeningCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
 
             IsStarted = true;
         }
@@ -241,6 +300,9 @@ namespace BleCommands.Core
         /// <inheritdoc />
         public void StopListening()
         {
+            if (!IsListening)
+                return;
+
             lock (_timerLock)
             {
                 _listeningTimer.Stop();
@@ -249,11 +311,13 @@ namespace BleCommands.Core
             }
         }
 
-        private void ThrowIfDisposed()
+        /// <summary>
+        /// Throws ObjectDisposedException if this object was disposed.
+        /// </summary>
+        protected void ThrowIfDisposed()
         {
             if (_disposed)
-                throw new ObjectDisposedException(
-                    typeof(BleTransport<TDevice, TService, TCharacteristic>).FullName);
+                throw new ObjectDisposedException(GetType().FullName);
         }
 
         /// <summary>
@@ -280,8 +344,10 @@ namespace BleCommands.Core
                 {
                     lock (_timerLock)
                     {
-                        ListeningTokenReceived -= ListeningHandler;
-                        _listeningTimer?.Dispose();
+                        var listeningAggregator = ListeningCharacteristic?.TokenAggregator;
+                        if (listeningAggregator != null)
+                            listeningAggregator.TokenReceived -= ListeningHandler;
+                        _listeningTimer.Dispose();
                         IsListening = false;
                     }
 
@@ -289,8 +355,7 @@ namespace BleCommands.Core
 
                     CommandCharacteristic?.Dispose();
                     ResponseCharacteristic?.Dispose();
-                    if (!ReferenceEquals(ResponseCharacteristic, ListeningCharacteristic))
-                        ListeningCharacteristic?.Dispose();
+                    ListeningCharacteristic?.Dispose();
                     Service?.Dispose();
                     Device?.Dispose();
                 }

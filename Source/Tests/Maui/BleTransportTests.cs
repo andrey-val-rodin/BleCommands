@@ -201,6 +201,29 @@ namespace BleCommands.Tests.Maui
         }
 
         [Fact]
+        public async Task StartAsync_WithSpecifiedTokenDelimiter_AggregatorsUseThisTokenDelimiter()
+        {
+            const char delimiter = '\x04'; // EOT
+            var device = new DeviceStub();
+            var service = new ServiceStub();
+            var commandCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Write);
+            var responseCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Notify);
+            var listeningCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Notify);
+            using var transport = new BleTransport(
+                device,
+                service,
+                commandCharacteristic,
+                responseCharacteristic,
+                listeningCharacteristic,
+                delimiter);
+
+            await transport.StartAsync(TestContext.Current.CancellationToken);
+
+            Assert.Equal(delimiter, transport.ResponseCharacteristic.TokenAggregator?.TokenDelimiter);
+            Assert.Equal(delimiter, transport.ListeningCharacteristic.TokenAggregator?.TokenDelimiter);
+        }
+
+        [Fact]
         public async Task SendCommandAsync_Disposed_ObjectDisposedException()
         {
             await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
@@ -440,7 +463,7 @@ namespace BleCommands.Tests.Maui
         }
 
         [Fact]
-        public void Instance_WithSpecifiedTokenDelimiter_AggregatorsUseThisTokenDelimiter()
+        public void Instance_AllPropertiesAreSetCorrectly()
         {
             const char delimiter = '\x04'; // EOT
             var device = new DeviceStub();
@@ -456,9 +479,12 @@ namespace BleCommands.Tests.Maui
                 listeningCharacteristic,
                 delimiter);
 
+            Assert.Equal(device, transport.Device);
+            Assert.Equal(service, transport.Service);
+            Assert.Equal(commandCharacteristic, transport.CommandCharacteristic);
+            Assert.Equal(responseCharacteristic, transport.ResponseCharacteristic);
+            Assert.Equal(listeningCharacteristic, transport.ListeningCharacteristic);
             Assert.Equal(delimiter, transport.TokenDelimiter);
-            Assert.Equal(delimiter, transport.ResponseCharacteristic.TokenAggregator?.TokenDelimiter);
-            Assert.Equal(delimiter, transport.ListeningCharacteristic.TokenAggregator?.TokenDelimiter);
         }
 
         [Fact]

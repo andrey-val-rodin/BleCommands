@@ -32,7 +32,7 @@ namespace IntegrationTests.Maui
 
         public static Service? Service { get; private set; }
 
-        public static BleTransport? BleTransport { get; private set; }
+        public static RotatingTableTransport? BleTransport { get; private set; }
 
         public static Characteristic? CommandCharacteristic { get; private set; }
 
@@ -86,7 +86,7 @@ namespace IntegrationTests.Maui
             Assert.IsNotNull(CharacteristicWithAttachedAggregator);
             CharacteristicWithAttachedAggregator.AttachTokenAggregator(new TokenAggregator());
             RegisterDisposableObject(CharacteristicWithAttachedAggregator);
-            BleTransport = new BleTransport(
+            BleTransport = new RotatingTableTransport(
                 Device,
                 Service,
                 CommandCharacteristic,

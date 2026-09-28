@@ -1,16 +1,16 @@
 ﻿using BleCommands.Core;
 using BleCommands.Core.Contracts;
-using NativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
-using NativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
-using NativeService = Plugin.BLE.Abstractions.Contracts.IService;
+using BleCommands.Windows;
+using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
-namespace BleCommands.Maui
+namespace BleCommands.IntegrationTests.Windows
 {
     /// <inheritdoc />
-    public class BleTransport : BleTransport<
-        IDevice<NativeDevice, Service>,
-        IService<NativeService, Characteristic>,
-        ICharacteristic<NativeCharacteristic>>
+    public class RotatingTableTransport : BleTransport<
+        IDevice<BluetoothLEDevice, Service>,
+        IService<GattDeviceService, Characteristic>,
+        ICharacteristic<GattCharacteristic>>
     {
         /// <summary>
         /// A constructor.
@@ -29,12 +29,12 @@ namespace BleCommands.Maui
         /// <param name="tokenDelimiter">Token separator. Typically, character '\n' is used.</param>
         /// <exception cref="ArgumentNullException">Thrown if any parameter is null.</exception>
         /// <exception cref="ArgumentException">Thrown if any characteristic has invalid properties.</exception>
-        public BleTransport(
-            IDevice<NativeDevice, Service> device,
-            IService<NativeService, Characteristic> service,
-            ICharacteristic<NativeCharacteristic> commandCharacteristic,
-            ICharacteristic<NativeCharacteristic> responseCharacteristic,
-            ICharacteristic<NativeCharacteristic> listeningCharacteristic,
+        public RotatingTableTransport(
+            IDevice<BluetoothLEDevice, Service> device,
+            IService<GattDeviceService, Characteristic> service,
+            ICharacteristic<GattCharacteristic> commandCharacteristic,
+            ICharacteristic<GattCharacteristic> responseCharacteristic,
+            ICharacteristic<GattCharacteristic> listeningCharacteristic,
             char tokenDelimiter = TokenAggregator.DefaultTokenDelimiter)
         {
             VerifyParameters(
@@ -53,18 +53,33 @@ namespace BleCommands.Maui
         }
 
         /// <inheritdoc />
-        public override IDevice<NativeDevice, Service> Device { get; }
+        public override IDevice<BluetoothLEDevice, Service> Device { get; }
 
         /// <inheritdoc />
-        public override IService<NativeService, Characteristic> Service { get; }
+        public override IService<GattDeviceService, Characteristic> Service { get; }
 
         /// <inheritdoc />
-        public override ICharacteristic<NativeCharacteristic> CommandCharacteristic { get; }
+        public override ICharacteristic<GattCharacteristic> CommandCharacteristic { get; }
 
         /// <inheritdoc />
-        public override ICharacteristic<NativeCharacteristic> ResponseCharacteristic { get; }
+        public override ICharacteristic<GattCharacteristic> ResponseCharacteristic { get; }
 
         /// <inheritdoc />
-        public override ICharacteristic<NativeCharacteristic> ListeningCharacteristic { get; }
+        public override ICharacteristic<GattCharacteristic> ListeningCharacteristic { get; }
+
+        public override async Task StartAsync(CancellationToken token = default)
+        {
+            ThrowIfDisposed();
+            if (IsStarted)
+                return;
+
+            // Rotating Table has only one Update characteristic
+            Assert.Equal(ResponseCharacteristic, ListeningCharacteristic);
+
+            ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator(TokenDelimiter));
+            await ResponseCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
+
+            IsStarted = true;
+        }
     }
 }

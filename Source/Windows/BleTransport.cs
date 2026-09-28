@@ -1,6 +1,5 @@
 ﻿using BleCommands.Core;
 using BleCommands.Core.Contracts;
-using BleCommands.Core.Enums;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
@@ -37,36 +36,12 @@ namespace BleCommands.Windows
             ICharacteristic<GattCharacteristic> listeningCharacteristic,
             char tokenDelimiter = TokenAggregator.DefaultTokenDelimiter)
         {
-            ArgumentNullException.ThrowIfNull(device);
-            ArgumentNullException.ThrowIfNull(service);
-            ArgumentNullException.ThrowIfNull(commandCharacteristic);
-            ArgumentNullException.ThrowIfNull(responseCharacteristic);
-            ArgumentNullException.ThrowIfNull(listeningCharacteristic);
-
-            if (!commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Write) &&
-                !commandCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse))
-                throw new ArgumentException(
-                    $"{nameof(commandCharacteristic)} is neither Write nor Write without response.",
-                    nameof(commandCharacteristic));
-            if (!responseCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Notify) &&
-                !responseCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Indicate))
-                throw new ArgumentException(
-                    $"{nameof(responseCharacteristic)} is neither Update nor Indicate.",
-                    nameof(responseCharacteristic));
-            if (!listeningCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Notify) &&
-                !listeningCharacteristic.Properties.HasFlag(CharacteristicPropertyFlags.Indicate))
-                throw new ArgumentException(
-                    $"{nameof(listeningCharacteristic)} is neither Update nor Indicate.",
-                    nameof(listeningCharacteristic));
-
-            if (responseCharacteristic.TokenAggregator != null)
-                throw new ArgumentException(
-                    $"{nameof(responseCharacteristic)} has attached TokenAggregator already.",
-                    nameof(responseCharacteristic));
-            if (listeningCharacteristic.TokenAggregator != null)
-                throw new ArgumentException(
-                    $"{nameof(listeningCharacteristic)} has attached TokenAggregator already.",
-                    nameof(listeningCharacteristic));
+            VerifyParameters(
+                device,
+                service,
+                commandCharacteristic,
+                responseCharacteristic,
+                listeningCharacteristic);
 
             Device = device;
             Service = service;
@@ -74,16 +49,6 @@ namespace BleCommands.Windows
             ResponseCharacteristic = responseCharacteristic;
             ListeningCharacteristic = listeningCharacteristic;
             TokenDelimiter = tokenDelimiter;
-
-            if (ResponseCharacteristic == ListeningCharacteristic)
-            {
-                ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator(tokenDelimiter));
-            }
-            else
-            {
-                ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator(tokenDelimiter));
-                ListeningCharacteristic.AttachTokenAggregator(new TokenAggregator(tokenDelimiter));
-            }
         }
 
         /// <inheritdoc />

@@ -1,5 +1,4 @@
-﻿using BleCommands.Core.Exceptions;
-using BleCommands.Maui;
+﻿using BleCommands.Maui;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Plugin.BLE.Abstractions.EventArgs;
 using System;

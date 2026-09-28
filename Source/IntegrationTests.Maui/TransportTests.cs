@@ -1,5 +1,4 @@
 ﻿using BleCommands.Core.Events;
-using BleCommands.Maui;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,7 @@ namespace IntegrationTests.Maui
     {
         public TestContext TestContext { get; set; }
 
-        private static BleTransport BleTransport => Fixture.BleTransport ?? throw new InvalidOperationException();
+        private static RotatingTableTransport BleTransport => Fixture.BleTransport ?? throw new InvalidOperationException();
 
         [TestMethod]
         public async Task SendCommandAsync_Status_ValidResponse()

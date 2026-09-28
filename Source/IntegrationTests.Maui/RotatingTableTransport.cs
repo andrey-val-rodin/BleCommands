@@ -1,13 +1,17 @@
 ﻿using BleCommands.Core;
 using BleCommands.Core.Contracts;
+using BleCommands.Maui;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading;
+using System.Threading.Tasks;
 using NativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 using NativeDevice = Plugin.BLE.Abstractions.Contracts.IDevice;
 using NativeService = Plugin.BLE.Abstractions.Contracts.IService;
 
-namespace BleCommands.Maui
+namespace IntegrationTests.Maui
 {
     /// <inheritdoc />
-    public class BleTransport : BleTransport<
+    public partial class RotatingTableTransport : BleTransport<
         IDevice<NativeDevice, Service>,
         IService<NativeService, Characteristic>,
         ICharacteristic<NativeCharacteristic>>
@@ -29,7 +33,7 @@ namespace BleCommands.Maui
         /// <param name="tokenDelimiter">Token separator. Typically, character '\n' is used.</param>
         /// <exception cref="ArgumentNullException">Thrown if any parameter is null.</exception>
         /// <exception cref="ArgumentException">Thrown if any characteristic has invalid properties.</exception>
-        public BleTransport(
+        public RotatingTableTransport(
             IDevice<NativeDevice, Service> device,
             IService<NativeService, Characteristic> service,
             ICharacteristic<NativeCharacteristic> commandCharacteristic,
@@ -66,5 +70,20 @@ namespace BleCommands.Maui
 
         /// <inheritdoc />
         public override ICharacteristic<NativeCharacteristic> ListeningCharacteristic { get; }
+
+        public override async Task StartAsync(CancellationToken token = default)
+        {
+            ThrowIfDisposed();
+            if (IsStarted)
+                return;
+
+            // Rotating Table has only one Update characteristic
+            Assert.AreEqual(ResponseCharacteristic, ListeningCharacteristic);
+
+            ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator(TokenDelimiter));
+            await ResponseCharacteristic.StartReceivingAsync(token).ConfigureAwait(false);
+
+            IsStarted = true;
+        }
     }
 }

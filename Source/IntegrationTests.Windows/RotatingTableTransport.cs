@@ -20,11 +20,8 @@ namespace BleCommands.IntegrationTests.Windows
         /// <param name="commandCharacteristic">
         /// Characteristic for sending commands to the device (Write or WriteWithoutResponse).
         /// </param>
-        /// <param name="responseCharacteristic">
-        /// Characteristic for receiving command responses from the device (Notify or Indicate).
-        /// </param>
-        /// <param name="listeningCharacteristic">
-        /// Characteristic for receiving token stream during listening (Notify or Indicate).
+        /// <param name="updatesCharacteristic">
+        /// Characteristic for receiving command responses and messages from the device (Notify or Indicate).
         /// </param>
         /// <param name="tokenDelimiter">Token separator. Typically, character '\n' is used.</param>
         /// <exception cref="ArgumentNullException">Thrown if any parameter is null.</exception>
@@ -33,22 +30,20 @@ namespace BleCommands.IntegrationTests.Windows
             IDevice<BluetoothLEDevice, Service> device,
             IService<GattDeviceService, Characteristic> service,
             ICharacteristic<GattCharacteristic> commandCharacteristic,
-            ICharacteristic<GattCharacteristic> responseCharacteristic,
-            ICharacteristic<GattCharacteristic> listeningCharacteristic,
+            ICharacteristic<GattCharacteristic> updatesCharacteristic,
             char tokenDelimiter = TokenAggregator.DefaultTokenDelimiter)
         {
             VerifyParameters(
                 device,
                 service,
                 commandCharacteristic,
-                responseCharacteristic,
-                listeningCharacteristic);
+                updatesCharacteristic,
+                updatesCharacteristic);
 
             Device = device;
             Service = service;
             CommandCharacteristic = commandCharacteristic;
-            ResponseCharacteristic = responseCharacteristic;
-            ListeningCharacteristic = listeningCharacteristic;
+            ListeningCharacteristic = ResponseCharacteristic = updatesCharacteristic;
             TokenDelimiter = tokenDelimiter;
         }
 

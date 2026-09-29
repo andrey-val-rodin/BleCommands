@@ -68,7 +68,6 @@ namespace BleCommands.IntegrationTests.Windows
                 Service,
                 CommandCharacteristic,
                 ResponseCharacteristic,
-                ListeningCharacteristic,
                 '\n');
 
             await BleTransport.StartAsync();

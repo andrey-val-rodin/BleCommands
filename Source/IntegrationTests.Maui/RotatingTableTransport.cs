@@ -24,11 +24,8 @@ namespace IntegrationTests.Maui
         /// <param name="commandCharacteristic">
         /// Characteristic for sending commands to the device (Write or WriteWithoutResponse).
         /// </param>
-        /// <param name="responseCharacteristic">
-        /// Characteristic for receiving command responses from the device (Notify or Indicate).
-        /// </param>
-        /// <param name="listeningCharacteristic">
-        /// Characteristic for receiving token stream during listening (Notify or Indicate).
+        /// <param name="updatesCharacteristic">
+        /// Characteristic for receiving command responses and messages from the device (Notify or Indicate).
         /// </param>
         /// <param name="tokenDelimiter">Token separator. Typically, character '\n' is used.</param>
         /// <exception cref="ArgumentNullException">Thrown if any parameter is null.</exception>
@@ -37,22 +34,20 @@ namespace IntegrationTests.Maui
             IDevice<NativeDevice, Service> device,
             IService<NativeService, Characteristic> service,
             ICharacteristic<NativeCharacteristic> commandCharacteristic,
-            ICharacteristic<NativeCharacteristic> responseCharacteristic,
-            ICharacteristic<NativeCharacteristic> listeningCharacteristic,
+            ICharacteristic<NativeCharacteristic> updatesCharacteristic,
             char tokenDelimiter = TokenAggregator.DefaultTokenDelimiter)
         {
             VerifyParameters(
                 device,
                 service,
                 commandCharacteristic,
-                responseCharacteristic,
-                listeningCharacteristic);
+                updatesCharacteristic,
+                updatesCharacteristic);
 
             Device = device;
             Service = service;
             CommandCharacteristic = commandCharacteristic;
-            ResponseCharacteristic = responseCharacteristic;
-            ListeningCharacteristic = listeningCharacteristic;
+            ListeningCharacteristic = ResponseCharacteristic = updatesCharacteristic;
             TokenDelimiter = tokenDelimiter;
         }
 

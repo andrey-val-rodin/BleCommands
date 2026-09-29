@@ -91,7 +91,6 @@ namespace IntegrationTests.Maui
                 Service,
                 CommandCharacteristic,
                 ResponseCharacteristic,
-                ListeningCharacteristic,
                 '\n');
 
             await BleTransport.StartAsync(context.CancellationToken);

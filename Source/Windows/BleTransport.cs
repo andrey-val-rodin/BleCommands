@@ -12,7 +12,7 @@ namespace BleCommands.Windows
         ICharacteristic<GattCharacteristic>>
     {
         /// <summary>
-        /// A constructor.
+        /// Initializes a new instance of the <see cref="BleTransport"/> class.
         /// </summary>
         /// <param name="device">A Bluetooth LE device. The device must be connected.</param>
         /// <param name="service"> A service.</param>

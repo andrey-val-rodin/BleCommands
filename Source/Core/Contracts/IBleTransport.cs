@@ -16,19 +16,20 @@ namespace BleCommands.Core.Contracts
         where TCharacteristic : ICharacteristic
     {
         /// <summary>
-        /// Occurs when the device connection is lost
+        /// Occurs when the device connection is lost.
         /// </summary>
         event EventHandler? Disconnected;
 
         /// <summary>
-        /// Occurs when the listening timeout is exceeded
-        /// (no token received within the specified interval).
+        /// Occurs when no listening token is received within the configured interval.
         /// </summary>
+        /// <remarks>
+        /// The interval is specified when a listening session is started.
+        /// </remarks>
         event ElapsedEventHandler? ListeningTimeoutElapsed;
 
         /// <summary>
-        /// Occurs when a token is received from the Bluetooth device during listening.
-        /// Subscribe to this event before calling <see cref="StartListening"/>.
+        /// Occurs when a listening token is received from the Bluetooth device.
         /// </summary>
         event EventHandler<TextEventArgs>? ListeningTokenReceived;
 
@@ -53,18 +54,17 @@ namespace BleCommands.Core.Contracts
         TCharacteristic ResponseCharacteristic { get; }
 
         /// <summary>
-        /// Gets the characteristic used for receiving token streams during listening mode.
+        /// Gets the characteristic used for receiving tokens from the Bluetooth device.
         /// </summary>
         TCharacteristic ListeningCharacteristic { get; }
 
         /// <summary>
-        /// Gets a value indicating whether this object has been initialized
-        /// (i.e., whether the <see cref="StartAsync"/> method was called.)
+        /// Gets a value indicating whether the transport has been successfully started.
         /// </summary>
         public bool IsStarted { get; }
 
         /// <summary>
-        /// Gets a value indicating whether listening is currently in progress.
+        /// Gets a value indicating whether a listening session is currently in progress.
         /// </summary>
         bool IsListening { get; }
 
@@ -122,11 +122,10 @@ namespace BleCommands.Core.Contracts
         Task<string?> SendCommandAsync(string command, CancellationToken token = default);
 
         /// <summary>
-        /// Starts listening for a token stream from the Bluetooth device.
-        /// Each received token will raise the <see cref="ListeningTokenReceived"/> event.
+        /// Starts a listening session for tokens received from the Bluetooth device.
         /// </summary>
         /// <param name="timeout">
-        /// A timeout that specifies the maximum allowed interval between consecutive tokens.
+        /// The maximum allowed interval between consecutive tokens.
         /// If the interval exceeds this value,
         /// the <see cref="ListeningTimeoutElapsed"/> event is raised.
         /// </param>
@@ -139,18 +138,13 @@ namespace BleCommands.Core.Contracts
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the transport has been disposed.
         /// </exception>
-        /// <remarks>
-        /// Subscribe to <see cref="ListeningTokenReceived"/> before calling this method.
-        /// Listening continues until <see cref="StopListening"/> is called.
-        /// </remarks>
         void StartListening(TimeSpan timeout);
 
         /// <summary>
-        /// Stops the ongoing listening process.
-        /// No further <see cref="ListeningTokenReceived"/> events will be raised after this call.
+        /// Stops the ongoing listening session.
         /// </summary>
         /// <remarks>
-        /// Has no effect if listening is not currently active (check <see cref="IsListening"/>).
+        /// Has no effect if no listening session is active.
         /// </remarks>
         void StopListening();
     }

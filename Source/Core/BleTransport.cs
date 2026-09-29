@@ -5,7 +5,19 @@ using System.Timers;
 
 namespace BleCommands.Core
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Provides Bluetooth communication capabilities with a connected device running
+    /// firmware based on the Arduino BleCommands library.
+    /// </summary>
+    /// <typeparam name="TDevice">A specific device implementation.</typeparam>
+    /// <typeparam name="TService">A specific service implementation.</typeparam>
+    /// <typeparam name="TCharacteristic">A specific characteristic implementation.</typeparam>
+    /// <remarks>
+    /// This class implements the standard BleCommands.Arduino layout with three
+    /// distinct characteristics. Derived classes may override <see cref="StartAsync"/>,
+    /// <see cref="StartListening"/>, and <see cref="StopListening"/> to support devices
+    /// with a different characteristic layout.
+    /// </remarks>
     public abstract class BleTransport<TDevice, TService, TCharacteristic>
         : IBleTransport<TDevice, TService, TCharacteristic>
         where TDevice : class, IDevice
@@ -18,21 +30,34 @@ namespace BleCommands.Core
         private TimeSpan _responseTimeout = TimeSpan.FromMilliseconds(1000);
         private bool _disposed;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Occurs when the device connection is lost
+        /// </summary>
         public event EventHandler? Disconnected
         {
             add => Device.Disconnected += value;
             remove => Device.Disconnected -= value;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Occurs when the listening timeout is exceeded
+        /// (no token received within the specified interval).
+        /// </summary>
         public event ElapsedEventHandler? ListeningTimeoutElapsed
         {
             add => _listeningTimer.Elapsed += value;
             remove => _listeningTimer.Elapsed -= value;
         }
 
-        /// <inheritdoc />
+
+        /// <summary>
+        /// Occurs when a listening token is received from the Bluetooth device.
+        /// </summary>
+        /// <remarks>
+        /// The underlying subscription is established by <see cref="StartAsync"/>.
+        /// Therefore, this event may fire immediately after the transport starts,
+        /// regardless of whether a listening session is active.
+        /// </remarks>
         public event EventHandler<TextEventArgs>? ListeningTokenReceived
         {
             add => ListeningAggregator.TokenReceived += value;
@@ -58,21 +83,11 @@ namespace BleCommands.Core
         /// Gets the <see cref="TokenAggregator"/> instance used by <see cref="ResponseCharacteristic"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="ICharacteristic.TokenAggregator"/> is <c>null</c>.
-        /// This indicates that the derived class failed to properly initialize the transport.
+        /// Thrown when no <see cref="TokenAggregator"/> is attached to <see cref="ResponseCharacteristic"/>.
         /// </exception>
         /// <remarks>
-        /// <para>
-        /// This property is expected to be initialized by derived classes in their constructor.
-        /// The <see cref="TokenAggregator"/> should be attached to the <see cref="ResponseCharacteristic"/>
-        /// during initialization of the specific BLE implementation.
-        /// </para>
-        /// <para>
-        /// The property throws <see cref="InvalidOperationException"/> if the aggregator is not attached.
-        /// This is by design — it serves as a safeguard to ensure proper initialization of the transport
-        /// before any operations are performed. Derived implementations must guarantee that
-        /// <see cref="ICharacteristic.TokenAggregator"/> is set before this property is accessed.
-        /// </para>
+        /// The aggregator is attached by <see cref="StartAsync"/>.
+        /// Derived classes that override <see cref="StartAsync"/> must attach an aggregator themselves.
         /// </remarks>
         protected TokenAggregator ResponseAggregator =>
             ResponseCharacteristic.TokenAggregator ??
@@ -82,31 +97,26 @@ namespace BleCommands.Core
         /// Gets the <see cref="TokenAggregator"/> instance used by <see cref="ListeningCharacteristic"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="ICharacteristic.TokenAggregator"/> is <c>null</c>.
-        /// This indicates that the derived class failed to properly initialize the transport.
+        /// Thrown when no <see cref="TokenAggregator"/> is attached to <see cref="ResponseCharacteristic"/>.
         /// </exception>
         /// <remarks>
-        /// <para>
-        /// This property is expected to be initialized by derived classes in their constructor.
-        /// The <see cref="TokenAggregator"/> should be attached to the <see cref="ListeningCharacteristic"/>
-        /// during initialization of the specific BLE implementation.
-        /// </para>
-        /// <para>
-        /// The property throws <see cref="InvalidOperationException"/> if the aggregator is not attached.
-        /// This is by design — it serves as a safeguard to ensure proper initialization of the transport
-        /// before any operations are performed. Derived implementations must guarantee that
-        /// <see cref="ICharacteristic.TokenAggregator"/> is set before this property is accessed.
-        /// </para>
+        /// The aggregator is attached by <see cref="StartAsync"/>.
+        /// Derived classes that override <see cref="StartAsync"/> must attach an aggregator themselves.
         /// </remarks>
         protected TokenAggregator ListeningAggregator =>
             ListeningCharacteristic.TokenAggregator ??
             throw new InvalidOperationException("TokenAggregator not attached to ListeningCharacteristic");
 
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a value indicating whether this object has been initialized
+        /// (i.e., whether the <see cref="StartAsync"/> method was called.)
+        /// </summary>
         public bool IsStarted { get; protected set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a value indicating whether listening is currently in progress.
+        /// </summary>
         public bool IsListening { get; protected set; }
 
         /// <inheritdoc />
@@ -127,9 +137,14 @@ namespace BleCommands.Core
         }
 
         /// <summary>
-        /// Method for validating parameters in derived class constructors.
+        /// Validates the constructor parameters of a derived transport.
         /// </summary>
-        /// <param name="device">A Bluetooth LE device. The device must be connected.</param>
+        /// <remarks>
+        /// Derived classes should call this method from their constructor to ensure
+        /// that all characteristics have the required properties and no aggregator
+        /// is attached prematurely.
+        /// </remarks>
+        /// <param name="device">A Bluetooth LE device.</param>
         /// <param name="service"> A service.</param>
         /// <param name="commandCharacteristic">
         /// Characteristic for sending commands to the device (Write or WriteWithoutResponse).
@@ -182,7 +197,28 @@ namespace BleCommands.Core
                     nameof(listeningCharacteristic));
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Starts the transport: attaches token aggregators to the response and listening
+        /// characteristics and subscribes to both.
+        /// </summary>
+        /// <param name="token">A token to cancel the operation.</param>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the transport has been disposed.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
+        /// <remarks>
+        /// <para>
+        /// This method is idempotent: calling it again after a successful start has no effect.
+        /// </para>
+        /// <para>
+        /// In the base implementation, both <see cref="ResponseCharacteristic"/> and
+        /// <see cref="ListeningCharacteristic"/> are subscribed. Derived classes may override
+        /// this method to change the subscription strategy, for example if the device uses
+        /// a single characteristic for both responses and listening tokens.
+        /// </para>
+        /// </remarks>
         public virtual async Task StartAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
@@ -257,7 +293,39 @@ namespace BleCommands.Core
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Starts listening session and begins tracking the interval between messages.
+        /// </summary>
+        /// <param name="timeout">
+        /// A timeout that specifies the maximum allowed interval between consecutive tokens.
+        /// If the interval exceeds this value,
+        /// the <see cref="ListeningTimeoutElapsed"/> event is raised.
+        /// </param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the transport has not been started or listening is already in progress.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown if <paramref name="timeout"/> is less than or equal to zero.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the transport has been disposed.
+        /// </exception>
+        /// <remarks>
+        /// <para>
+        /// A listening session is a logical concept: it controls the timeout timer and
+        /// the <see cref="IsListening"/> flag. The underlying subscription is established
+        /// by <see cref="StartAsync"/> and is not affected by this method.
+        /// </para>
+        /// <para>
+        /// Subscribe to <see cref="ListeningTokenReceived"/> and
+        /// <see cref="ListeningTimeoutElapsed"/> before calling this method.
+        /// </para>
+        /// <para>
+        /// Call this method when you are about to start receiving
+        /// periodic messages from the Bluetooth device.
+        /// The session continues until <see cref="StopListening"/> is called.
+        /// </para>
+        /// </remarks>
         public void StartListening(TimeSpan timeout)
         {
             ThrowIfDisposed();
@@ -297,7 +365,17 @@ namespace BleCommands.Core
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Stops the ongoing listening session.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The ListeningTokenReceived event will still be raised after this method is called.
+        /// </para>
+        /// <para>
+        /// Has no effect if listening is not currently active (check <see cref="IsListening"/>).
+        /// </para>
+        /// </remarks>
         public void StopListening()
         {
             if (!IsListening)
@@ -312,8 +390,12 @@ namespace BleCommands.Core
         }
 
         /// <summary>
-        /// Throws ObjectDisposedException if this object was disposed.
+        /// Throws <see cref="ObjectDisposedException"/> if this transport has been disposed.
         /// </summary>
+        /// <remarks>
+        /// Derived classes overriding <see cref="StartAsync"/> or other public methods
+        /// should call this method at the beginning of their implementation.
+        /// </remarks>
         protected void ThrowIfDisposed()
         {
             if (_disposed)

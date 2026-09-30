@@ -10,7 +10,10 @@ using NativeService = Plugin.BLE.Abstractions.Contracts.IService;
 
 namespace IntegrationTests.Maui
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// A transport for the Rotating Table test device, which uses a single Update
+    /// characteristic for both command responses and listening tokens.
+    /// </summary>
     public partial class RotatingTableTransport : BleTransport<
         IDevice<NativeDevice, Service>,
         IService<NativeService, Characteristic>,

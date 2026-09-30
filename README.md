@@ -11,7 +11,7 @@
 - **Cross-platform**: A single API for **MAUI** (Android/iOS), **WPF**, and **WinForms**.
 - **Reliability**: Automatic reassembly of fragmented packets, response waiting and timeouts.
 - **Ready-to-use companion**: The dedicated [library for Arduino/ESP32](https://github.com/andrey-val-rodin/BleCommands.Arduino) implements the server side of the protocol out of the box.
-- **Advanced scenarios**: Convenient work with a BLE device with access to native objects.
+- **Advanced scenarios**: Direct access to native device, service, and characteristic objects.
 
 ## Installation
 
@@ -45,3 +45,4 @@ using var device = await new BleScanner().FindDeviceAsync("My BLE device");
 var services = await device.GetServicesAsync();
 var characteristics = await services.FirstOrDefault()?.GetCharacteristicsAsync();
 ```
+For details on the protocol, transport lifecycle, and extending the transport, see [BLE Transport](https://github.com/andrey-val-rodin/BleCommands/blob/main/Docs/BLE%20Transport.md).

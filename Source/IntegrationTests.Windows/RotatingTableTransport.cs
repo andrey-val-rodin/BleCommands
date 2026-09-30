@@ -6,7 +6,10 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace BleCommands.IntegrationTests.Windows
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// A transport for the Rotating Table test device, which uses a single Update
+    /// characteristic for both command responses and listening tokens.
+    /// </summary>
     public class RotatingTableTransport : BleTransport<
         IDevice<BluetoothLEDevice, Service>,
         IService<GattDeviceService, Characteristic>,

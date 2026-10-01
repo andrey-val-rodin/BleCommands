@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.5.0
+- **Added**: The BleTransport.StartAsync method is now virtual, allowing derived transport classes to modify its behavior
+- **Changed**: The base transport implementation no longer specially handles a shared Response and Listening characteristics. Devices with a single characteristic require a specialized transport implementation
 ## 3.4.0
 - Ability to cancel operation FindDeviceAsync
 ## 3.3.4

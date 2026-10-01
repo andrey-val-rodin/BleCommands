@@ -265,7 +265,6 @@ namespace BleCommands.Tests.Windows
                 new CharacteristicStub(CharacteristicPropertyFlags.Write),
                 new CharacteristicStub(CharacteristicPropertyFlags.Notify),
                 new CharacteristicStub(CharacteristicPropertyFlags.Notify));
-
             await transport.StartAsync(TestContext.Current.CancellationToken);
 
             Assert.Throws<ArgumentOutOfRangeException>(
@@ -273,7 +272,7 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
-        public async Task StartListening_ReceivedToken_RaisesListeningTokenReceived()
+        public async Task Listening_ReceivedToken_RaisesListeningTokenReceived()
         {
             var listeningCharacteristic = new CharacteristicStub(CharacteristicPropertyFlags.Notify);
             using var transport = new BleTransport(
@@ -290,15 +289,12 @@ namespace BleCommands.Tests.Windows
             transport.ListeningTokenReceived += (_, args) =>
                 received.TrySetResult(args.Text);
 
-            transport.StartListening(TimeSpan.FromSeconds(1));
-
             listeningCharacteristic.EmulateReceiving("TOKEN\n");
 
             var result = await received.Task.WaitAsync(
                 TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
 
             Assert.Equal("TOKEN", result);
-            Assert.True(transport.IsListening);
         }
 
         [Fact]
@@ -319,13 +315,36 @@ namespace BleCommands.Tests.Windows
             transport.ListeningTokenReceived += (_, args) =>
                 received.TrySetResult(args.Text);
 
-            transport.StartListening(TimeSpan.FromSeconds(1));
-
             listeningCharacteristic.EmulateReceiving("HEL");
             listeningCharacteristic.EmulateReceiving("LO\n");
 
             Assert.Equal("HELLO", await received.Task.WaitAsync(
                 TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken));
+        }
+
+        [Fact]
+        public async Task Listening_StopAndRestart_DoesNotDuplicateTimeoutHandlers()
+        {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+            await transport.StartAsync(TestContext.Current.CancellationToken);
+
+            var timeoutCount = 0;
+            transport.ListeningTimeoutElapsed += (_, _) =>
+                Interlocked.Increment(ref timeoutCount);
+
+            transport.StartListening(TimeSpan.FromMilliseconds(100));
+            transport.StopListening();
+
+            transport.StartListening(TimeSpan.FromMilliseconds(100));
+
+            await Task.Delay(200, TestContext.Current.CancellationToken);
+
+            Assert.Equal(1, Volatile.Read(ref timeoutCount));
         }
 
         [Fact]
@@ -425,6 +444,49 @@ namespace BleCommands.Tests.Windows
             await transport.StartAsync(TestContext.Current.CancellationToken);
 
             transport.StartListening(TimeSpan.FromSeconds(1));
+            Assert.True(transport.IsListening);
+        }
+
+        [Fact]
+        public async Task StartListening_WithoutTokens_RaisesTimeout()
+        {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+            await transport.StartAsync(TestContext.Current.CancellationToken);
+
+            var timeout = new TaskCompletionSource(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+
+            transport.ListeningTimeoutElapsed += (_, _) =>
+                timeout.TrySetResult();
+
+            transport.StartListening(TimeSpan.FromMilliseconds(100));
+
+            await timeout.Task.WaitAsync(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
+
+            Assert.True(transport.IsListening);
+        }
+
+        [Fact]
+        public async Task StartListening_AfterStop_CanBeStartedAgain()
+        {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+            await transport.StartAsync(TestContext.Current.CancellationToken);
+
+            transport.StartListening(TimeSpan.FromSeconds(1));
+            transport.StopListening();
+
+            transport.StartListening(TimeSpan.FromSeconds(1));
+
             Assert.True(transport.IsListening);
         }
 

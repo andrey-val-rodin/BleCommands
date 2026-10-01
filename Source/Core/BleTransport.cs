@@ -370,7 +370,10 @@ namespace BleCommands.Core
         /// </summary>
         /// <remarks>
         /// <para>
-        /// The ListeningTokenReceived event will still be raised after this method is called.
+        /// No new <see cref="ListeningTimeoutElapsed"/> callbacks will be raised
+        /// after this call.
+        /// A timeout callback that has already started may still complete.
+        /// The <see cref="ListeningTokenReceived"/> event will still be raised after this method is called.
         /// </para>
         /// <para>
         /// Has no effect if listening is not currently active (check <see cref="IsListening"/>).

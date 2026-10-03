@@ -10,6 +10,14 @@ namespace BleCommands.IntegrationTests.Windows
         private RotatingTableTransport BleTransport => Fixture.BleTransport;
 
         [Fact]
+        public async Task StartAsync_SecondCall_DoesNothing()
+        {
+            await BleTransport.StartAsync(TestContext.Current.CancellationToken);
+
+            Assert.True(BleTransport.IsStarted, "BleTransport is still running.");
+        }
+
+        [Fact]
         public async Task SendCommandAsync_Status_ValidResponse()
         {
             Assert.Equal("READY", await BleTransport.SendCommandAsync("STATUS", TestContext.Current.CancellationToken));

@@ -14,6 +14,14 @@ namespace IntegrationTests.Maui
         private static RotatingTableTransport BleTransport => Fixture.BleTransport ?? throw new InvalidOperationException();
 
         [TestMethod]
+        public async Task StartAsync_SecondCall_DoesNothing()
+        {
+            await BleTransport.StartAsync(TestContext.CancellationToken);
+
+            Assert.IsTrue(BleTransport.IsStarted, "BleTransport is still running.");
+        }
+
+        [TestMethod]
         public async Task SendCommandAsync_Status_ValidResponse()
         {
             Assert.AreEqual("READY", await BleTransport.SendCommandAsync("STATUS", TestContext.CancellationToken));

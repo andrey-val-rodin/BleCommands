@@ -1,5 +1,4 @@
-﻿using BleCommands.Core;
-using BleCommands.Core.Events;
+﻿using BleCommands.Core.Events;
 using BleCommands.Maui;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -81,11 +80,6 @@ namespace IntegrationTests.Maui
             Assert.IsNotNull(ListeningCharacteristic);
             RegisterDisposableObject(ResponseCharacteristic);
             RegisterDisposableObject(ListeningCharacteristic);
-            CharacteristicWithAttachedAggregator =
-                await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid, context.CancellationToken);
-            Assert.IsNotNull(CharacteristicWithAttachedAggregator);
-            CharacteristicWithAttachedAggregator.AttachTokenAggregator(new TokenAggregator());
-            RegisterDisposableObject(CharacteristicWithAttachedAggregator);
             BleTransport = new RotatingTableTransport(
                 Device,
                 Service,

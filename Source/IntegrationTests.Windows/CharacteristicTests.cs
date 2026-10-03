@@ -1,4 +1,5 @@
-﻿using BleCommands.Core.Events;
+﻿using BleCommands.Core;
+using BleCommands.Core.Events;
 using BleCommands.Windows;
 
 namespace BleCommands.IntegrationTests.Windows
@@ -26,8 +27,25 @@ namespace BleCommands.IntegrationTests.Windows
         }
         #endregion
 
+        #region DetachTokenAggregator
+        [Fact]
+        public async Task DetachTokenAggregator_TokenAggregatorPropertyIsNull()
+        {
+            var characteristic = await Fixture.Service.GetCharacteristicAsync(
+                Fixture.UpdatesCharacteristicUuid, TestContext.Current.CancellationToken);
+            Assert.NotNull(characteristic);
+            var aggregator = new TokenAggregator();
+            characteristic.AttachTokenAggregator(aggregator);
+            Assert.Equal(aggregator, characteristic.TokenAggregator);
+
+            characteristic.DetachTokenAggregator();
+            Assert.Null(characteristic.TokenAggregator);
+        }
+        #endregion
+
         #region StartReceivingAsync
         [Fact]
+
         public async Task StartReceivingAsync_WhenCharacteristicSupportsNotify_StartsReceiving()
         {
             // Arrange

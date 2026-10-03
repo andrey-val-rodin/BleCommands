@@ -1,4 +1,5 @@
-﻿using BleCommands.Core.Events;
+﻿using BleCommands.Core;
+using BleCommands.Core.Events;
 using BleCommands.Maui;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -26,6 +27,22 @@ namespace IntegrationTests.Maui
 
             // Assert
             Assert.IsNotNull(characteristic);
+        }
+        #endregion
+
+        #region DetachTokenAggregator
+        [TestMethod]
+        public async Task DetachTokenAggregator_TokenAggregatorPropertyIsNull()
+        {
+            var characteristic = await Fixture.Service!.GetCharacteristicAsync(
+                Fixture.UpdatesCharacteristicUuid, TestContext.CancellationToken);
+            Assert.IsNotNull(characteristic);
+            var aggregator = new TokenAggregator();
+            characteristic.AttachTokenAggregator(aggregator);
+            Assert.AreEqual(aggregator, characteristic.TokenAggregator);
+
+            characteristic.DetachTokenAggregator();
+            Assert.IsNull(characteristic.TokenAggregator);
         }
         #endregion
 

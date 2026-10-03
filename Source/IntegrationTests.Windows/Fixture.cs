@@ -1,5 +1,4 @@
-﻿using BleCommands.Core;
-using BleCommands.Core.Events;
+﻿using BleCommands.Core.Events;
 using BleCommands.IntegrationTests.Windows;
 using BleCommands.Windows;
 using BleTransport = BleCommands.Windows.BleTransport;
@@ -61,8 +60,6 @@ namespace BleCommands.IntegrationTests.Windows
             ListeningCharacteristic = ResponseCharacteristic = (await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
             Assert.NotNull(ResponseCharacteristic);
             Assert.NotNull(ListeningCharacteristic);
-            CharacteristicWithAttachedAggregator = (await Service.GetCharacteristicAsync(UpdatesCharacteristicUuid))!;
-            CharacteristicWithAttachedAggregator.AttachTokenAggregator(new TokenAggregator());
             BleTransport = new RotatingTableTransport(
                 Device,
                 Service,

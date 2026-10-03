@@ -110,7 +110,6 @@ namespace BleCommands.Windows
                 using (token.Register(() => tcs.TrySetCanceled()))
                 {
                     await tcs.Task.ConfigureAwait(false);
-                    return;
                 }
             }
             finally

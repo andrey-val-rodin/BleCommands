@@ -15,9 +15,9 @@ namespace BleCommands.IntegrationTests.Windows
     {
         public const string Id = "BluetoothLE#BluetoothLE90:e8:68:ad:f0:54-f8:b3:b7:22:09:3e";
         public const ulong MacAddress = 0xf8b3b722093e;
-        public static readonly Guid ServiceUuid                 = new("0000ffe0-0000-1000-8000-00805f9b34fb");
-        public static readonly Guid UpdatesCharacteristicUuid   = new("0000ffe1-0000-1000-8000-00805f9b34fb");
-        public static readonly Guid WriteCharacteristicUuid     = new("0000ffe2-0000-1000-8000-00805f9b34fb");
+        public static readonly Guid ServiceUuid = new("0000ffe0-0000-1000-8000-00805f9b34fb");
+        public static readonly Guid UpdatesCharacteristicUuid = new("0000ffe1-0000-1000-8000-00805f9b34fb");
+        public static readonly Guid WriteCharacteristicUuid = new("0000ffe2-0000-1000-8000-00805f9b34fb");
 
         public BleScanner BleScanner { get; } = new BleScanner();
 

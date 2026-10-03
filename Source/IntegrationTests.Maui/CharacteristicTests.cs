@@ -1,4 +1,5 @@
-﻿using BleCommands.Maui;
+﻿using BleCommands.Core.Events;
+using BleCommands.Maui;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;
@@ -156,6 +157,35 @@ namespace IntegrationTests.Maui
             // Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(act);
             Assert.AreEqual("The characteristic is neither Write nor WriteWithoutResponse.", exception.Message);
+        }
+        #endregion
+
+        #region ValueReceived
+        [TestMethod]
+        public async Task ValueReceived_WhenDeviceSendsResponse_RaisesEventWithReceivedBytes()
+        {
+            // Arrange
+            var characteristic = Fixture.ListeningCharacteristic!;
+            var eventArgsSource = new TaskCompletionSource<ByteArrayEventArgs>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            void Handler(object? sender, ByteArrayEventArgs args) => eventArgsSource.TrySetResult(args);
+            characteristic.ValueReceived += Handler;
+
+            try
+            {
+                // Act
+                var response = await Fixture.BleTransport!.SendCommandAsync(
+                    "STATUS", TestContext.CancellationToken);
+                var eventArgs = await eventArgsSource.Task;
+
+                // Assert
+                Assert.AreEqual("READY", response);
+                Assert.AreEqual("READY\n", Characteristic.ConvertToString(eventArgs.Value));
+            }
+            finally
+            {
+                characteristic.ValueReceived -= Handler;
+            }
         }
         #endregion
 

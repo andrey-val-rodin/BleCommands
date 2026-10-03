@@ -1,4 +1,5 @@
-﻿using BleCommands.Windows;
+﻿using BleCommands.Core.Events;
+using BleCommands.Windows;
 
 namespace BleCommands.IntegrationTests.Windows
 {
@@ -153,6 +154,35 @@ namespace BleCommands.IntegrationTests.Windows
             // Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(act);
             Assert.Equal("The characteristic is neither Write nor WriteWithoutResponse.", exception.Message);
+        }
+        #endregion
+
+        #region ValueReceived
+        [Fact]
+        public async Task ValueReceived_WhenDeviceSendsResponse_RaisesEventWithReceivedBytes()
+        {
+            // Arrange
+            var characteristic = Fixture.ListeningCharacteristic;
+            var eventArgsSource = new TaskCompletionSource<ByteArrayEventArgs>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            void Handler(object? sender, ByteArrayEventArgs args) => eventArgsSource.TrySetResult(args);
+            characteristic.ValueReceived += Handler;
+
+            try
+            {
+                // Act
+                var response = await Fixture.BleTransport.SendCommandAsync(
+                    "STATUS", TestContext.Current.CancellationToken);
+                var eventArgs = await eventArgsSource.Task;
+
+                // Assert
+                Assert.Equal("READY", response);
+                Assert.Equal("READY\n", Characteristic.ConvertToString(eventArgs.Value));
+            }
+            finally
+            {
+                characteristic.ValueReceived -= Handler;
+            }
         }
         #endregion
 

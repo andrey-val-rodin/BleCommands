@@ -16,6 +16,8 @@ namespace IntegrationTests.Maui
         [TestMethod]
         public async Task StartAsync_SecondCall_DoesNothing()
         {
+            Assert.IsTrue(BleTransport.IsStarted);
+
             await BleTransport.StartAsync(TestContext.CancellationToken);
 
             Assert.IsTrue(BleTransport.IsStarted, "BleTransport is still running.");

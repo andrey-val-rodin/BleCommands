@@ -12,6 +12,8 @@ namespace BleCommands.IntegrationTests.Windows
         [Fact]
         public async Task StartAsync_SecondCall_DoesNothing()
         {
+            Assert.True(BleTransport.IsStarted);
+
             await BleTransport.StartAsync(TestContext.Current.CancellationToken);
 
             Assert.True(BleTransport.IsStarted, "BleTransport is still running.");

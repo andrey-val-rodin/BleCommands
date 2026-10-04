@@ -115,20 +115,15 @@ namespace BleCommands.Maui
         /// </summary>
         /// <param name="value">The byte array to convert.</param>
         /// <returns>
-        /// The converted string, or an empty string if the conversion fails.
+        /// The decoded string, with invalid UTF-8 sequences replaced by U+FFFD.
+        /// Returns an empty string if <paramref name="value"/> is <c>null</c>.
         /// </returns>
         public static string ConvertToString(byte[] value)
         {
-            try
-            {
-                return Encoding.UTF8.GetString(value);
-            }
-            catch (Exception ex) when (ex is DecoderFallbackException or
-                                             ArgumentException or
-                                             ArgumentNullException)
-            {
+            if (value == null)
                 return string.Empty;
-            }
+
+            return Encoding.UTF8.GetString(value);
         }
 
         /// <inheritdoc/>

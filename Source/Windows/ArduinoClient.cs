@@ -105,7 +105,9 @@ namespace BleCommands.Windows
         private static async Task<Device?> CreateDeviceAsync(string deviceName, CancellationToken token)
         {
             var scanner = new BleScanner();
-            var device = await scanner.FindDeviceAsync(deviceName).ConfigureAwait(false);
+            var timeout = TimeSpan.FromSeconds(BleScanner.DefaultTimeoutSeconds);
+            var device = await scanner.FindDeviceAsync(
+                deviceName, timeout, token).ConfigureAwait(false);
             if (device == null)
             {
                 // Device not found

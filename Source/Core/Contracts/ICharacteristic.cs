@@ -9,7 +9,7 @@ namespace BleCommands.Core.Contracts
     public interface ICharacteristic : IDisposable
     {
         /// <summary>
-        /// Occurs when the characteristic value is received via notification.
+        /// Occurs when the characteristic value is received via notification or indication.
         /// </summary>
         event EventHandler<ByteArrayEventArgs>? ValueReceived;
 

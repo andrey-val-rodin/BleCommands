@@ -6,6 +6,31 @@ namespace BleCommands.Tests.Windows
 {
     public class CharacteristicTests
     {
+        [Theory]
+        [InlineData(new byte[] { 0x41, 0x42 }, "AB")]
+        [InlineData(new byte[] { 0xC3, 0xA9 }, "\u00E9")]
+        [InlineData(new byte[] { 0x80 }, "\uFFFD")]
+        [InlineData(new byte[] { 0xC3, 0x28 }, "\uFFFD(")]
+        [InlineData(new byte[] { 0xC3 }, "\uFFFD")]
+        [InlineData(new byte[] { 0xE2, 0x82 }, "\uFFFD")]
+        [InlineData(new byte[] { 0xF0, 0x90, 0x80 }, "\uFFFD")]
+        [InlineData(new byte[] { 0xC0, 0xAF }, "\uFFFD\uFFFD")]
+        [InlineData(new byte[] { 0xE0, 0x80, 0xAF }, "\uFFFD\uFFFD\uFFFD")]
+        [InlineData(new byte[] { 0xF0, 0x80, 0x80, 0xAF }, "\uFFFD\uFFFD\uFFFD\uFFFD")]
+        [InlineData(new byte[] { 0xED, 0xA0, 0x80 }, "\uFFFD\uFFFD\uFFFD")]
+        [InlineData(new byte[] { 0xF4, 0x90, 0x80, 0x80 }, "\uFFFD\uFFFD\uFFFD\uFFFD")]
+        [InlineData(new byte[] { 0xF5, 0x80, 0x80, 0x80 }, "\uFFFD\uFFFD\uFFFD\uFFFD")]
+        public void ConvertToString_DecodesUtf8AndReplacesInvalidSequences(byte[] value, string expected)
+        {
+            Assert.Equal(expected, Characteristic.ConvertToString(value));
+        }
+
+        [Fact]
+        public void ConvertToString_NullValue_ReturnsEmptyString()
+        {
+            Assert.Equal(string.Empty, Characteristic.ConvertToString(null!));
+        }
+
         [Fact]
         public void Constructor_NullCharacteristic_ArgumentNullException()
         {

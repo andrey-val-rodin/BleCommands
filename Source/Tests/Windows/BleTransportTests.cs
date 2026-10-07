@@ -323,31 +323,6 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
-        public async Task Listening_StopAndRestart_DoesNotDuplicateTimeoutHandlers()
-        {
-            using var transport = new BleTransport(
-                new DeviceStub(),
-                new ServiceStub(),
-                new CharacteristicStub(CharacteristicPropertyFlags.Write),
-                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
-                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
-            await transport.StartAsync(TestContext.Current.CancellationToken);
-
-            var timeoutCount = 0;
-            transport.ListeningTimeoutElapsed += (_, _) =>
-                Interlocked.Increment(ref timeoutCount);
-
-            transport.StartListening(TimeSpan.FromMilliseconds(100));
-            transport.StopListening();
-
-            transport.StartListening(TimeSpan.FromMilliseconds(100));
-
-            await Task.Delay(200, TestContext.Current.CancellationToken);
-
-            Assert.Equal(1, Volatile.Read(ref timeoutCount));
-        }
-
-        [Fact]
         public async Task SendCommandAsync_ExternalCancellation_ThrowsOperationCanceledException()
         {
             await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>

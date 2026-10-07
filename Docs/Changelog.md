@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.5.1
+- ArduinoClient: Using CancellationToken in call to FindDeviceAsync
+- Improve ConvertToString
+- Update documentation
 ## 3.5.0
 - **Added**: The BleTransport.StartAsync method is now virtual, allowing derived transport classes to modify its behavior
 - **Changed**: The base transport implementation no longer specially handles a shared Response and Listening characteristics. Devices with a single characteristic require a specialized transport implementation

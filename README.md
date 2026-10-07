@@ -10,6 +10,7 @@
 - **Ease of use**: No need to understand the intricacies of GATT, characteristics, descriptors or buffering.
 - **Cross-platform**: A single API for **MAUI** (Android/iOS), **WPF**, and **WinForms**.
 - **Reliability**: Automatic reassembly of fragmented packets, response waiting and timeouts.
+- **Unlimited message length**: Receive UTF-8 strings of any length.
 - **Ready-to-use companion**: The dedicated [library for Arduino/ESP32](https://github.com/andrey-val-rodin/BleCommands.Arduino) implements the server side of the protocol out of the box.
 - **Advanced scenarios**: Direct access to native device, service, and characteristic objects.
 

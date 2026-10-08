@@ -82,6 +82,9 @@ namespace BleCommands.Core.Contracts
         /// Starts process of communication between Bluetooth transport and device.
         /// </summary>
         /// <param name="token">A token to cancel the operation.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the transport has already been started.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         /// The operation was canceled via <paramref name="token"/>.
         /// </exception>

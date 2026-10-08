@@ -182,6 +182,24 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
+        public async Task StartAsync_SecondCall_ThrowsInvalidOperationException()
+        {
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                using var transport = new BleTransport(
+                    new DeviceStub(),
+                    new ServiceStub(),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+                await transport.StartAsync(TestContext.Current.CancellationToken);
+                await transport.StartAsync(TestContext.Current.CancellationToken);
+            });
+            Assert.Equal("BleTransport has already been started.", exception.Message);
+        }
+
+        [Fact]
         public async Task StartAsync_ExternalCancellation_ThrowsOperationCanceledException()
         {
             await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>

@@ -202,6 +202,9 @@ namespace BleCommands.Core
         /// characteristics and subscribes to both.
         /// </summary>
         /// <param name="token">A token to cancel the operation.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the transport has already been started.
+        /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the transport has been disposed.
         /// </exception>
@@ -210,7 +213,12 @@ namespace BleCommands.Core
         /// </exception>
         /// <remarks>
         /// <para>
-        /// This method is idempotent: calling it again after a successful start has no effect.
+        /// This method must be called exactly once after the transport is created.
+        /// If it is called again, an <see cref="InvalidOperationException"/> is thrown.
+        /// </para>
+        /// <para>
+        /// If initialization fails, the transport should be disposed and recreated
+        /// instead of attempting to start it again.
         /// </para>
         /// <para>
         /// In the base implementation, both <see cref="ResponseCharacteristic"/> and
@@ -224,7 +232,7 @@ namespace BleCommands.Core
             ThrowIfDisposed();
 
             if (IsStarted)
-                return;
+                throw new InvalidOperationException("BleTransport has already been started.");
 
             ResponseCharacteristic.AttachTokenAggregator(new TokenAggregator(TokenDelimiter));
             ListeningCharacteristic.AttachTokenAggregator(new TokenAggregator(TokenDelimiter));

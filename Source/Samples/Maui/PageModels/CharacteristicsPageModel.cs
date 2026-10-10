@@ -9,21 +9,21 @@ namespace MauiSample.PageModels
     {
         public event Func<MyCharacteristic, Task<string>>? RequestUserInput;
 
-        DeviceHolder DeviceHolder { get; set; } = deviceHolder;
+        private DeviceHolder DeviceHolder { get; set; } = deviceHolder;
 
         [ObservableProperty]
-        bool _isBusy;
+        private bool _isBusy;
 
         public ObservableCollection<MyCharacteristic> Characteristics { get; private set; } = [];
 
         [ObservableProperty]
-        string _error = string.Empty;
+        private string _error = string.Empty;
 
         [ObservableProperty]
-        MyCharacteristic? _item;
+        private MyCharacteristic? _item;
 
         [RelayCommand]
-        async Task GetCharacteristicsAsync()
+        private async Task GetCharacteristicsAsync()
         {
             IsBusy = true;
             try
@@ -51,7 +51,7 @@ namespace MauiSample.PageModels
         }
 
         [RelayCommand]
-        async Task WriteAsync(MyCharacteristic characteristic)
+        private async Task WriteAsync(MyCharacteristic characteristic)
         {
             if (characteristic == null)
                 return;
@@ -77,7 +77,7 @@ namespace MauiSample.PageModels
         }
 
         [RelayCommand]
-        async Task ReadAsync(MyCharacteristic characteristic)
+        private async Task ReadAsync(MyCharacteristic characteristic)
         {
             if (characteristic == null)
                 return;
@@ -95,7 +95,7 @@ namespace MauiSample.PageModels
         }
 
         [RelayCommand]
-        void ToggleNotifying(MyCharacteristic characteristic)
+        private void ToggleNotifying(MyCharacteristic characteristic)
         {
             if (characteristic == null)
                 return;

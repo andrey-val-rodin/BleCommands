@@ -7,7 +7,7 @@ namespace WpfSample
     /// </summary>
     public partial class MainWindow : Window
     {
-        const string DeviceName = "BLECommands Messaging Example";
+        private const string DeviceName = "BLECommands Messaging Example";
 
         public MainWindow()
         {

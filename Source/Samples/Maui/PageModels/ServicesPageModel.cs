@@ -7,21 +7,21 @@ namespace MauiSample.PageModels
 {
     public partial class ServicesPageModel(DeviceHolder deviceHolder) : ObservableObject
     {
-        DeviceHolder DeviceHolder { get; set; } = deviceHolder;
+        private DeviceHolder DeviceHolder { get; set; } = deviceHolder;
 
         [ObservableProperty]
-        bool _isBusy;
+        private bool _isBusy;
 
         public ObservableCollection<MyService> Services { get; private set; } = [];
 
         [ObservableProperty]
-        string _error = string.Empty;
+        private string _error = string.Empty;
 
         [ObservableProperty]
-        MyService? _item;
+        private MyService? _item;
 
         [RelayCommand]
-        async Task GetServicesAsync()
+        private async Task GetServicesAsync()
         {
             IsBusy = true;
             try
@@ -49,7 +49,7 @@ namespace MauiSample.PageModels
         }
 
         [RelayCommand]
-        async Task ExploreServiceAsync(MyService? service)
+        private async Task ExploreServiceAsync(MyService? service)
         {
             if (service == null)
                 return;

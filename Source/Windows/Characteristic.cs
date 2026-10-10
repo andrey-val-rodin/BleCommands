@@ -18,7 +18,6 @@ namespace BleCommands.Windows
     /// </summary>
     public class Characteristic : ICharacteristic<GattCharacteristic>
     {
-        private TokenAggregator? _tokenAggregator;
         private readonly object _lock = new();
         private bool _disposed;
 
@@ -78,7 +77,7 @@ namespace BleCommands.Windows
         public bool IsReceiving { get; private set; }
 
         /// <inheritdoc/>
-        public TokenAggregator? TokenAggregator => _tokenAggregator;
+        public TokenAggregator? TokenAggregator { get; private set; }
 
         /// <inheritdoc/>
         /// <exception cref="DeviceException">
@@ -134,10 +133,7 @@ namespace BleCommands.Windows
         /// </returns>
         public static string ConvertToString(byte[] value)
         {
-            if (value == null)
-                return string.Empty;
-
-            return Encoding.UTF8.GetString(value);
+            return value == null ? string.Empty : Encoding.UTF8.GetString(value);
         }
 
         /// <inheritdoc/>
@@ -152,11 +148,11 @@ namespace BleCommands.Windows
 
             lock (_lock)
             {
-                if (_tokenAggregator != null)
+                if (TokenAggregator != null)
                     throw new InvalidOperationException(
                         "TokenAggregator is already attached. Call DetachTokenAggregator first.");
 
-                _tokenAggregator = tokenAggregator;
+                TokenAggregator = tokenAggregator;
             }
         }
 
@@ -165,7 +161,7 @@ namespace BleCommands.Windows
         {
             lock (_lock)
             {
-                _tokenAggregator = null;
+                TokenAggregator = null;
             }
         }
 
@@ -233,7 +229,7 @@ namespace BleCommands.Windows
             TokenAggregator? tokenAggregator;
             lock (_lock)
             {
-                tokenAggregator = _tokenAggregator;
+                tokenAggregator = TokenAggregator;
             }
 
             tokenAggregator?.Append(ConvertToString(bytes));

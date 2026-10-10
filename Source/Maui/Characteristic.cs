@@ -14,7 +14,6 @@ namespace BleCommands.Maui
     /// </summary>
     public class Characteristic : ICharacteristic<NativeCharacteristic>
     {
-        private TokenAggregator? _tokenAggregator;
         private readonly object _lock = new();
         private bool _disposed;
 
@@ -74,7 +73,7 @@ namespace BleCommands.Maui
         public bool IsReceiving { get; private set; }
 
         /// <inheritdoc/>
-        public TokenAggregator? TokenAggregator => _tokenAggregator;
+        public TokenAggregator? TokenAggregator { get; private set; }
 
         /// <inheritdoc/>
         /// <exception cref="Exception">
@@ -120,10 +119,7 @@ namespace BleCommands.Maui
         /// </returns>
         public static string ConvertToString(byte[] value)
         {
-            if (value == null)
-                return string.Empty;
-
-            return Encoding.UTF8.GetString(value);
+            return value == null ? string.Empty : Encoding.UTF8.GetString(value);
         }
 
         /// <inheritdoc/>
@@ -139,11 +135,11 @@ namespace BleCommands.Maui
 
             lock (_lock)
             {
-                if (_tokenAggregator != null)
+                if (TokenAggregator != null)
                     throw new InvalidOperationException(
                         "TokenAggregator is already attached. Call DetachTokenAggregator first.");
 
-                _tokenAggregator = tokenAggregator;
+                TokenAggregator = tokenAggregator;
             }
         }
 
@@ -152,7 +148,7 @@ namespace BleCommands.Maui
         {
             lock (_lock)
             {
-                _tokenAggregator = null;
+                TokenAggregator = null;
             }
         }
 
@@ -204,7 +200,7 @@ namespace BleCommands.Maui
             TokenAggregator? tokenAggregator;
             lock (_lock)
             {
-                tokenAggregator = _tokenAggregator;
+                tokenAggregator = TokenAggregator;
             }
 
             tokenAggregator?.Append(e.Characteristic.StringValue);

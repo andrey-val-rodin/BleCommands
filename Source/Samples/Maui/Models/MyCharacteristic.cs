@@ -25,14 +25,14 @@ namespace MauiSample.Models
         public string PropertiesString => GetPropertiesString(Properties);
 
         [ObservableProperty]
-        string _notifyValue = string.Empty;
+        private string _notifyValue = string.Empty;
 
         [ObservableProperty]
-        string _readValue = string.Empty;
+        private string _readValue = string.Empty;
 
         public bool IsNotifying
         {
-            get { return _isNotifying; }
+            get => _isNotifying;
             set
             {
                 if (SetProperty(ref _isNotifying, value))

@@ -7,19 +7,19 @@ namespace MauiSample.PageModels
 {
     public partial class MainPageModel(DeviceHolder deviceHolder) : ObservableObject
     {
-        DeviceHolder DeviceHolder { get; set; } = deviceHolder;
+        private DeviceHolder DeviceHolder { get; set; } = deviceHolder;
 
         [ObservableProperty]
-        bool _isBusy;
+        private bool _isBusy;
 
         [ObservableProperty]
-        bool _isPermissionsGranted;
+        private bool _isPermissionsGranted;
 
         [ObservableProperty]
-        string _deviceName = string.Empty;
+        private string _deviceName = string.Empty;
 
         [ObservableProperty]
-        string _error = string.Empty;
+        private string _error = string.Empty;
 
         partial void OnDeviceNameChanged(string value)
         {
@@ -27,7 +27,7 @@ namespace MauiSample.PageModels
         }
 
         [RelayCommand]
-        async Task ConnectAsync()
+        private async Task ConnectAsync()
         {
             Error = string.Empty;
             IsBusy = true;

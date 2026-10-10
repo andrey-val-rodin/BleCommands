@@ -14,7 +14,7 @@ namespace MauiSample.Pages
             Loaded += MainPage_Loaded;
         }
 
-        DeviceHolder DeviceHolder { get; set; }
+        private DeviceHolder DeviceHolder { get; set; }
 
         protected override void OnAppearing()
         {

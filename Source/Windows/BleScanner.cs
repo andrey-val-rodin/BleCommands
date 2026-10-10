@@ -194,12 +194,7 @@ namespace BleCommands.Windows
                         tcs.Task,
                         Task.Delay(Timeout.InfiniteTimeSpan, token)).ConfigureAwait(false);
 
-                    if (tcs.Task.IsCompleted)
-                    {
-                        return await tcs.Task.ConfigureAwait(false);
-                    }
-
-                    throw new OperationCanceledException(token);
+                    return tcs.Task.IsCompleted ? await tcs.Task.ConfigureAwait(false) : throw new OperationCanceledException(token);
                 }
                 finally
                 {

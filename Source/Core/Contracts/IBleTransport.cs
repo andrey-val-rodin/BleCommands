@@ -61,7 +61,7 @@ namespace BleCommands.Core.Contracts
         /// <summary>
         /// Gets a value indicating whether the transport has been successfully started.
         /// </summary>
-        public bool IsStarted { get; }
+        bool IsStarted { get; }
 
         /// <summary>
         /// Gets a value indicating whether a listening session is currently in progress.

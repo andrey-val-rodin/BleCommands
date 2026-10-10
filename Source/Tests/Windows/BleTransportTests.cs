@@ -167,16 +167,16 @@ namespace BleCommands.Tests.Windows
         [Fact]
         public async Task StartAsync_Disposed_ObjectDisposedException()
         {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+            transport.Dispose();
+
             await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
             {
-                using var transport = new BleTransport(
-                    new DeviceStub(),
-                    new ServiceStub(),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
-                transport.Dispose();
-
                 await transport.StartAsync(TestContext.Current.CancellationToken);
             });
         }
@@ -184,16 +184,17 @@ namespace BleCommands.Tests.Windows
         [Fact]
         public async Task StartAsync_SecondCall_ThrowsInvalidOperationException()
         {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+            await transport.StartAsync(TestContext.Current.CancellationToken);
+
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             {
-                using var transport = new BleTransport(
-                    new DeviceStub(),
-                    new ServiceStub(),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
-
-                await transport.StartAsync(TestContext.Current.CancellationToken);
                 await transport.StartAsync(TestContext.Current.CancellationToken);
             });
             Assert.Equal("BleTransport has already been started.", exception.Message);
@@ -202,18 +203,18 @@ namespace BleCommands.Tests.Windows
         [Fact]
         public async Task StartAsync_ExternalCancellation_ThrowsOperationCanceledException()
         {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
             await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
             {
-                using var transport = new BleTransport(
-                    new DeviceStub(),
-                    new ServiceStub(),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
-
-                using var cts = new CancellationTokenSource();
-                cts.Cancel();
-
                 await transport.StartAsync(cts.Token);
             });
         }
@@ -244,16 +245,16 @@ namespace BleCommands.Tests.Windows
         [Fact]
         public async Task SendCommandAsync_Disposed_ObjectDisposedException()
         {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+            transport.Dispose();
+
             await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
             {
-                using var transport = new BleTransport(
-                    new DeviceStub(),
-                    new ServiceStub(),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
-                transport.Dispose();
-
                 await transport.SendCommandAsync("STATUS", TestContext.Current.CancellationToken);
             });
         }
@@ -261,15 +262,15 @@ namespace BleCommands.Tests.Windows
         [Fact]
         public async Task SendCommandAsync_NotStarted_InvalidOperationException()
         {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
             await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             {
-                using var transport = new BleTransport(
-                    new DeviceStub(),
-                    new ServiceStub(),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
-
                 await transport.SendCommandAsync("STATUS", TestContext.Current.CancellationToken);
             });
         }
@@ -343,19 +344,19 @@ namespace BleCommands.Tests.Windows
         [Fact]
         public async Task SendCommandAsync_ExternalCancellation_ThrowsOperationCanceledException()
         {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
+            await transport.StartAsync(TestContext.Current.CancellationToken);
+            using var cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromMilliseconds(50));
+
             await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
             {
-                using var transport = new BleTransport(
-                    new DeviceStub(),
-                    new ServiceStub(),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
-
-                await transport.StartAsync(TestContext.Current.CancellationToken);
-                using var cts = new CancellationTokenSource();
-                cts.CancelAfter(TimeSpan.FromMilliseconds(50));
-
                 await transport.SendCommandAsync("STATUS", cts.Token);
             });
         }
@@ -377,15 +378,15 @@ namespace BleCommands.Tests.Windows
         [Fact]
         public void StartListening_NotStarted_InvalidOperationException()
         {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+
             Assert.Throws<InvalidOperationException>(() =>
             {
-                using var transport = new BleTransport(
-                    new DeviceStub(),
-                    new ServiceStub(),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
-
                 transport.StartListening(TimeSpan.FromSeconds(1));
             });
         }
@@ -393,16 +394,16 @@ namespace BleCommands.Tests.Windows
         [Fact]
         public void StartListening_Disposed_ObjectDisposedException()
         {
+            using var transport = new BleTransport(
+                new DeviceStub(),
+                new ServiceStub(),
+                new CharacteristicStub(CharacteristicPropertyFlags.Write),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify),
+                new CharacteristicStub(CharacteristicPropertyFlags.Notify));
+            transport.Dispose();
+
             Assert.Throws<ObjectDisposedException>(() =>
             {
-                using var transport = new BleTransport(
-                    new DeviceStub(),
-                    new ServiceStub(),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Write),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify),
-                    new CharacteristicStub(CharacteristicPropertyFlags.Notify));
-                transport.Dispose();
-
                 transport.StartListening(TimeSpan.FromSeconds(1));
             });
         }

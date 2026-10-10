@@ -10,8 +10,7 @@ namespace BleCommands.Tests.Windows
             var scanner = new BleScanner();
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
-                string? deviceName = null!;
-                await scanner.FindDeviceAsync(deviceName);
+                await scanner.FindDeviceAsync(null!);
             });
             Assert.Equal("deviceName", exception.ParamName);
         }
@@ -22,8 +21,7 @@ namespace BleCommands.Tests.Windows
             var scanner = new BleScanner();
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
-                string deviceName = string.Empty;
-                await scanner.FindDeviceAsync(deviceName);
+                await scanner.FindDeviceAsync(string.Empty);
             });
             Assert.Equal("deviceName", exception.ParamName);
         }

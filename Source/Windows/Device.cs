@@ -48,35 +48,73 @@ namespace BleCommands.Windows
         /// </summary>
         public BluetoothLEDevice? NativeDevice { get; protected set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Initiates process of connection to the device.
+        /// </summary>
+        /// <param name="token">Cancellation token to cancel the operation.</param>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the device has been disposed.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the device has already been connected.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
         /// <exception cref="DeviceException">
         /// Thrown if the device with the specified Bluetooth address is not found.
         /// </exception>
+        /// <remarks>
+        /// <para>
+        /// This method is intended to be called once per instance lifecycle.
+        /// The connection will be established shortly.
+        /// </para>
+        /// <para>
+        /// The underlying Windows BLE API may not support cancellation.
+        /// </para>
+        /// <para>
+        /// If the connection attempt fails, or if the connection is later lost
+        /// (see <see cref="Disconnected"/>), the device should be disposed and
+        /// a new instance should be created instead of attempting to reconnect
+        /// with the same object.
+        /// </para>
+        /// </remarks>
         public async Task ConnectAsync(CancellationToken token = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
 
             if (NativeDevice != null)
-                return;
+                throw new InvalidOperationException("Device has already been connected.");
 
-            NativeDevice = await BluetoothLEDevice
+            var nativeDevice = await BluetoothLEDevice
                 .FromBluetoothAddressAsync(_bluetoothAddress)
                 .AsTask(token)
-                .ConfigureAwait(false);
-
-            if (NativeDevice == null)
+                .ConfigureAwait(false) ??
                 throw new DeviceException("Unable to find the device identified by bluetooth address " +
                     $"{_bluetoothAddress}. This occurs especially often if the device is not paired " +
                     $"and is not found in the system cache.");
 
             // Create and configure GATT session to maintain connection
-            _gattSession = await GattSession.FromDeviceIdAsync(NativeDevice.BluetoothDeviceId)
-                .AsTask(token)
-                .ConfigureAwait(false);
-            _gattSession.MaintainConnection = true;
+            GattSession? gattSession = null;
+            try
+            {
+                gattSession = await GattSession.FromDeviceIdAsync(nativeDevice.BluetoothDeviceId)
+                    .AsTask(token)
+                    .ConfigureAwait(false);
+                gattSession.MaintainConnection = true;
 
-            // Monitor connection status
-            NativeDevice.ConnectionStatusChanged += NativeDevice_ConnectionStatusChanged;
+                // Monitor connection status
+                nativeDevice.ConnectionStatusChanged += NativeDevice_ConnectionStatusChanged;
+
+                NativeDevice = nativeDevice;
+                _gattSession = gattSession;
+            }
+            catch
+            {
+                gattSession?.Dispose();
+                nativeDevice.Dispose();
+                throw;
+            }
         }
 
         private void NativeDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)

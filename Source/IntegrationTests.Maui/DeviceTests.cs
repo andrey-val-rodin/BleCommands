@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Plugin.BLE.Abstractions.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IntegrationTests.Maui
@@ -17,6 +18,29 @@ namespace IntegrationTests.Maui
         public TestContext TestContext { get; set; }
 
         private static BleScanner BleScanner => Fixture.BleScanner;
+
+        [TestMethod]
+        public async Task ConnectAsync_SecondCall_ThrowsInvalidOperationException()
+        {
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await Fixture.Device!.ConnectAsync(TestContext.CancellationToken);
+            });
+            Assert.AreEqual("Device has already been connected.", exception.Message);
+        }
+
+        [TestMethod]
+        public async Task ConnectAsync_Cancel_TaskCanceledException()
+        {
+            using var device = new Device(Fixture.DeviceUuid);
+
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+            await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                await device.ConnectAsync(cts.Token);
+            });
+        }
 
         [TestMethod]
         public async Task ConnectAsync_NonExistentBluetoothAddress_Exception()

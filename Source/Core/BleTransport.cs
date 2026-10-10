@@ -31,8 +31,13 @@ namespace BleCommands.Core
         private bool _disposed;
 
         /// <summary>
-        /// Occurs when the device connection is lost
+        /// Occurs when the device connection is lost.
         /// </summary>
+        /// <remarks>
+        /// This event is forwarded from <see cref="IDevice.Disconnected"/>.
+        /// After the connection is lost, the transport should be disposed and
+        /// recreated together with the underlying device.
+        /// </remarks>
         public event EventHandler? Disconnected
         {
             add => Device.Disconnected += value;

@@ -18,6 +18,16 @@ namespace BleCommands.IntegrationTests.Windows
         private BleScanner BleScanner => Fixture.BleScanner;
 
         [Fact]
+        public async Task ConnectAsync_SecondCall_ThrowsInvalidOperationException()
+        {
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await Fixture.Device.ConnectAsync(TestContext.Current.CancellationToken);
+            });
+            Assert.Equal("Device has already been connected.", exception.Message);
+        }
+
+        [Fact]
         public async Task ConnectAsync_NonExistentBluetoothAddress_Exception()
         {
             // Arrange

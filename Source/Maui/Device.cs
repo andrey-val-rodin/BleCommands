@@ -74,37 +74,44 @@ namespace BleCommands.Maui
         internal IAdapter Adapter { get; private set; }
 
         /// <inheritdoc/>
-        /// <exception cref="DeviceConnectionException">Thrown on device connection errors.</exception>
+        /// <exception cref="DeviceConnectionException">
+        /// Thrown on device connection errors.
+        /// </exception>
         public async Task ConnectAsync(CancellationToken token = default)
         {
             ThrowIfDisposed();
 
             if (_connectionInvoked)
-                return;
+                throw new InvalidOperationException("Device has already been connected.");
 
             // Different events can be fired on different platforms
             Adapter.DeviceDisconnected += Adapter_DeviceDisconnected;
             Adapter.DeviceConnectionLost += Adapter_DeviceDisconnected;
 
-            if (NativeDevice != null)
+            try
             {
-                await ConnectAsync(NativeDevice, token).ConfigureAwait(false);
+                if (NativeDevice != null)
+                    await ConnectAsync(NativeDevice, token).ConfigureAwait(false);
+                else if (_guid != null)
+                    await ConnectAsync(_guid.Value, token).ConfigureAwait(false);
+                else
+                    throw new InvalidOperationException(
+                        "Object initialization error. Both NativeDevice and Guid are null.");
+
+                if (NativeDevice == null)
+                    throw new InvalidOperationException(
+                        "Unexpected null device after successful connection.");
+
+                await NativeDevice.RequestMtuAsync(512, token).ConfigureAwait(false);
+
+                _connectionInvoked = true;
             }
-            else if (_guid != null)
+            catch
             {
-                await ConnectAsync(_guid.Value, token).ConfigureAwait(false);
+                Adapter.DeviceDisconnected -= Adapter_DeviceDisconnected;
+                Adapter.DeviceConnectionLost -= Adapter_DeviceDisconnected;
+                throw;
             }
-            else
-                throw new InvalidOperationException(
-                    "Object initialization error. Both NativeDevice and Guid are null.");
-
-            if (NativeDevice == null)
-                throw new InvalidOperationException("Unexpected null device after successful connection.");
-
-            // Request MTU size in Android
-            await NativeDevice.RequestMtuAsync(512, token).ConfigureAwait(false);
-
-            _connectionInvoked = true;
         }
 
         private void Adapter_DeviceDisconnected(object sender, DeviceEventArgs e)

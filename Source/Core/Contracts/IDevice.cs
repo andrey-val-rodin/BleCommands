@@ -8,6 +8,12 @@
         /// <summary>
         /// Occurs when the device is disconnected.
         /// </summary>
+        /// <remarks>
+        /// The connection is dynamic and may be lost at any time. After this event
+        /// is raised, this device instance should be disposed and a new one should
+        /// be created to establish a new connection; the same instance must not be
+        /// reused for reconnection.
+        /// </remarks>
         event EventHandler? Disconnected;
 
         /// <summary>
@@ -32,12 +38,23 @@
         /// <exception cref="ObjectDisposedException">
         /// Thrown if the device has been disposed.
         /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the device is already connected.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         /// The operation was canceled via <paramref name="token"/>.
         /// </exception>
         /// <remarks>
+        /// <para>
         /// This method is intended to be called once per instance lifecycle.
         /// The connection will be established shortly.
+        /// </para>
+        /// <para>
+        /// If the connection attempt fails, or if the connection is later lost
+        /// (see <see cref="Disconnected"/>), the device should be disposed and
+        /// a new instance should be created instead of attempting to reconnect
+        /// with the same object.
+        /// </para>
         /// </remarks>
         Task ConnectAsync(CancellationToken token = default);
     }

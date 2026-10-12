@@ -141,7 +141,6 @@ namespace BleCommands.Windows
         {
             ValidateDeviceName(deviceName);
             ValidateTimeout(timeout);
-            token.ThrowIfCancellationRequested();
 
             using var timeoutCts = new CancellationTokenSource(timeout);
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
@@ -194,7 +193,9 @@ namespace BleCommands.Windows
                         tcs.Task,
                         Task.Delay(Timeout.InfiniteTimeSpan, token)).ConfigureAwait(false);
 
-                    return tcs.Task.IsCompleted ? await tcs.Task.ConfigureAwait(false) : throw new OperationCanceledException(token);
+                    return tcs.Task.IsCompleted
+                        ? await tcs.Task.ConfigureAwait(false)
+                        : throw new OperationCanceledException(token);
                 }
                 finally
                 {

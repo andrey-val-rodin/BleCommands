@@ -296,7 +296,6 @@ namespace BleCommands.Core
                     return await tcs.Task.ConfigureAwait(false);
                 }
 
-                token.ThrowIfCancellationRequested();
                 return null;
             }
             finally

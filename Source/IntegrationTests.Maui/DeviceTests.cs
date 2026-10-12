@@ -30,12 +30,12 @@ namespace IntegrationTests.Maui
         }
 
         [TestMethod]
-        public async Task ConnectAsync_Cancel_TaskCanceledException()
+        public async Task ConnectAsync_ExternalCancellation_ThrowsOperationCanceledException()
         {
             using var device = new Device(Fixture.DeviceUuid);
-
             using var cts = new CancellationTokenSource();
-            cts.Cancel();
+            cts.CancelAfter(20);
+
             await Assert.ThrowsAsync<OperationCanceledException>(async () =>
             {
                 await device.ConnectAsync(cts.Token);

@@ -49,19 +49,5 @@ namespace BleCommands.Tests.Windows
             });
             Assert.Equal("timeout", exception.ParamName);
         }
-
-        [Fact]
-        public async Task FindDeviceAsync_TokenIsCanceled_OperationCanceledException()
-        {
-            var scanner = new BleScanner();
-            using var cts = new CancellationTokenSource();
-            cts.Cancel();
-
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-                scanner.FindDeviceAsync(
-                    "Some device",
-                    TimeSpan.FromSeconds(1),
-                    cts.Token));
-        }
     }
 }

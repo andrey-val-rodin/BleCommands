@@ -30,17 +30,27 @@ namespace IntegrationTests.Maui
         public async Task FindDeviceAsync_ExternalCancellation_ThrowsOperationCanceledException()
         {
             using var cts = new CancellationTokenSource();
+            cts.CancelAfter(20);
 
-            var searchTask = BleScanner.FindDeviceAsync(
-                "Non-existent device for cancellation test",
-                TimeSpan.FromSeconds(30),
-                cts.Token);
+            await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                await BleScanner.FindDeviceAsync(
+                    "Non-existent device for cancellation test",
+                    TimeSpan.FromSeconds(30),
+                    cts.Token);
+            });
+        }
 
-            await Task.Delay(20, TestContext.CancellationToken);
-            cts.Cancel();
+        [TestMethod]
+        public async Task ScanAsync_ExternalCancellation_ThrowsOperationCanceledException()
+        {
+            using var cts = new CancellationTokenSource();
+            cts.CancelAfter(20);
 
-            await Assert.ThrowsAsync<OperationCanceledException>(
-                async () => await searchTask);
+            await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                await BleScanner.ScanAsync(token: cts.Token);
+            });
         }
 
         [TestMethod]

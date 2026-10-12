@@ -353,7 +353,7 @@ namespace BleCommands.Tests.Windows
 
             await transport.StartAsync(TestContext.Current.CancellationToken);
             using var cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromMilliseconds(50));
+            cts.Cancel();
 
             await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
             {

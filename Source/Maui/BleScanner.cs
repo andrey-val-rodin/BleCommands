@@ -106,6 +106,11 @@ namespace BleCommands.Maui
                     scanFilterOptions: filter,
                     cancellationToken: token).ConfigureAwait(false);
 
+                // Plugin.BLE's StartScanningForDevicesAsync does not throw
+                // OperationCanceledException upon external cancellation, violating
+                // the .NET cancellation contract.
+                // This call compensates for the underlying library's defect to ensure
+                // the correct cancellation semantics.
                 token.ThrowIfCancellationRequested();
             }
             finally
@@ -136,7 +141,6 @@ namespace BleCommands.Maui
         {
             ValidateDeviceName(deviceName);
             ValidateTimeout(timeout);
-            token.ThrowIfCancellationRequested();
 
             using var timeoutCts = new CancellationTokenSource(timeout);
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(

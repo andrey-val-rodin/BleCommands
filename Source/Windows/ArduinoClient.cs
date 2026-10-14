@@ -63,8 +63,8 @@ namespace BleCommands.Windows
             char tokenDelimiter,
             CancellationToken token = default)
         {
-            if (!await BluetoothHelper.IsBluetoothAvailableAsync().ConfigureAwait(false) ||
-                !await BluetoothHelper.IsBluetoothOnAsync().ConfigureAwait(false))
+            if (!await BluetoothHelper.IsBluetoothAvailableAsync(token).ConfigureAwait(false) ||
+                !await BluetoothHelper.IsBluetoothOnAsync(token).ConfigureAwait(false))
                 return null;
 
             var device = await CreateDeviceAsync(deviceName, token).ConfigureAwait(false);

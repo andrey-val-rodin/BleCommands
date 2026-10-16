@@ -5,11 +5,13 @@ using NativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
 
 namespace MauiSample.Models
 {
-    [INotifyPropertyChanged]
     public partial class MyCharacteristic(NativeCharacteristic nativeCharacteristic)
-        : Characteristic(nativeCharacteristic)
+        : ObservableObject
     {
         private bool _isNotifying = false;
+
+        public Characteristic Characteristic { get; } = new Characteristic(nativeCharacteristic);
+        private NativeCharacteristic NativeCharacteristic { get; } = nativeCharacteristic;
 
         public string Name
         {
@@ -22,44 +24,61 @@ namespace MauiSample.Models
             }
         }
 
-        public string PropertiesString => GetPropertiesString(Properties);
+        public Guid Id => Characteristic.Id;
+
+        public bool CanUpdate => Characteristic.CanUpdate;
+
+        public bool CanRead => Characteristic.CanRead;
+
+        public bool CanWrite => Characteristic.CanWrite;
+
+        public string PropertiesString => GetPropertiesString(Characteristic.Properties);
 
         [ObservableProperty]
-        private string _notifyValue = string.Empty;
+        public partial string NotifyValue { get; set; } = string.Empty;
 
         [ObservableProperty]
-        private string _readValue = string.Empty;
+        public partial string ReadValue { get; set; } = string.Empty;
 
         public bool IsNotifying
         {
-            get => _isNotifying;
+            get { return _isNotifying; }
             set
             {
                 if (SetProperty(ref _isNotifying, value))
                 {
                     if (_isNotifying)
-                        ValueReceived += MyCharacteristic_ValueReceived;
+                        Characteristic.ValueReceived += MyCharacteristic_ValueReceived;
                     else
-                        ValueReceived -= MyCharacteristic_ValueReceived;
+                        Characteristic.ValueReceived -= MyCharacteristic_ValueReceived;
                 }
             }
         }
 
         private void MyCharacteristic_ValueReceived(object? sender, BleCommands.Core.Events.ByteArrayEventArgs e)
         {
-            NotifyValue = ConvertToString(e.Value);
+            NotifyValue = Characteristic.ConvertToString(e.Value);
         }
 
         public async Task InitializeAsync()
         {
-            if (CanUpdate)
+            if (Characteristic.CanUpdate)
             {
-                await StartReceivingAsync();
+                await Characteristic.StartReceivingAsync();
                 IsNotifying = true;
             }
         }
+        public async Task<string> ReadAsync(CancellationToken token = default)
+        {
+            return await Characteristic.ReadAsync(token);
+        }
 
-        public static string GetPropertiesString(CharacteristicPropertyFlags properties)
+        public async Task WriteAsync(string text, CancellationToken token = default)
+        {
+            await Characteristic.WriteAsync(text, token);
+        }
+
+        private static string GetPropertiesString(CharacteristicPropertyFlags properties)
         {
             if (properties == 0)
                 return "No properties";

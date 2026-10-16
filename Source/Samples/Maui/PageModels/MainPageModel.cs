@@ -7,19 +7,19 @@ namespace MauiSample.PageModels
 {
     public partial class MainPageModel(DeviceHolder deviceHolder) : ObservableObject
     {
-        private DeviceHolder DeviceHolder { get; set; } = deviceHolder;
+        public DeviceHolder DeviceHolder { get; set; } = deviceHolder;
 
         [ObservableProperty]
-        private bool _isBusy;
+        public partial bool IsBusy { get; set; }
 
         [ObservableProperty]
-        private bool _isPermissionsGranted;
+        public partial bool IsPermissionsGranted { get; set; }
 
         [ObservableProperty]
-        private string _deviceName = string.Empty;
+        public partial string DeviceName { get; set; } = string.Empty;
 
         [ObservableProperty]
-        private string _error = string.Empty;
+        public partial string Error { get; set; } = string.Empty;
 
         partial void OnDeviceNameChanged(string value)
         {

@@ -6,9 +6,9 @@ namespace MauiSample.Pages
     {
         public CharacteristicsPage(CharacteristicsPageModel model)
         {
-            InitializeComponent();
             BindingContext = model;
             model.RequestUserInput += Model_RequestUserInputAsync;
+            InitializeComponent();
         }
 
         private async Task<string> Model_RequestUserInputAsync(Models.MyCharacteristic arg)

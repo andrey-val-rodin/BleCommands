@@ -7,18 +7,18 @@ namespace MauiSample.PageModels
 {
     public partial class ServicesPageModel(DeviceHolder deviceHolder) : ObservableObject
     {
-        private DeviceHolder DeviceHolder { get; set; } = deviceHolder;
+        public DeviceHolder DeviceHolder { get; set; } = deviceHolder;
 
         [ObservableProperty]
-        private bool _isBusy;
+        public partial bool IsBusy { get; set; }
 
         public ObservableCollection<MyService> Services { get; private set; } = [];
 
         [ObservableProperty]
-        private string _error = string.Empty;
+        public partial string Error { get; set; } = string.Empty;
 
         [ObservableProperty]
-        private MyService? _item;
+        public partial MyService? Item { get; set; }
 
         [RelayCommand]
         private async Task GetServicesAsync()

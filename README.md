@@ -25,6 +25,7 @@ Install-Package BleCommands.Maui
 # For Windows applications (WPF, WinForms, Console)
 Install-Package BleCommands.Windows
 ```
+> For Windows applications, use TargetFramework **net10.0-windows10.0.17763.**
 
 ## Quick Start
 If your Arduino sketch uses the [Arduino companion library](https://github.com/andrey-val-rodin/BleCommands.Arduino), then the work will be quite simple:

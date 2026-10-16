@@ -18,7 +18,7 @@ namespace BleCommands.Windows
     /// </summary>
     public class Characteristic : ICharacteristic<GattCharacteristic>
     {
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
         private bool _disposed;
 
         /// <summary>

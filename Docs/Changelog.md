@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.5.2
+- Add .NET 10.0 target framework to BleCommands.Windows
+- InvalidOperationException in BleTransport.StartAsync if the transport is already started
+- InvalidOperationException if the device is already connected and rollback if connection fails
+- CancellationToken in IsBluetoothAvailableAsync and IsBluetoothOnAsync
+- Remove redundant ThrowIfCancellationRequested calls
 ## 3.5.1
 - ArduinoClient: Using CancellationToken in call to FindDeviceAsync
 - Improve ConvertToString

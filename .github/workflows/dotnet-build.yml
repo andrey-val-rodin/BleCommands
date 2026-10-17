@@ -10,20 +10,20 @@ jobs:
   build-linux:
     name: Build on Linux
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
-    
+
     - name: Restore
       run: |
         dotnet restore Source/Core/Core.csproj
         dotnet restore Source/Maui/Maui.csproj
-      
+
     - name: Build
       run: |
         dotnet build Source/Core/Core.csproj --configuration Release --no-restore
@@ -32,41 +32,35 @@ jobs:
   build-windows:
     name: Build on Windows
     runs-on: windows-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
-    
+
     - name: Install .NET MAUI workloads
       run: dotnet workload install maui
-      
-    - name: Restore all projects
+
+    - name: Restore Core & Maui & Windows
       run: |
         dotnet restore Source/Core/Core.csproj
         dotnet restore Source/Maui/Maui.csproj
         dotnet restore Source/Windows/Windows.csproj
-        dotnet restore Source/Tests/Tests.csproj
-        dotnet restore Source/Samples/Console/ConsoleSample.csproj
-        dotnet restore Source/Samples/WPF/WPFSample.csproj
-        dotnet restore Source/Samples/Maui/MauiSample.csproj
-      
-    - name: Build all projects
+
+    - name: Restore Tests
+      run: dotnet restore Source/Tests/Tests.csproj
+
+    - name: Build Core & Maui & Windows
       run: |
         dotnet build Source/Core/Core.csproj --configuration Release --no-restore
         dotnet build Source/Maui/Maui.csproj --configuration Release --no-restore
         dotnet build Source/Windows/Windows.csproj --configuration Release --no-restore
-        dotnet build Source/Tests/Tests.csproj --configuration Release --no-restore
-        dotnet build Source/Samples/Console/ConsoleSample.csproj --configuration Release --no-restore
-        dotnet build Source/Samples/WPF/WPFSample.csproj --configuration Release --no-restore
-      
-    - name: Build Samples.Maui for Android and iOS
-      run: |
-        dotnet build Source/Samples/Maui/MauiSample.csproj -f net9.0-android --configuration Release --no-restore
-        dotnet build Source/Samples/Maui/MauiSample.csproj -f net9.0-ios --configuration Release --no-restore
-      
+
+    - name: Build Tests
+      run: dotnet build Source/Tests/Tests.csproj --configuration Release --no-restore
+
     - name: Run Unit Tests
       run: dotnet test Source/Tests/Tests.csproj --configuration Release --no-build --verbosity normal

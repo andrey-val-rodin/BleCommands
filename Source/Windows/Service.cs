@@ -11,7 +11,7 @@ namespace BleCommands.Windows
     /// </summary>
     public class Service : IService<GattDeviceService, Characteristic>
     {
-        private readonly List<IDisposable> _children = new();
+        private readonly List<IDisposable> _children = [];
         private bool _disposed = false;
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace BleCommands.Windows
             var nativeCharacteristics = gattResult.Characteristics;
 
             var result = nativeCharacteristics == null
-                ? new List<Characteristic>()
+                ? []
                 : nativeCharacteristics.Select(static c => new Characteristic(c)).ToList();
 
             foreach (var characteristic in result)

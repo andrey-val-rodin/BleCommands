@@ -42,7 +42,7 @@ namespace BleCommands.Windows.Extensions
                 throw new DeviceException(errorMessage);
             }
 
-            return result.Value?.ToArray() ?? Array.Empty<byte>();
+            return result.Value?.ToArray() ?? [];
         }
 
         public static void ThrowIfError(this GattCommunicationStatus status, [CallerMemberName] string? tag = null, byte? protocolError = null)

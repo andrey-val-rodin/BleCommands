@@ -9,18 +9,18 @@ namespace MauiSample.PageModels
     {
         public event Func<MyCharacteristic, Task<string>>? RequestUserInput;
 
-        private DeviceHolder DeviceHolder { get; set; } = deviceHolder;
+        public DeviceHolder DeviceHolder { get; set; } = deviceHolder;
 
         [ObservableProperty]
-        private bool _isBusy;
+        public partial bool IsBusy { get; set; }
 
         public ObservableCollection<MyCharacteristic> Characteristics { get; private set; } = [];
 
         [ObservableProperty]
-        private string _error = string.Empty;
+        public partial string Error { get; set; } = string.Empty;
 
         [ObservableProperty]
-        private MyCharacteristic? _item;
+        public partial MyCharacteristic? Item { get; set; }
 
         [RelayCommand]
         private async Task GetCharacteristicsAsync()

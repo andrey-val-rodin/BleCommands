@@ -14,7 +14,7 @@ namespace BleCommands.Windows
     {
         private readonly ulong _bluetoothAddress;
         private GattSession? _gattSession;
-        private readonly List<IDisposable> _children = new();
+        private readonly List<IDisposable> _children = [];
         private bool _disposed = false;
 
         /// <inheritdoc/>
@@ -139,7 +139,7 @@ namespace BleCommands.Windows
             var nativeServices = gattResult.Services;
 
             var result = nativeServices == null
-                ? new List<Service>()
+                ? []
                 : nativeServices.Select(s => new Service(s)).ToList();
 
             foreach (var service in result)

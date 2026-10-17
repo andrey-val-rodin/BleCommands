@@ -135,12 +135,9 @@ namespace IntegrationTests.Maui
         }
 
         [TestMethod]
-        [Ignore("Connecting to known device causes the test to hang when running it together with other tests")]
         public async Task ConnectToKnownDevice_Success()
         {
-            // Disposing device in this test causes other tests to fail
             using var device = new Device(Fixture.DeviceUuid);
-            // Plugin.BLE hangs in this call when running together with other tests:
             await device.ConnectAsync(TestContext.CancellationToken);
 
             Assert.IsTrue(device.IsConnected);

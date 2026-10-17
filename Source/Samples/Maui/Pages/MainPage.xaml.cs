@@ -62,7 +62,7 @@ namespace MauiSample.Pages
             return true;
         }
 
-        private void Entry_Completed(object sender, EventArgs e)
+        private void Entry_Completed(object? sender, EventArgs e)
         {
             if (BindingContext is MainPageModel viewModel)
             {

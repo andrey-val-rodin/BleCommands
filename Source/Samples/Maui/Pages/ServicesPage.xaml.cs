@@ -6,8 +6,8 @@ namespace MauiSample.Pages
     {
         public ServicesPage(ServicesPageModel model)
         {
-            InitializeComponent();
             BindingContext = model;
+            InitializeComponent();
         }
 
         protected override void OnNavigatedTo(NavigatedToEventArgs args)

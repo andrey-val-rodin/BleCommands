@@ -66,20 +66,22 @@ namespace BleCommands.Core
 
             lock (_buffer)
             {
-                foreach (char c in text)
+                int start = 0;
+                while (start < text.Length)
                 {
-                    if (c == TokenDelimiter)
+                    int delimiterIndex = text.IndexOf(TokenDelimiter, start);
+                    if (delimiterIndex < 0)
                     {
-                        string token = _buffer.ToString();
-                        _buffer.Clear();
+                        _buffer.Append(text, start, text.Length - start);
+                        break;
+                    }
 
-                        System.Diagnostics.Debug.WriteLine($"Token: {token}");
-                        TokenReceived?.Invoke(this, new TextEventArgs(token));
-                    }
-                    else
-                    {
-                        _buffer.Append(c);
-                    }
+                    _buffer.Append(text, start, delimiterIndex - start);
+                    string token = _buffer.ToString();
+                    _buffer.Clear();
+
+                    TokenReceived?.Invoke(this, new TextEventArgs(token));
+                    start = delimiterIndex + 1;
                 }
             }
         }

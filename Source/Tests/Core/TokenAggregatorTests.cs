@@ -59,6 +59,24 @@ namespace BleCommands.Tests.Core
         }
 
         [Fact]
+        public void Append_LargeToken_ValidToken()
+        {
+            var token = new string('x', 1024 * 1024);
+            Aggregator.TokenReceived += Aggregator_TokenReceived;
+            try
+            {
+                Aggregator.Append($"{token}{D}");
+
+                var item = Assert.Single(Tokens);
+                Assert.Equal(token, item);
+            }
+            finally
+            {
+                Aggregator.TokenReceived -= Aggregator_TokenReceived;
+            }
+        }
+
+        [Fact]
         public void Append_FirstEmptyToken_ValidTokens()
         {
             var token1 = "";
@@ -105,7 +123,6 @@ namespace BleCommands.Tests.Core
                 Aggregator.TokenReceived -= Aggregator_TokenReceived;
             }
         }
-
 
         [Fact]
         public void Append_EmptyTokenInTheMiddle_ValidTokens()

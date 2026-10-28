@@ -66,7 +66,7 @@ namespace MauiSample.PageModels
                 {
                     try
                     {
-                        await characteristic.WriteAsync(input + '\n');
+                        await characteristic.WriteAsync(input);
                     }
                     catch (Exception ex)
                     {

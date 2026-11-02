@@ -1,5 +1,7 @@
 # Changelog
 
+## 3.5.3
+- Optimization of TokenAggregator.Append
 ## 3.5.2
 - Add .NET 10.0 target framework to BleCommands.Windows
 - InvalidOperationException in BleTransport.StartAsync if the transport is already started

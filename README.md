@@ -2,6 +2,9 @@
 
 [![.NET Build & Test](https://github.com/andrey-val-rodin/BleCommands/actions/workflows/dotnet-build.yml/badge.svg)](https://github.com/andrey-val-rodin/BleCommands/actions/workflows/dotnet-build.yml)
 
+[![NuGet](https://img.shields.io/nuget/v/BleCommands.Maui)](https://www.nuget.org/packages/BleCommands.Maui)
+[![NuGet](https://img.shields.io/nuget/v/BleCommands.Windows)](https://www.nuget.org/packages/BleCommands.Windows)
+
 **BleCommands** is a simple and reliable library for exchanging text commands between devices via Bluetooth Low Energy (BLE). It provides a unified interface for .NET applications (MAUI, WPF, WinForms) and, together with the [companion library for Arduino](https://github.com/andrey-val-rodin/BleCommands.Arduino), makes it easy to control your BLE devices.
 
 ## Features

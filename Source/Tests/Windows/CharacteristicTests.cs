@@ -109,6 +109,75 @@ namespace BleCommands.Tests.Windows
         }
 
         [Fact]
+        public async Task WriteAsync_WriteWithoutResponseProperty_TextIsNull_ThrowsArgumentNullException()
+        {
+            var characteristic = new Characteristic(CharacteristicPropertyFlags.WriteWithoutResponse);
+
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                await characteristic.WriteAsync(null!, TestContext.Current.CancellationToken);
+            });
+
+            Assert.Equal("text", exception.ParamName);
+        }
+
+        [Fact]
+        public async Task WriteWithConfirmationAsync_WithoutWriteProperty_ThrowsInvalidOperationException()
+        {
+            var characteristic = new Characteristic(CharacteristicPropertyFlags.WriteWithoutResponse);
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await characteristic.WriteWithConfirmationAsync(
+                    "test", TestContext.Current.CancellationToken);
+            });
+
+            Assert.Equal("The characteristic does not allow writing with response.", exception.Message);
+        }
+
+        [Fact]
+        public async Task WriteWithConfirmationAsync_WithWriteProperty_TextIsNull_ThrowsArgumentNullException()
+        {
+            var characteristic = new Characteristic(CharacteristicPropertyFlags.Write);
+
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                await characteristic.WriteWithConfirmationAsync(
+                    null!, TestContext.Current.CancellationToken);
+            });
+
+            Assert.Equal("text", exception.ParamName);
+        }
+
+        [Fact]
+        public async Task WriteWithoutConfirmationAsync_WithoutWriteWithoutResponseProperty_ThrowsInvalidOperationException()
+        {
+            var characteristic = new Characteristic(CharacteristicPropertyFlags.Write);
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await characteristic.WriteWithoutConfirmationAsync(
+                    "test", TestContext.Current.CancellationToken);
+            });
+
+            Assert.Equal("The characteristic does not allow writing without response.", exception.Message);
+        }
+
+        [Fact]
+        public async Task WriteWithoutConfirmationAsync_WithWriteWithoutResponseProperty_TextIsNull_ThrowsArgumentNullException()
+        {
+            var characteristic = new Characteristic(CharacteristicPropertyFlags.WriteWithoutResponse);
+
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                await characteristic.WriteWithoutConfirmationAsync(
+                    null!, TestContext.Current.CancellationToken);
+            });
+
+            Assert.Equal("text", exception.ParamName);
+        }
+
+        [Fact]
         public async Task WriteAsync_ExternalCancellation_ThrowsOperationCanceledException()
         {
             // Arrange

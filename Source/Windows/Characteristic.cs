@@ -119,6 +119,9 @@ namespace BleCommands.Windows
         }
 
         /// <inheritdoc/>
+        /// <exception cref="DeviceException">
+        /// Thrown if the write operation fails at the Bluetooth level.
+        /// </exception>
         public async Task WriteWithConfirmationAsync(string text, CancellationToken token = default)
         {
             ArgumentNullException.ThrowIfNull(text);
@@ -126,12 +129,16 @@ namespace BleCommands.Windows
             ObjectDisposedException.ThrowIf(_disposed, this);
 
             if (!Properties.HasFlag(CharacteristicPropertyFlags.Write))
-                throw new InvalidOperationException($"The characteristic does not allow writing with response.");
+                throw new InvalidOperationException(
+                    $"The characteristic does not allow writing with response.");
 
             await WriteAsync(text, GattWriteOption.WriteWithResponse, token).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
+        /// <exception cref="DeviceException">
+        /// Thrown if the write operation fails at the Bluetooth level.
+        /// </exception>
         public async Task WriteWithoutConfirmationAsync(string text, CancellationToken token = default)
         {
             ArgumentNullException.ThrowIfNull(text);
@@ -139,7 +146,8 @@ namespace BleCommands.Windows
             ObjectDisposedException.ThrowIf(_disposed, this);
 
             if (!Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse))
-                throw new InvalidOperationException($"The characteristic does not allow writing without response.");
+                throw new InvalidOperationException(
+                    $"The characteristic does not allow writing without response.");
 
             await WriteAsync(text, GattWriteOption.WriteWithoutResponse, token).ConfigureAwait(false);
         }

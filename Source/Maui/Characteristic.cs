@@ -22,19 +22,23 @@ namespace BleCommands.Maui
         /// Initializes a new instance of the <see cref="Characteristic"/> class
         /// using a native <see cref="Plugin.BLE.Abstractions.Contracts.ICharacteristic"/>.
         /// </summary>
-        /// <param name="characteristic">The <see cref="Plugin.BLE.Abstractions.Contracts.ICharacteristic"/> to wrap.</param>
+        /// <param name="characteristic">
+        /// The <see cref="Plugin.BLE.Abstractions.Contracts.ICharacteristic"/> to wrap.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="characteristic"/> is <c>null</c>.
         /// </exception>
         public Characteristic(NativeCharacteristic characteristic)
         {
-            NativeCharacteristic = characteristic ?? throw new ArgumentNullException(nameof(characteristic));
+            NativeCharacteristic = characteristic ??
+                throw new ArgumentNullException(nameof(characteristic));
             Id = NativeCharacteristic.Id;
             Properties = (CharacteristicPropertyFlags)NativeCharacteristic.Properties;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Characteristic"/> class for testing purposes.
+        /// Initializes a new instance of the <see cref="Characteristic"/> class
+        /// for testing purposes.
         /// </summary>
         /// <param name="properties">The characteristic properties to simulate.</param>
         /// <remarks>
@@ -112,6 +116,9 @@ namespace BleCommands.Maui
         }
 
         /// <inheritdoc/>
+        /// <exception cref="Exception">
+        /// Thrown if the write operation fails at the Bluetooth level.
+        /// </exception>
         public async Task WriteWithConfirmationAsync(string text, CancellationToken token = default)
         {
             if (text == null)
@@ -120,12 +127,16 @@ namespace BleCommands.Maui
             ThrowIfDisposed();
 
             if (!Properties.HasFlag(CharacteristicPropertyFlags.Write))
-                throw new InvalidOperationException($"The characteristic does not allow writing with response.");
+                throw new InvalidOperationException(
+                    $"The characteristic does not allow writing with response.");
 
             await WriteAsync(text, CharacteristicWriteType.WithResponse, token).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
+        /// <exception cref="Exception">
+        /// Thrown if the write operation fails at the Bluetooth level.
+        /// </exception>
         public async Task WriteWithoutConfirmationAsync(string text, CancellationToken token = default)
         {
             if (text == null)
@@ -134,7 +145,8 @@ namespace BleCommands.Maui
             ThrowIfDisposed();
 
             if (!Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse))
-                throw new InvalidOperationException($"The characteristic does not allow writing without response.");
+                throw new InvalidOperationException(
+                    $"The characteristic does not allow writing without response.");
 
             await WriteAsync(text, CharacteristicWriteType.WithoutResponse, token).ConfigureAwait(false);
         }

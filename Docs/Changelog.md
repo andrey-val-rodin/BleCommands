@@ -1,5 +1,7 @@
 # Changelog
 
+## 3.6.0
+- New methods WriteWithConfirmationAsync and WriteWithoutConfirmationAsync
 ## 3.5.3
 - Optimization of TokenAggregator.Append
 ## 3.5.2

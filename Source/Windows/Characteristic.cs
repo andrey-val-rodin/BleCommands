@@ -104,20 +104,52 @@ namespace BleCommands.Windows
         /// </exception>
         public async Task WriteAsync(string text, CancellationToken token = default)
         {
-            ObjectDisposedException.ThrowIf(_disposed, this);
-
             if (!CanWrite)
-                throw new InvalidOperationException("The characteristic is neither Write nor WriteWithoutResponse.");
+                throw new InvalidOperationException(
+                    "The characteristic is neither Write nor WriteWithoutResponse.");
 
+            if (Properties.HasFlag(CharacteristicPropertyFlags.Write))
+            {
+                await WriteWithConfirmationAsync(text, token).ConfigureAwait(false);
+            }
+            else
+            {
+                await WriteWithoutConfirmationAsync(text, token).ConfigureAwait(false);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task WriteWithConfirmationAsync(string text, CancellationToken token = default)
+        {
             ArgumentNullException.ThrowIfNull(text);
 
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
+            if (!Properties.HasFlag(CharacteristicPropertyFlags.Write))
+                throw new InvalidOperationException($"The characteristic does not allow writing with response.");
+
+            await WriteAsync(text, GattWriteOption.WriteWithResponse, token).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc/>
+        public async Task WriteWithoutConfirmationAsync(string text, CancellationToken token = default)
+        {
+            ArgumentNullException.ThrowIfNull(text);
+
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
+            if (!Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse))
+                throw new InvalidOperationException($"The characteristic does not allow writing without response.");
+
+            await WriteAsync(text, GattWriteOption.WriteWithoutResponse, token).ConfigureAwait(false);
+        }
+
+        private async Task WriteAsync(string text, GattWriteOption writeOption, CancellationToken token = default)
+        {
             var bytes = Encoding.UTF8.GetBytes(text);
             IBuffer value = CryptographicBuffer.CreateFromByteArray(bytes);
-            GattWriteOption option = Properties.HasFlag(CharacteristicPropertyFlags.Write)
-                ? GattWriteOption.WriteWithResponse
-                : GattWriteOption.WriteWithoutResponse;
             var result = await NativeCharacteristic
-                .WriteValueWithResultAsync(value, option)
+                .WriteValueWithResultAsync(value, writeOption)
                 .AsTask(token)
                 .ConfigureAwait(false);
             result.ThrowIfError();
@@ -246,12 +278,9 @@ namespace BleCommands.Windows
         {
             if (!_disposed)
             {
-                if (disposing)
+                if (disposing && NativeCharacteristic != null)
                 {
-                    if (NativeCharacteristic != null)
-                    {
-                        NativeCharacteristic.ValueChanged -= NativeCharacteristic_ValueChanged;
-                    }
+                    NativeCharacteristic.ValueChanged -= NativeCharacteristic_ValueChanged;
                 }
 
                 _disposed = true;

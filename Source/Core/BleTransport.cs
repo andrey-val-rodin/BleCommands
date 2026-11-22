@@ -277,7 +277,8 @@ namespace BleCommands.Core
                 ResponseAggregator.TokenReceived += Handler;
 
                 // Send command
-                await CommandCharacteristic.WriteAsync(command, token).ConfigureAwait(false);
+                await CommandCharacteristic.WriteWithoutConfirmationAsync(
+                    command, token).ConfigureAwait(false);
 
                 using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(token);
                 timeoutCts.CancelAfter(ResponseTimeout);

@@ -68,11 +68,25 @@ namespace BleCommands.Core.Contracts
         Task<string> ReadAsync(CancellationToken token = default);
 
         /// <summary>
-        /// Writes a string value to the characteristic.
+        /// Writes a string value to the characteristic, automatically selecting the
+        /// write method based on the characteristic's properties.
         /// </summary>
         /// <param name="text">The string value to write.</param>
         /// <param name="token">A cancellation token to cancel the write operation.</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
+        /// <remarks>
+        /// <para>
+        /// If the characteristic supports <see cref="CharacteristicPropertyFlags.Write"/>,
+        /// this method uses Write With Response (see <see cref="WriteWithConfirmationAsync"/>).
+        /// Otherwise, if it supports <see cref="CharacteristicPropertyFlags.WriteWithoutResponse"/>,
+        /// it uses Write Without Response (see <see cref="WriteWithoutConfirmationAsync"/>).
+        /// </para>
+        /// <para>
+        /// For explicit control over the write method, call
+        /// <see cref="WriteWithConfirmationAsync"/> or <see cref="WriteWithoutConfirmationAsync"/>
+        /// directly.
+        /// </para>
+        /// </remarks>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="CanWrite"/> is <c>false</c>.
         /// </exception>
@@ -86,6 +100,70 @@ namespace BleCommands.Core.Contracts
         /// The operation was canceled via <paramref name="token"/>.
         /// </exception>
         Task WriteAsync(string text, CancellationToken token = default);
+
+        /// <summary>
+        /// Writes a string value to the characteristic using the GATT Write Request
+        /// procedure (ATT-level confirmation).
+        /// </summary>
+        /// <param name="text">The string value to write.</param>
+        /// <param name="token">A cancellation token to cancel the write operation.</param>
+        /// <returns>A task that represents the asynchronous write operation.</returns>
+        /// <remarks>
+        /// <para>
+        /// This method writes the value and waits for an ATT Write Response from the server,
+        /// confirming that the ATT Write Request was received.
+        /// </para>
+        /// <para>
+        /// Requires the <see cref="CharacteristicPropertyFlags.Write"/> property.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the characteristic does not support Write With Response
+        /// (<see cref="CharacteristicPropertyFlags.Write"/> is not set).
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if <paramref name="text"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the characteristic has been disposed.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
+        Task WriteWithConfirmationAsync(string text, CancellationToken token = default);
+
+        /// <summary>
+        /// Writes a string value to the characteristic using the GATT Write Command
+        /// procedure (no ATT-level confirmation).
+        /// </summary>
+        /// <param name="text">The string value to write.</param>
+        /// <param name="token">A cancellation token to cancel the write operation.</param>
+        /// <returns>A task that represents the asynchronous write operation.</returns>
+        /// <remarks>
+        /// <para>
+        /// This method writes the value and returns without waiting for an ATT-level
+        /// acknowledgment. The write is delivered at the Link Layer, but delivery to the
+        /// device's application layer is not guaranteed; losses must be handled at the
+        /// application level.
+        /// </para>
+        /// <para>
+        /// Requires the <see cref="CharacteristicPropertyFlags.WriteWithoutResponse"/> property.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the characteristic does not support Write Without Response
+        /// (<see cref="CharacteristicPropertyFlags.WriteWithoutResponse"/> is not set).
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if <paramref name="text"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the characteristic has been disposed.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The operation was canceled via <paramref name="token"/>.
+        /// </exception>
+        Task WriteWithoutConfirmationAsync(string text, CancellationToken token = default);
 
         /// <summary>
         /// Attaches a token aggregator to collect notification/indication values.

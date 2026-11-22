@@ -56,6 +56,18 @@ namespace BleCommands.Tests.Windows
             return Task.CompletedTask;
         }
 
+        public Task WriteWithConfirmationAsync(string text, CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            return Task.CompletedTask;
+        }
+
+        public Task WriteWithoutConfirmationAsync(string text, CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            return Task.CompletedTask;
+        }
+
         public Task StartReceivingAsync(CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();

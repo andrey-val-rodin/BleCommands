@@ -2,6 +2,7 @@
 using BleCommands.Core.Contracts;
 using BleCommands.Core.Enums;
 using BleCommands.Core.Events;
+using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.EventArgs;
 using System.Text;
 using NativeCharacteristic = Plugin.BLE.Abstractions.Contracts.ICharacteristic;
@@ -96,17 +97,62 @@ namespace BleCommands.Maui
         /// </exception>
         public async Task WriteAsync(string text, CancellationToken token = default)
         {
-            ThrowIfDisposed();
-
             if (!CanWrite)
                 throw new InvalidOperationException(
                     "The characteristic is neither Write nor WriteWithoutResponse.");
 
+            if (Properties.HasFlag(CharacteristicPropertyFlags.Write))
+            {
+                await WriteWithConfirmationAsync(text, token).ConfigureAwait(false);
+            }
+            else
+            {
+                await WriteWithoutConfirmationAsync(text, token).ConfigureAwait(false);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task WriteWithConfirmationAsync(string text, CancellationToken token = default)
+        {
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
 
-            var bytes = Encoding.UTF8.GetBytes(text);
-            await NativeCharacteristic.WriteAsync(bytes, token).ConfigureAwait(false);
+            ThrowIfDisposed();
+
+            if (!Properties.HasFlag(CharacteristicPropertyFlags.Write))
+                throw new InvalidOperationException($"The characteristic does not allow writing with response.");
+
+            await WriteAsync(text, CharacteristicWriteType.WithResponse, token).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc/>
+        public async Task WriteWithoutConfirmationAsync(string text, CancellationToken token = default)
+        {
+            if (text == null)
+                throw new ArgumentNullException(nameof(text));
+
+            ThrowIfDisposed();
+
+            if (!Properties.HasFlag(CharacteristicPropertyFlags.WriteWithoutResponse))
+                throw new InvalidOperationException($"The characteristic does not allow writing without response.");
+
+            await WriteAsync(text, CharacteristicWriteType.WithoutResponse, token).ConfigureAwait(false);
+        }
+
+        private async Task WriteAsync(string text, CharacteristicWriteType writeType,
+            CancellationToken token = default)
+        {
+            var oldWriteType = NativeCharacteristic.WriteType;
+            NativeCharacteristic.WriteType = writeType;
+            try
+            {
+                var bytes = Encoding.UTF8.GetBytes(text);
+                await NativeCharacteristic.WriteAsync(bytes, token).ConfigureAwait(false);
+            }
+            finally
+            {
+                NativeCharacteristic.WriteType = oldWriteType;
+            }
         }
 
         /// <summary>

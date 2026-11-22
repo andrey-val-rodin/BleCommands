@@ -1,6 +1,7 @@
 ﻿using BleCommands.Core;
 using BleCommands.Core.Enums;
 using BleCommands.Maui;
+using Plugin.BLE.Abstractions;
 
 namespace BleCommands.Tests.Maui
 {
@@ -108,6 +109,68 @@ namespace BleCommands.Tests.Maui
             });
         }
 
+        [Theory]
+        [InlineData(CharacteristicPropertyFlags.Write, CharacteristicWriteType.WithResponse)]
+        [InlineData(CharacteristicPropertyFlags.WriteWithoutResponse, CharacteristicWriteType.WithoutResponse)]
+        [InlineData(CharacteristicPropertyFlags.Write | CharacteristicPropertyFlags.WriteWithoutResponse, CharacteristicWriteType.WithResponse)]
+        public async Task WriteAsync_SupportedProperties_SetsAndRestoresWriteType(
+            CharacteristicPropertyFlags properties,
+            CharacteristicWriteType expectedWriteType)
+        {
+            await AssertWriteTypeIsSetAndRestoredAsync(
+                properties,
+                expectedWriteType,
+                characteristic => characteristic.WriteAsync("test", TestContext.Current.CancellationToken));
+        }
+
+        [Fact]
+        public async Task WriteWithConfirmationAsync_SetsAndRestoresWriteType()
+        {
+            await AssertWriteTypeIsSetAndRestoredAsync(
+                CharacteristicPropertyFlags.Write,
+                CharacteristicWriteType.WithResponse,
+                characteristic => characteristic.WriteWithConfirmationAsync(
+                    "test", TestContext.Current.CancellationToken));
+        }
+
+        [Fact]
+        public async Task WriteWithoutConfirmationAsync_SetsAndRestoresWriteType()
+        {
+            await AssertWriteTypeIsSetAndRestoredAsync(
+                CharacteristicPropertyFlags.WriteWithoutResponse,
+                CharacteristicWriteType.WithoutResponse,
+                characteristic => characteristic.WriteWithoutConfirmationAsync(
+                    "test", TestContext.Current.CancellationToken));
+        }
+
+        [Fact]
+        public async Task WriteWithConfirmationAsync_WithoutWriteProperty_ThrowsInvalidOperationException()
+        {
+            var characteristic = new Characteristic(CharacteristicPropertyFlags.WriteWithoutResponse);
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await characteristic.WriteWithConfirmationAsync(
+                    "test", TestContext.Current.CancellationToken);
+            });
+
+            Assert.Equal("The characteristic does not allow writing with response.", exception.Message);
+        }
+
+        [Fact]
+        public async Task WriteWithoutConfirmationAsync_WithoutWriteWithoutResponseProperty_ThrowsInvalidOperationException()
+        {
+            var characteristic = new Characteristic(CharacteristicPropertyFlags.Write);
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await characteristic.WriteWithoutConfirmationAsync(
+                    "test", TestContext.Current.CancellationToken);
+            });
+
+            Assert.Equal("The characteristic does not allow writing without response.", exception.Message);
+        }
+
         [Fact]
         public async Task WriteAsync_ExternalCancellation_ThrowsOperationCanceledException()
         {
@@ -121,6 +184,26 @@ namespace BleCommands.Tests.Maui
             {
                 await characteristic.ReadAsync(cts.Token);
             });
+        }
+
+        private static async Task AssertWriteTypeIsSetAndRestoredAsync(
+            CharacteristicPropertyFlags properties,
+            CharacteristicWriteType expectedWriteType,
+            Func<Characteristic, Task> write)
+        {
+            var originalWriteType = expectedWriteType == CharacteristicWriteType.WithResponse
+                ? CharacteristicWriteType.WithoutResponse
+                : CharacteristicWriteType.WithResponse;
+            var nativeCharacteristic = new FakeNativeCharacteristic(
+                (CharacteristicPropertyType)properties,
+                originalWriteType);
+            var characteristic = new Characteristic(nativeCharacteristic);
+
+            await write(characteristic);
+
+            Assert.Equal(expectedWriteType, nativeCharacteristic.WriteTypeDuringWrite);
+            Assert.Equal(originalWriteType, nativeCharacteristic.WriteType);
+            Assert.Equal("test"u8.ToArray(), nativeCharacteristic.ValueWritten);
         }
 
         [Fact]

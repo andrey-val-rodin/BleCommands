@@ -281,12 +281,9 @@ namespace BleCommands.Maui
         {
             if (!_disposed)
             {
-                if (disposing)
+                if (disposing && NativeCharacteristic != null)
                 {
-                    if (NativeCharacteristic != null)
-                    {
-                        NativeCharacteristic.ValueUpdated -= NativeCharacteristic_ValueUpdated;
-                    }
+                    NativeCharacteristic.ValueUpdated -= NativeCharacteristic_ValueUpdated;
                 }
 
                 _disposed = true;
